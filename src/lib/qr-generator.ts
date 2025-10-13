@@ -4,7 +4,7 @@ import { supabase } from './supabase'
 export async function generateQRCode(customerId: string): Promise<string> {
     try {
         // Generate QR code URL
-        const qrUrl = `${process.env.NEXT_PUBLIC_APP_URL}/scan?customer=${customerId}`
+        const qrUrl = `${process.env.NEXT_PUBLIC_APP_URL}/scanner?customer=${customerId}`
 
         // Generate QR code as data URL
         const qrCodeDataUrl = await QRCode.toDataURL(qrUrl, {

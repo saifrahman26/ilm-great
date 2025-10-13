@@ -13,6 +13,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
 import { Upload, Building, Mail, Phone, Lock, User } from 'lucide-react'
+import Logo from '@/components/Logo'
 
 
 const signupSchema = z.object({
@@ -188,10 +189,8 @@ export default function SignupPage() {
             <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
                 <div className="sm:mx-auto sm:w-full sm:max-w-md">
                     <div className="text-center">
-                        <div className="mx-auto w-20 h-20 bg-gradient-to-r from-green-500 to-blue-600 rounded-full flex items-center justify-center mb-6">
-                            <svg className="w-10 h-10 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                            </svg>
+                        <div className="flex justify-center mb-6">
+                            <Logo size={80} showText={false} />
                         </div>
                         <h2 className="text-3xl font-bold text-gray-900 mb-4">
                             🎉 Account Created Successfully!
@@ -280,8 +279,8 @@ export default function SignupPage() {
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="text-center">
-                    <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
-                        <span className="text-white font-bold text-2xl">L</span>
+                    <div className="flex justify-center mb-6">
+                        <Logo size={64} showText={true} textColor="text-gray-900" />
                     </div>
                     <h2 className="text-3xl font-bold text-gray-900">
                         Start your loyalty program

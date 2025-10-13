@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -16,11 +16,12 @@ import {
     QrCode,
     Loader
 } from 'lucide-react'
+import Logo from '@/components/Logo'
 
 const customerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     phone: z.string().min(10, 'Phone number must be at least 10 digits'),
-    email: z.string().email('Invalid email address').optional().or(z.literal('')),
+    email: z.string().email('Invalid email address').or(z.literal('')).optional(),
 })
 
 type CustomerForm = z.infer<typeof customerSchema>
@@ -33,7 +34,7 @@ interface Business {
     visit_goal: number
 }
 
-export default function ScanRegisterPage() {
+function ScanRegisterContent() {
     const searchParams = useSearchParams()
     const businessId = searchParams.get('business')
 
@@ -106,34 +107,15 @@ export default function ScanRegisterPage() {
             const result = await response.json()
 
             if (!response.ok) {
-                if (result.error && result.error.includes('already exists')) {
-                    // Customer exists, record visit for existing customer
-                    setError(`Welcome back! Recording your visit...`)
-
-                    // Find existing customer and record visit
-                    setTimeout(async () => {
-                        try {
-                            // For now, show success - in a real app you'd look up the customer
-                            setSuccess(true)
-                            setRegisteredCustomer({
-                                name: data.name,
-                                email: data.email,
-                                visits: 'Updated'
-                            })
-                        } catch (visitError) {
-                            setError('Failed to record visit for existing customer')
-                        }
-                        setSubmitting(false)
-                    }, 1000)
-                    return
-                } else {
-                    setError(result.error || 'Failed to register')
-                    setSubmitting(false)
-                    return
-                }
+                setError(result.error || 'Failed to register')
+                setSubmitting(false)
+                return
             }
 
-            setRegisteredCustomer(result.customer)
+            setRegisteredCustomer({
+                ...result.customer,
+                isExistingCustomer: result.isExistingCustomer || false
+            })
             setSuccess(true)
             reset()
         } catch (err) {
@@ -176,9 +158,14 @@ export default function ScanRegisterPage() {
                         <div className="bg-green-100 rounded-full p-4 mx-auto w-20 h-20 flex items-center justify-center mb-6">
                             <CheckCircle className="w-10 h-10 text-green-600" />
                         </div>
-                        <h2 className="text-2xl font-bold text-gray-900 mb-4">Welcome to {business?.name}!</h2>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                            {registeredCustomer.isExistingCustomer ? `Welcome back to ${business?.name}!` : `Welcome to ${business?.name}!`}
+                        </h2>
                         <p className="text-gray-600 mb-6">
-                            You've successfully joined our loyalty program and your visit has been recorded!
+                            {registeredCustomer.isExistingCustomer
+                                ? "Your visit has been recorded and your information has been updated!"
+                                : "You've successfully joined our loyalty program and your visit has been recorded!"
+                            }
                         </p>
 
                         <div className="bg-blue-50 rounded-lg p-4 mb-6">
@@ -196,11 +183,11 @@ export default function ScanRegisterPage() {
                                 <Gift className="w-5 h-5 text-teal-600 mr-2" />
                                 <span className="font-medium text-teal-900">Current Progress</span>
                             </div>
-                            <p className="text-teal-800">1 of {business?.visit_goal} visits completed</p>
+                            <p className="text-teal-800">{registeredCustomer.visits} of {business?.visit_goal} visits completed</p>
                             <div className="w-full bg-teal-200 rounded-full h-2 mt-2">
                                 <div
                                     className="bg-teal-600 h-2 rounded-full transition-all duration-500"
-                                    style={{ width: `${(1 / (business?.visit_goal || 5)) * 100}%` }}
+                                    style={{ width: `${(registeredCustomer.visits / (business?.visit_goal || 5)) * 100}%` }}
                                 ></div>
                             </div>
                         </div>
@@ -221,10 +208,10 @@ export default function ScanRegisterPage() {
                     {/* Header */}
                     <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 text-center">
                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                            <QrCode className="w-8 h-8 text-blue-600" />
+                            <Logo size={32} />
                         </div>
                         <h1 className="text-2xl font-bold text-white mb-2">Join {business?.name}</h1>
-                        <p className="text-blue-100">Complete your registration to earn points</p>
+                        <p className="text-blue-100">Complete your registration or update your info to earn points</p>
                     </div>
 
                     {/* Reward Info */}
@@ -311,25 +298,43 @@ export default function ScanRegisterPage() {
                                 {submitting ? (
                                     <>
                                         <Loader className="w-4 h-4 animate-spin" />
-                                        <span>Joining...</span>
+                                        <span>Processing...</span>
                                     </>
                                 ) : (
                                     <>
                                         <UserPlus className="w-4 h-4" />
-                                        <span>Join & Record Visit</span>
+                                        <span>Register Visit</span>
                                     </>
                                 )}
                             </button>
                         </form>
 
                         <div className="mt-6 text-center">
-                            <p className="text-xs text-gray-500">
+                            <p className="text-xs text-gray-500 mb-2">
                                 Your personal QR code will be sent to your email
+                            </p>
+                            <p className="text-xs text-gray-400">
+                                Already registered? Just enter your phone number to record your visit and optionally add/update your email
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function ScanRegisterPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        }>
+            <ScanRegisterContent />
+        </Suspense>
     )
 }

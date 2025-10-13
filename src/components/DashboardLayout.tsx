@@ -18,6 +18,7 @@ import {
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 
+
 interface DashboardLayoutProps {
     children: React.ReactNode
     title: string
@@ -36,7 +37,6 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
         { name: 'Add Customer', href: '/register', icon: UserPlus },
         { name: 'Manual Visit', href: '/manual-visit', icon: User },
         { name: 'QR Scanner', href: '/scanner', icon: Camera },
-        { name: 'Scan Results', href: '/scan', icon: QrCode },
         { name: 'QR Code', href: '/qr-code', icon: QrCode },
         { name: 'Rewards', href: '/rewards', icon: Gift },
         { name: 'Settings', href: '/settings', icon: Settings },
@@ -54,10 +54,20 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
             {/* Sidebar */}
             <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-300 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
                 <div className="flex items-center justify-between h-16 px-6 border-b border-gray-200">
-                    <div className="flex items-center space-x-2">
-                        <div className="w-8 h-8 bg-teal-600 rounded-lg flex items-center justify-center">
-                            <span className="text-white font-bold text-sm">L</span>
-                        </div>
+                    <div className="flex items-center space-x-3">
+                        {business?.business_logo_url ? (
+                            <img
+                                src={business.business_logo_url}
+                                alt={`${business.name} logo`}
+                                className="w-8 h-8 object-contain rounded"
+                            />
+                        ) : (
+                            <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-purple-600 rounded flex items-center justify-center">
+                                <span className="text-white text-sm font-bold">
+                                    {business?.name?.charAt(0) || 'B'}
+                                </span>
+                            </div>
+                        )}
                         <span className="text-xl font-semibold text-gray-900">{business?.name || 'LoyalLink'}</span>
                     </div>
                     <button

@@ -50,11 +50,94 @@ export async function POST(request: NextRequest) {
         }
 
         if (existingCustomer) {
-            console.log('❌ Customer already exists')
-            return NextResponse.json(
-                { error: `Customer with phone number ${phone} already exists` },
-                { status: 409 }
-            )
+            console.log('✅ Customer already exists, updating information...')
+
+            // Update existing customer with new email if provided
+            const updateData: any = {
+                visits: existingCustomer.visits + 1,
+                last_visit: new Date().toISOString()
+            }
+
+            // Only update email if it's provided and different from existing
+            if (email?.trim() && email.trim() !== existingCustomer.email) {
+                updateData.email = email.trim()
+                console.log('📧 Updating email for existing customer')
+            }
+
+            // Update name if it's different (in case of typos or name changes)
+            if (name.trim() !== existingCustomer.name) {
+                updateData.name = name.trim()
+                console.log('👤 Updating name for existing customer')
+            }
+
+            const { data: updatedCustomer, error: updateError } = await supabaseAdmin
+                .from('customers')
+                .update(updateData)
+                .eq('id', existingCustomer.id)
+                .select()
+                .single()
+
+            if (updateError) {
+                console.error('❌ Error updating existing customer:', updateError)
+                return NextResponse.json(
+                    { error: `Failed to update customer: ${updateError.message}` },
+                    { status: 500 }
+                )
+            }
+
+            // Record the visit
+            console.log('📝 Recording visit for existing customer...')
+            try {
+                const { error: visitError } = await supabaseAdmin
+                    .from('visits')
+                    .insert({
+                        business_id: businessId,
+                        customer_id: existingCustomer.id,
+                        visit_date: new Date().toISOString(),
+                        points_earned: 1,
+                        notes: 'Visit recorded - Welcome back!',
+                        created_at: new Date().toISOString()
+                    })
+
+                if (visitError) {
+                    console.error('❌ Error recording visit:', visitError)
+                } else {
+                    console.log('✅ Visit recorded successfully')
+                }
+            } catch (visitException) {
+                console.error('❌ Exception recording visit:', visitException)
+            }
+
+            // Send QR code email if email was added/updated
+            if (email?.trim() && email.trim() !== existingCustomer.email) {
+                console.log('📧 Sending QR code email to updated email address...')
+                try {
+                    const customerWithQR = {
+                        ...updatedCustomer,
+                        qr_code_url: existingCustomer.qr_code_url,
+                        qr_data: existingCustomer.qr_data
+                    }
+
+                    const businessInfo = {
+                        name: businessName || 'LoyalLink Business',
+                        rewardTitle: rewardTitle || 'Loyalty Reward',
+                        visitGoal: visitGoal || 5
+                    }
+
+                    const { sendQRCodeToCustomer } = await import('@/lib/messaging')
+                    await sendQRCodeToCustomer(customerWithQR, businessInfo)
+                    console.log('✅ QR code email sent to updated email address')
+                } catch (emailError) {
+                    console.error('❌ Failed to send QR code email:', emailError)
+                }
+            }
+
+            return NextResponse.json({
+                success: true,
+                customer: updatedCustomer,
+                message: `Welcome back ${name}! Visit recorded and information updated.`,
+                isExistingCustomer: true
+            })
         }
 
         console.log('✅ No existing customer found')
@@ -83,9 +166,9 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Generate QR code with customer ID that links to scan page
+        // Generate QR code with customer ID that links to scanner page
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-        const qrData = `${baseUrl}/scan?customer=${customer.id}`
+        const qrData = `${baseUrl}/scanner?customer=${customer.id}`
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
 
         // Update customer with QR code info

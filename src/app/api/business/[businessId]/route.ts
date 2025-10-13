@@ -15,10 +15,10 @@ const supabaseAdmin = createClient(
 
 export async function GET(
     request: NextRequest,
-    { params }: { params: { businessId: string } }
+    { params }: { params: Promise<{ businessId: string }> }
 ) {
     try {
-        const { businessId } = params
+        const { businessId } = await params
 
         if (!businessId) {
             return NextResponse.json(

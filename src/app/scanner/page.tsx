@@ -183,6 +183,56 @@ export default function ScannerPage() {
         }
     }
 
+    const handleCustomerScan = async (customerId: string) => {
+        try {
+            setScanning(true)
+            setError('')
+
+            // Record the visit
+            const response = await fetch('/api/record-visit', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customerId: customerId,
+                    businessId: business?.id
+                }),
+            })
+
+            const result = await response.json()
+
+            if (response.ok) {
+                // Show success message and redirect to dashboard
+                alert(`Visit recorded successfully for ${result.customer?.name || 'customer'}!`)
+                router.push('/dashboard')
+            } else {
+                setError(result.error || 'Failed to record visit')
+                setTimeout(() => {
+                    setError('')
+                    startCamera()
+                }, 3000)
+            }
+        } catch (error) {
+            setError('Failed to record visit')
+            setTimeout(() => {
+                setError('')
+                startCamera()
+            }, 3000)
+        } finally {
+            setScanning(false)
+        }
+    }
+
+    const handleQRScan = (qrData: string) => {
+        // Handle other types of QR codes
+        setError('QR code detected but not a customer code')
+        setTimeout(() => {
+            setError('')
+            startCamera()
+        }, 2000)
+    }
+
     const handleQRCodeDetected = (qrData: string) => {
         stopCamera()
 
@@ -195,17 +245,20 @@ export default function ScannerPage() {
                 const url = new URL(qrData)
                 const customerId = url.searchParams.get('customer')
                 if (customerId) {
-                    router.push(`/scan?customer=${customerId}`)
+                    // Handle customer QR code scan directly
+                    handleCustomerScan(customerId)
                     return
                 }
             }
 
             if (qrData.match(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)) {
-                router.push(`/scan?customer=${qrData}`)
+                // Handle customer UUID directly
+                handleCustomerScan(qrData)
                 return
             }
 
-            router.push(`/scan?qr_data=${encodeURIComponent(qrData)}`)
+            // Handle other QR data directly
+            handleQRScan(qrData)
         } catch (error) {
             setError('Invalid QR code')
             setTimeout(() => {

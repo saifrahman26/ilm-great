@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
+import Logo from '@/components/Logo'
 
 const loginSchema = z.object({
     email: z.string().email('Invalid email address'),
@@ -74,8 +75,8 @@ export default function LoginPage() {
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
             <div className="sm:mx-auto sm:w-full sm:max-w-md">
                 <div className="text-center">
-                    <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500 to-purple-600 rounded-xl flex items-center justify-center mb-6">
-                        <span className="text-white font-bold text-2xl">L</span>
+                    <div className="flex justify-center mb-6">
+                        <Logo size={64} showText={true} textColor="text-gray-900" />
                     </div>
                     <h2 className="text-3xl font-bold text-gray-900">
                         Welcome back

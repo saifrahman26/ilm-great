@@ -112,7 +112,7 @@ Make sure to add all environment variables from \`.env.example\` to your Vercel 
 - \`/login\` - Business login
 - \`/dashboard\` - Business dashboard
 - \`/customers\` - Customer management
-- \`/scan\` - QR code scanner
+- \`/scanner\` - QR code scanner
 - \`/manual-visit\` - Manual visit recording
 - \`/qr-code\` - Business QR code generator
 - \`/settings\` - Business settings

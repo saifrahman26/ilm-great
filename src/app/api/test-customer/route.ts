@@ -63,7 +63,7 @@ export async function POST(request: NextRequest) {
             qrCodeUrl: qrCodeUrl,
             testInstructions: {
                 scannerUrl: `/scanner`,
-                directScanUrl: `/scan?customer=${customer.id}`,
+                directScanUrl: `/scanner?customer=${customer.id}`,
                 testQrUrl: `/test-qr`
             }
         })

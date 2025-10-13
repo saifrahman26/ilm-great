@@ -13,6 +13,13 @@ const inter = Inter({
 export const metadata: Metadata = {
   title: "LoyalLink - Customer Loyalty Made Simple",
   description: "Track customer visits and reward loyalty with automated messaging. Perfect for cafes, restaurants, and local businesses.",
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: '32x32' }
+    ],
+    apple: '/logo.svg',
+  },
 };
 
 export default function RootLayout({

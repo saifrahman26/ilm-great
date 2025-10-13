@@ -4,6 +4,7 @@ interface EmailTemplateProps {
     totalPoints?: number
     message: string
     businessName?: string
+    logoUrl?: string
 }
 
 export function getLoyaltyEmailTemplate({
@@ -11,7 +12,8 @@ export function getLoyaltyEmailTemplate({
     points,
     totalPoints,
     message,
-    businessName = 'LoyalLink Business'
+    businessName = 'LoyalLink Business',
+    logoUrl
 }: EmailTemplateProps): string {
     return `
 <!DOCTYPE html>

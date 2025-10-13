@@ -19,6 +19,11 @@ export async function POST(request: NextRequest) {
             name: 'Test Customer',
             email: email,
             phone: '+1234567890',
+            email_confirmed: false,
+            visits: 1,
+            last_visit: new Date().toISOString(),
+            business_id: 'test-business-id',
+            created_at: new Date().toISOString(),
             qr_code_url: `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=test-${Date.now()}`,
             qr_data: `test-${Date.now()}`
         }

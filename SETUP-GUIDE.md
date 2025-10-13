@@ -89,7 +89,7 @@ The signup is failing because of Row Level Security. Run this SQL:
 2. **Configure Resend** with your verified domain
 3. **Test signup** to ensure it works
 4. **Add your first customer** via /register
-5. **Test QR scanning** via /scan?customer=CUSTOMER_ID
+5. **Test QR scanning** via /scanner?customer=CUSTOMER_ID
 6. **Customize** the email templates and branding
 
 ## 📧 Email Templates
