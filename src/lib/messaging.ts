@@ -46,9 +46,15 @@ export async function sendEmail(customer: Customer, subject: string, htmlContent
             },
             body: JSON.stringify({
                 from: 'LoyalLink <onboarding@resend.dev>',
-                to: customer.email,
-                subject: subject,
-                html: htmlContent
+                to: 'warriorsaifdurer@gmail.com', // Resend sandbox mode - can only send to verified email
+                subject: `[LoyalLink] ${subject} - For: ${customer.email}`,
+                html: `
+                    <div style="background: #e3f2fd; border: 2px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+                        <strong>📧 SANDBOX MODE:</strong> This email was originally intended for: <strong>${customer.email}</strong><br>
+                        <small style="color: #666;">Resend is in sandbox mode - emails are redirected to the verified address for testing.</small>
+                    </div>
+                    ${htmlContent}
+                `
             })
         })
 

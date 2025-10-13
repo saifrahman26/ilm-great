@@ -69,21 +69,16 @@ export async function POST(request: NextRequest) {
             },
             body: JSON.stringify({
                 from: 'LoyalLink <onboarding@resend.dev>', // Using Resend's verified test domain
-                to: process.env.NODE_ENV === 'development' ? 'warriorsaifdurer@gmail.com' : email,
-                subject: process.env.NODE_ENV === 'development'
-                    ? `[TEST] ${subject || 'Loyalty Program Update'} - Originally for: ${email}`
-                    : (subject || 'Loyalty Program Update'),
-                html: process.env.NODE_ENV === 'development'
-                    ? `
-                        <div style="background: #fff3cd; border: 1px solid #ffeaa7; padding: 10px; margin-bottom: 20px; border-radius: 5px;">
-                            <strong>🧪 TEST MODE:</strong> This email was originally intended for: <strong>${email}</strong>
-                        </div>
-                        ${htmlContent}
-                    `
-                    : htmlContent,
-                text: process.env.NODE_ENV === 'development'
-                    ? `[TEST MODE] Originally for: ${email}\n\n${message}`
-                    : message,
+                to: 'warriorsaifdurer@gmail.com', // Resend sandbox mode - can only send to verified email
+                subject: `[LoyalLink] ${subject || 'Loyalty Program Update'} - For: ${email}`,
+                html: `
+                    <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
+                        <strong>📧 SANDBOX MODE:</strong> This email was originally intended for: <strong>${email}</strong><br>
+                        <small style="color: #666;">Resend is in sandbox mode - emails are redirected to the verified address for testing.</small>
+                    </div>
+                    ${htmlContent}
+                `,
+                text: `[SANDBOX MODE] Originally for: ${email}\n\n${message}`,
             })
         })
 
