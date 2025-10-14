@@ -1,7 +1,7 @@
 'use client'
 
-import { useState, Suspense } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useState, useEffect } from 'react'
+
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
@@ -26,8 +26,15 @@ const customerSchema = z.object({
 type CustomerForm = z.infer<typeof customerSchema>
 
 function ScanRegisterContent() {
-    const searchParams = useSearchParams()
-    const businessId = searchParams.get('business')
+    const [businessId, setBusinessId] = useState<string | null>(null)
+
+    // Get business ID from URL without Suspense issues
+    useEffect(() => {
+        if (typeof window !== 'undefined') {
+            const params = new URLSearchParams(window.location.search)
+            setBusinessId(params.get('business'))
+        }
+    }, [])
 
     const [submitting, setSubmitting] = useState(false)
     const [success, setSuccess] = useState(false)
@@ -299,16 +306,5 @@ function ScanRegisterContent() {
 }
 
 export default function ScanRegisterPage() {
-    return (
-        <Suspense fallback={
-            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-                <div className="text-center">
-                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
-                    <p className="text-gray-600">Loading...</p>
-                </div>
-            </div>
-        }>
-            <ScanRegisterContent />
-        </Suspense>
-    )
+    return <ScanRegisterContent />
 }
