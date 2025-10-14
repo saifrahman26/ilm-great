@@ -168,6 +168,30 @@ export default function LoginPage() {
                             </button>
                         </div>
                     </form>
+
+                    {/* Clear Session Link */}
+                    <div className="mt-6 text-center">
+                        <div className="text-sm text-gray-600 mb-3">
+                            Don't have an account?{' '}
+                            <Link
+                                href="/signup"
+                                className="font-medium text-blue-600 hover:text-blue-500"
+                            >
+                                Sign up here
+                            </Link>
+                        </div>
+                        <div className="pt-3 border-t border-gray-200">
+                            <p className="text-xs text-gray-500 mb-2">
+                                Having login issues or stuck on setup?
+                            </p>
+                            <Link
+                                href="/clear-session"
+                                className="text-xs text-red-600 hover:text-red-500 underline font-medium"
+                            >
+                                Clear Session Data & Reset
+                            </Link>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

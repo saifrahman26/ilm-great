@@ -3,6 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase, Business, hasValidSupabaseConfig } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
+import { SessionUtils } from '@/lib/sessionUtils'
 
 interface AuthContextType {
     user: User | null
@@ -19,6 +20,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [user, setUser] = useState<User | null>(null)
     const [business, setBusiness] = useState<Business | null>(null)
     const [loading, setLoading] = useState(true)
+    const [currentFetchUserId, setCurrentFetchUserId] = useState<string | null>(null)
 
     useEffect(() => {
         let mounted = true
@@ -30,21 +32,28 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             try {
-                // Get initial session with timeout
-                const sessionPromise = supabase.auth.getSession()
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error('Session fetch timeout')), 10000)
-                )
+                // Check if session is stale first
+                const isStale = await SessionUtils.isSessionStale()
+                if (isStale) {
+                    console.log('🧹 Stale session detected, clearing...')
+                    await SessionUtils.clearAllSessionData()
+                    if (mounted) {
+                        setUser(null)
+                        setBusiness(null)
+                        setLoading(false)
+                    }
+                    return
+                }
 
-                const { data: { session }, error } = await Promise.race([
-                    sessionPromise,
-                    timeoutPromise
-                ]) as any
+                // Get initial session
+                const { data: { session }, error } = await supabase.auth.getSession()
 
                 if (!mounted) return
 
                 if (error) {
                     console.error('❌ Session fetch error:', error)
+                    // Clear potentially corrupted session
+                    await SessionUtils.clearAllSessionData()
                     setUser(null)
                     setBusiness(null)
                     setLoading(false)
@@ -64,6 +73,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
             } catch (err) {
                 console.error('❌ Session initialization error:', err)
+                // Clear session on any initialization error
+                await SessionUtils.clearAllSessionData()
                 if (mounted) {
                     setUser(null)
                     setBusiness(null)
@@ -96,8 +107,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             subscription.unsubscribe()
         }
     }, [])
-
-    const [currentFetchUserId, setCurrentFetchUserId] = useState<string | null>(null)
 
     const fetchBusiness = async (userId: string) => {
         if (!userId) {
@@ -289,7 +298,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     const signOut = async () => {
-        await supabase.auth.signOut()
+        await SessionUtils.clearAllSessionData()
     }
 
     const value = {
