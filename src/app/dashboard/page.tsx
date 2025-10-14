@@ -39,6 +39,19 @@ export default function DashboardPage() {
         repeatRate: 0,
         avgVisitInterval: 0,
     })
+    const [loadingTimeout, setLoadingTimeout] = useState(false)
+
+    // Add loading timeout to prevent infinite loading
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (loading) {
+                console.log('⚠️ Loading timeout reached, showing fallback')
+                setLoadingTimeout(true)
+            }
+        }, 15000) // 15 second timeout
+
+        return () => clearTimeout(timer)
+    }, [loading])
 
     // Calculate stats whenever customers data changes
     useEffect(() => {
@@ -61,6 +74,36 @@ export default function DashboardPage() {
             avgVisitInterval,
         })
     }, [customers, business?.visit_goal])
+
+    // Show loading timeout fallback
+    if (loadingTimeout || (loading && !user && !business)) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center max-w-md mx-auto px-4">
+                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                        <h2 className="text-xl font-semibold text-gray-900 mb-4">Loading Issue Detected</h2>
+                        <p className="text-gray-600 mb-6">
+                            The app seems to be stuck loading. This usually happens due to session issues.
+                        </p>
+                        <div className="space-y-3">
+                            <a
+                                href="/clear-session"
+                                className="block bg-red-600 text-white px-4 py-2 rounded hover:bg-red-700 transition-colors"
+                            >
+                                Clear Session & Fix Loading
+                            </a>
+                            <a
+                                href="/login"
+                                className="block bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700 transition-colors"
+                            >
+                                Try Login Again
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        )
+    }
 
     if (!user) {
         return (

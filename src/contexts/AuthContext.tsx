@@ -21,56 +21,112 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
-        if (!hasValidSupabaseConfig) {
-            setLoading(false)
-            return
-        }
+        let mounted = true
 
-        // Get initial session
-        supabase.auth.getSession().then(({ data: { session }, error }) => {
-            if (error) {
-                console.error('❌ Session fetch error:', error)
-            } else {
+        const initializeAuth = async () => {
+            if (!hasValidSupabaseConfig) {
+                if (mounted) setLoading(false)
+                return
+            }
+
+            try {
+                // Get initial session with timeout
+                const sessionPromise = supabase.auth.getSession()
+                const timeoutPromise = new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error('Session fetch timeout')), 10000)
+                )
+
+                const { data: { session }, error } = await Promise.race([
+                    sessionPromise,
+                    timeoutPromise
+                ]) as any
+
+                if (!mounted) return
+
+                if (error) {
+                    console.error('❌ Session fetch error:', error)
+                    setUser(null)
+                    setBusiness(null)
+                    setLoading(false)
+                    return
+                }
+
                 console.log('🔍 Initial session check:', session ? 'Found session' : 'No session')
-            }
+                setUser(session?.user ?? null)
 
-            setUser(session?.user ?? null)
-            if (session?.user) {
-                fetchBusiness(session.user.id)
+                if (session?.user) {
+                    await fetchBusiness(session.user.id)
+                } else {
+                    setBusiness(null)
+                }
+
+                if (mounted) setLoading(false)
+
+            } catch (err) {
+                console.error('❌ Session initialization error:', err)
+                if (mounted) {
+                    setUser(null)
+                    setBusiness(null)
+                    setLoading(false)
+                }
             }
-            setLoading(false)
-        }).catch((err) => {
-            console.error('❌ Session fetch exception:', err)
-            setLoading(false)
-        })
+        }
 
         // Listen for auth changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange(async (event, session) => {
+            if (!mounted) return
+
+            console.log('🔄 Auth state change:', event, session ? 'with session' : 'no session')
+
             setUser(session?.user ?? null)
+
             if (session?.user) {
                 await fetchBusiness(session.user.id)
             } else {
                 setBusiness(null)
             }
-            setLoading(false)
+
+            if (mounted) setLoading(false)
         })
 
-        return () => subscription.unsubscribe()
+        initializeAuth()
+
+        return () => {
+            mounted = false
+            subscription.unsubscribe()
+        }
     }, [])
 
     const fetchBusiness = async (userId: string) => {
+        if (!userId) {
+            setBusiness(null)
+            return
+        }
+
         try {
             console.log('📊 Fetching business for user:', userId)
 
-            const { data, error } = await supabase
+            // Add timeout to prevent hanging
+            const businessPromise = supabase
                 .from('businesses')
                 .select('*')
                 .eq('id', userId)
                 .single()
 
+            const timeoutPromise = new Promise((_, reject) =>
+                setTimeout(() => reject(new Error('Business fetch timeout')), 8000)
+            )
+
+            const { data, error } = await Promise.race([
+                businessPromise,
+                timeoutPromise
+            ]) as any
+
             if (error) {
                 console.error('❌ Error fetching business:', error)
-                if (error.code !== 'PGRST116') { // Not "not found" error
+                if (error.code === 'PGRST116') {
+                    console.log('⚠️ No business found for user (expected for new users)')
+                } else {
                     console.error('Unexpected business fetch error:', error)
                 }
                 setBusiness(null)
@@ -81,7 +137,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
                 console.log('✅ Business fetched:', data.name)
                 setBusiness(data)
             } else {
-                console.log('⚠️ No business found for user')
+                console.log('⚠️ No business data returned')
                 setBusiness(null)
             }
         } catch (err) {
