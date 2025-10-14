@@ -15,14 +15,16 @@ import {
     Gift,
     QrCode,
     Loader,
-    Star
+    Star,
+    Sparkles,
+    Heart,
+    Award
 } from 'lucide-react'
-// import Logo from '@/components/Logo' // Not used in this component
 
 const customerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     phone: z.string().min(10, 'Phone number must be at least 10 digits'),
-    email: z.string().email('Invalid email address').optional().or(z.literal('')),
+    email: z.string().email('Please enter a valid email address'),
 })
 
 type CustomerForm = z.infer<typeof customerSchema>
@@ -34,6 +36,69 @@ interface Business {
     reward_description: string
     visit_goal: number
     business_logo_url?: string
+}
+
+// Dynamic color themes based on business name/type
+const getBusinessTheme = (businessName: string) => {
+    const name = businessName.toLowerCase()
+
+    // Restaurant/Food themes
+    if (name.includes('restaurant') || name.includes('cafe') || name.includes('coffee') || name.includes('food') || name.includes('pizza') || name.includes('burger')) {
+        return {
+            primary: 'from-orange-500 to-red-500',
+            secondary: 'from-orange-50 to-red-50',
+            accent: 'bg-orange-100',
+            button: 'bg-orange-600 hover:bg-orange-700',
+            text: 'text-orange-900',
+            icon: 'text-orange-600'
+        }
+    }
+
+    // Beauty/Salon themes
+    if (name.includes('salon') || name.includes('beauty') || name.includes('spa') || name.includes('nail') || name.includes('hair')) {
+        return {
+            primary: 'from-pink-500 to-purple-500',
+            secondary: 'from-pink-50 to-purple-50',
+            accent: 'bg-pink-100',
+            button: 'bg-pink-600 hover:bg-pink-700',
+            text: 'text-pink-900',
+            icon: 'text-pink-600'
+        }
+    }
+
+    // Health/Fitness themes
+    if (name.includes('gym') || name.includes('fitness') || name.includes('health') || name.includes('medical') || name.includes('clinic')) {
+        return {
+            primary: 'from-green-500 to-teal-500',
+            secondary: 'from-green-50 to-teal-50',
+            accent: 'bg-green-100',
+            button: 'bg-green-600 hover:bg-green-700',
+            text: 'text-green-900',
+            icon: 'text-green-600'
+        }
+    }
+
+    // Retail/Shopping themes
+    if (name.includes('store') || name.includes('shop') || name.includes('retail') || name.includes('boutique') || name.includes('market')) {
+        return {
+            primary: 'from-purple-500 to-indigo-500',
+            secondary: 'from-purple-50 to-indigo-50',
+            accent: 'bg-purple-100',
+            button: 'bg-purple-600 hover:bg-purple-700',
+            text: 'text-purple-900',
+            icon: 'text-purple-600'
+        }
+    }
+
+    // Default professional theme
+    return {
+        primary: 'from-blue-500 to-indigo-500',
+        secondary: 'from-blue-50 to-indigo-50',
+        accent: 'bg-blue-100',
+        button: 'bg-blue-600 hover:bg-blue-700',
+        text: 'text-blue-900',
+        icon: 'text-blue-600'
+    }
 }
 
 function JoinBusinessContent() {
@@ -89,8 +154,8 @@ function JoinBusinessContent() {
         setError('')
 
         try {
-            // Register the customer using the no-email endpoint for reliability
-            const response = await fetch('/api/register-customer-no-email', {
+            // Register the customer with email functionality
+            const response = await fetch('/api/register-customer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -165,18 +230,38 @@ function JoinBusinessContent() {
                         </h2>
                         <p className="text-gray-600 mb-6">
                             {registeredCustomer.isExistingCustomer
-                                ? "Your visit has been recorded and your information has been updated!"
-                                : "You've successfully joined our loyalty program!"
+                                ? "Welcome back! Your visit has been recorded and your information updated."
+                                : "🎉 Congratulations! You've successfully joined our loyalty program!"
                             }
                         </p>
 
-                        <div className="bg-blue-50 rounded-lg p-4 mb-6">
-                            <h3 className="font-semibold text-blue-900 mb-2">What's Next?</h3>
-                            <ul className="text-sm text-blue-800 space-y-1 text-left">
-                                <li>• Your personal QR code is ready</li>
-                                <li>• Show your QR code on each visit</li>
-                                <li>• Earn rewards after {business?.visit_goal} visits</li>
-                                <li>• Enjoy your {business?.reward_title}!</li>
+                        {/* Show QR Code directly if available */}
+                        {registeredCustomer.qr_code_url && (
+                            <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                                <h3 className="font-semibold text-gray-900 mb-3 text-center">Your Personal QR Code</h3>
+                                <div className="flex justify-center mb-3">
+                                    <img
+                                        src={registeredCustomer.qr_code_url}
+                                        alt="Your QR Code"
+                                        className="w-32 h-32 border-2 border-gray-200 rounded-lg"
+                                    />
+                                </div>
+                                <p className="text-xs text-gray-600 text-center">
+                                    📱 Save this QR code to your phone and show it on each visit!
+                                </p>
+                            </div>
+                        )}
+
+                        <div className="bg-green-50 rounded-lg p-4 mb-6 border border-green-200">
+                            <h3 className="font-semibold text-green-900 mb-2 flex items-center">
+                                <Mail className="w-4 h-4 mr-2" />
+                                Check Your Email!
+                            </h3>
+                            <ul className="text-sm text-green-800 space-y-1 text-left">
+                                <li>• We've sent your personal QR code to your email</li>
+                                <li>• Save the QR code to your phone</li>
+                                <li>• Show your QR code on each visit to earn points</li>
+                                <li>• Get your {business?.reward_title} after {business?.visit_goal} visits!</li>
                             </ul>
                         </div>
 
@@ -311,19 +396,20 @@ function JoinBusinessContent() {
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
                                     <Mail className="w-4 h-4 inline mr-2" />
-                                    Email Address (Optional)
+                                    Email Address *
                                 </label>
                                 <input
                                     {...register('email')}
                                     type="email"
                                     placeholder="Enter your email address"
                                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                                    required
                                 />
                                 {errors.email && (
                                     <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                                 )}
                                 <p className="mt-1 text-xs text-gray-500">
-                                    Get your personal QR code and updates
+                                    📧 Your personal QR code will be sent to this email
                                 </p>
                             </div>
 
@@ -348,11 +434,19 @@ function JoinBusinessContent() {
                         </form>
 
                         <div className="mt-6 text-center">
+                            <div className="bg-blue-50 rounded-lg p-3 mb-4">
+                                <p className="text-xs text-blue-700 font-medium mb-1">
+                                    📧 Your QR Code Will Be Emailed To You
+                                </p>
+                                <p className="text-xs text-blue-600">
+                                    Save it to your phone and show it on each visit to earn rewards!
+                                </p>
+                            </div>
                             <p className="text-xs text-gray-500 mb-2">
                                 By joining, you agree to receive loyalty program updates
                             </p>
                             <p className="text-xs text-gray-400">
-                                Already a member? Just enter your phone number to update your info
+                                Already a member? Enter your info to update and get your QR code
                             </p>
                         </div>
                     </div>

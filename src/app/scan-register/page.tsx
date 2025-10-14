@@ -87,8 +87,8 @@ function ScanRegisterContent() {
         setError('')
 
         try {
-            // Register the customer and record the visit (using no-email endpoint to avoid API key issues)
-            const response = await fetch('/api/register-customer-no-email', {
+            // Register the customer and record the visit
+            const response = await fetch('/api/register-customer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ function ScanRegisterContent() {
                         <div className="bg-blue-50 rounded-lg p-4 mb-6">
                             <h3 className="font-semibold text-blue-900 mb-2">What's Next?</h3>
                             <ul className="text-sm text-blue-800 space-y-1 text-left">
-                                <li>• Your QR code is ready (email sending temporarily disabled)</li>
+                                <li>• Your QR code has been sent to your email</li>
                                 <li>• Show your QR code on each visit</li>
                                 <li>• Earn rewards after {business?.visit_goal} visits</li>
                                 <li>• Enjoy your {business?.reward_title}!</li>
@@ -323,7 +323,7 @@ function ScanRegisterContent() {
 
                         <div className="mt-6 text-center">
                             <p className="text-xs text-gray-500 mb-2">
-                                Your QR code will be generated (email sending temporarily disabled)
+                                Your QR code will be sent to your email address
                             </p>
                             <p className="text-xs text-gray-400">
                                 Already registered? Just enter your phone number to record your visit and optionally add/update your email

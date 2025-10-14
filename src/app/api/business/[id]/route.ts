@@ -15,11 +15,10 @@ const supabaseAdmin = createClient(
 
 export async function GET(
     request: NextRequest,
-    context: { params: { id: string } }
+    { params }: { params: Promise<{ id: string }> }
 ) {
-    const { params } = context
     try {
-        const businessId = params.id
+        const { id: businessId } = await params
 
         if (!businessId) {
             return NextResponse.json(
@@ -27,8 +26,6 @@ export async function GET(
                 { status: 400 }
             )
         }
-
-        console.log('🏢 Fetching business:', businessId)
 
         // Fetch business data
         const { data: business, error: businessError } = await supabaseAdmin
@@ -38,42 +35,20 @@ export async function GET(
             .single()
 
         if (businessError) {
-            console.error('❌ Error fetching business:', businessError)
-            if (businessError.code === 'PGRST116') {
-                return NextResponse.json(
-                    { error: 'Business not found' },
-                    { status: 404 }
-                )
-            }
-            return NextResponse.json(
-                { error: 'Database error' },
-                { status: 500 }
-            )
-        }
-
-        if (!business) {
+            console.error('Error fetching business:', businessError)
             return NextResponse.json(
                 { error: 'Business not found' },
                 { status: 404 }
             )
         }
 
-        console.log('✅ Business found:', business.name)
-
         return NextResponse.json({
             success: true,
-            business: {
-                id: business.id,
-                name: business.name,
-                reward_title: business.reward_title || 'Loyalty Reward',
-                reward_description: business.reward_description || 'Thank you for being a loyal customer!',
-                visit_goal: business.visit_goal || 5,
-                business_logo_url: business.business_logo_url
-            }
+            business
         })
 
     } catch (error) {
-        console.error('❌ Error in business API:', error)
+        console.error('Error in business API:', error)
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

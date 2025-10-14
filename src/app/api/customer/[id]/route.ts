@@ -15,9 +15,9 @@ const supabaseAdmin = createClient(
 
 export async function GET(
     request: NextRequest,
-    context: { params: { id: string } }
+    context: { params: Promise<{ id: string }> }
 ) {
-    const { params } = context
+    const params = await context.params
     try {
         const customerId = params.id
 
