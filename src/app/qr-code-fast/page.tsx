@@ -8,7 +8,8 @@ import {
     Copy,
     CheckCircle,
     ArrowLeft,
-    Share2
+    Share2,
+    Printer
 } from 'lucide-react'
 import { useRouter } from 'next/navigation'
 
@@ -32,19 +33,123 @@ export default function FastQRCodePage() {
     }, [business])
 
     const downloadQRCode = async () => {
-        if (!qrCodeUrl) return
+        if (!qrCodeUrl || !business) return
 
         try {
-            const response = await fetch(qrCodeUrl)
-            const blob = await response.blob()
-            const url = window.URL.createObjectURL(blob)
-            const a = document.createElement('a')
-            a.href = url
-            a.download = `${business?.name || 'business'}-qr-code.png`
-            a.click()
-            window.URL.revokeObjectURL(url)
+            // Create a canvas to design the QR code with business info
+            const canvas = document.createElement('canvas')
+            const ctx = canvas.getContext('2d')
+            if (!ctx) return
+
+            // Set canvas size
+            canvas.width = 800
+            canvas.height = 1000
+
+            // Background
+            ctx.fillStyle = '#ffffff'
+            ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+            // Header background
+            const gradient = ctx.createLinearGradient(0, 0, canvas.width, 100)
+            gradient.addColorStop(0, '#2563eb')
+            gradient.addColorStop(1, '#7c3aed')
+            ctx.fillStyle = gradient
+            ctx.fillRect(0, 0, canvas.width, 120)
+
+            // Business name
+            ctx.fillStyle = '#ffffff'
+            ctx.font = 'bold 36px Arial'
+            ctx.textAlign = 'center'
+            ctx.fillText(business.name, canvas.width / 2, 70)
+
+            // Subtitle
+            ctx.font = '20px Arial'
+            ctx.fillText('Loyalty Program', canvas.width / 2, 100)
+
+            // Load and draw QR code
+            const qrImage = new Image()
+            qrImage.crossOrigin = 'anonymous'
+
+            qrImage.onload = () => {
+                // Draw QR code
+                const qrSize = 400
+                const qrX = (canvas.width - qrSize) / 2
+                const qrY = 180
+
+                // QR background
+                ctx.fillStyle = '#ffffff'
+                ctx.fillRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40)
+                ctx.strokeStyle = '#e5e7eb'
+                ctx.lineWidth = 2
+                ctx.strokeRect(qrX - 20, qrY - 20, qrSize + 40, qrSize + 40)
+
+                // Draw QR code
+                ctx.drawImage(qrImage, qrX, qrY, qrSize, qrSize)
+
+                // Instructions
+                ctx.fillStyle = '#374151'
+                ctx.font = 'bold 24px Arial'
+                ctx.textAlign = 'center'
+                ctx.fillText('Scan to Join Our Loyalty Program', canvas.width / 2, 650)
+
+                // Reward info
+                ctx.font = '20px Arial'
+                ctx.fillStyle = '#6b7280'
+                ctx.fillText(business.reward_title || 'Loyalty Rewards', canvas.width / 2, 690)
+
+                // Visit goal
+                ctx.font = '18px Arial'
+                ctx.fillText(`Earn rewards after ${business.visit_goal || 5} visits`, canvas.width / 2, 720)
+
+                // Steps
+                ctx.font = 'bold 20px Arial'
+                ctx.fillStyle = '#374151'
+                ctx.textAlign = 'left'
+                ctx.fillText('How it works:', 100, 780)
+
+                ctx.font = '16px Arial'
+                ctx.fillStyle = '#6b7280'
+                ctx.fillText('1. Scan this QR code with your phone', 100, 810)
+                ctx.fillText('2. Fill in your name, phone, and email', 100, 835)
+                ctx.fillText('3. Get your personal QR code via email', 100, 860)
+                ctx.fillText('4. Show your QR code on each visit', 100, 885)
+                ctx.fillText('5. Earn rewards and enjoy benefits!', 100, 910)
+
+                // Footer
+                ctx.fillStyle = '#9ca3af'
+                ctx.font = '14px Arial'
+                ctx.textAlign = 'center'
+                ctx.fillText('Powered by LoyalLink', canvas.width / 2, 960)
+
+                // Download the designed image
+                canvas.toBlob((blob) => {
+                    if (blob) {
+                        const url = window.URL.createObjectURL(blob)
+                        const a = document.createElement('a')
+                        a.href = url
+                        a.download = `${business.name}-loyalty-qr.png`
+                        a.click()
+                        window.URL.revokeObjectURL(url)
+                    }
+                })
+            }
+
+            qrImage.src = qrCodeUrl
         } catch (error) {
-            console.error('Error downloading QR code:', error)
+            console.error('Error creating designed QR code:', error)
+            // Fallback to simple download
+            try {
+                const response = await fetch(qrCodeUrl)
+                const blob = await response.blob()
+                const url = window.URL.createObjectURL(blob)
+                const a = document.createElement('a')
+                a.href = url
+                a.download = `${business?.name || 'business'}-qr-code.png`
+                a.click()
+                window.URL.revokeObjectURL(url)
+            } catch (fallbackError) {
+                console.error('Fallback download failed:', fallbackError)
+            }
         }
     }
 
@@ -57,6 +162,160 @@ export default function FastQRCodePage() {
             setTimeout(() => setCopied(false), 2000)
         } catch (error) {
             console.error('Error copying to clipboard:', error)
+        }
+    }
+
+    const printQRCode = () => {
+        if (!qrCodeUrl || !business) return
+
+        const printWindow = window.open('', '_blank')
+        if (printWindow) {
+            printWindow.document.write(`
+                <html>
+                    <head>
+                        <title>${business.name} - Loyalty QR Code</title>
+                        <style>
+                            @page { margin: 0.5in; }
+                            body { 
+                                font-family: Arial, sans-serif; 
+                                text-align: center; 
+                                margin: 0; 
+                                padding: 20px;
+                                background: white;
+                            }
+                            .header {
+                                background: linear-gradient(135deg, #2563eb, #7c3aed);
+                                color: white;
+                                padding: 30px;
+                                border-radius: 15px;
+                                margin-bottom: 30px;
+                            }
+                            .business-name {
+                                font-size: 36px;
+                                font-weight: bold;
+                                margin-bottom: 10px;
+                            }
+                            .subtitle {
+                                font-size: 18px;
+                                opacity: 0.9;
+                            }
+                            .qr-container {
+                                background: white;
+                                border: 3px solid #e5e7eb;
+                                border-radius: 20px;
+                                padding: 30px;
+                                margin: 30px auto;
+                                display: inline-block;
+                                box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+                            }
+                            .qr-code {
+                                width: 300px;
+                                height: 300px;
+                                margin: 0 auto;
+                            }
+                            .instructions {
+                                margin: 30px 0;
+                                font-size: 20px;
+                                font-weight: bold;
+                                color: #374151;
+                            }
+                            .reward-info {
+                                background: #fef3c7;
+                                border: 2px solid #f59e0b;
+                                border-radius: 10px;
+                                padding: 20px;
+                                margin: 20px auto;
+                                max-width: 500px;
+                            }
+                            .reward-title {
+                                font-size: 22px;
+                                font-weight: bold;
+                                color: #92400e;
+                                margin-bottom: 10px;
+                            }
+                            .reward-description {
+                                font-size: 16px;
+                                color: #78350f;
+                                margin-bottom: 10px;
+                            }
+                            .visit-goal {
+                                font-size: 18px;
+                                font-weight: bold;
+                                color: #92400e;
+                            }
+                            .steps {
+                                text-align: left;
+                                max-width: 600px;
+                                margin: 30px auto;
+                                background: #f8fafc;
+                                padding: 25px;
+                                border-radius: 10px;
+                                border: 1px solid #e2e8f0;
+                            }
+                            .steps h3 {
+                                text-align: center;
+                                color: #374151;
+                                margin-bottom: 20px;
+                                font-size: 20px;
+                            }
+                            .steps ol {
+                                font-size: 16px;
+                                color: #4b5563;
+                                line-height: 1.8;
+                            }
+                            .steps li {
+                                margin-bottom: 8px;
+                            }
+                            .footer {
+                                margin-top: 40px;
+                                font-size: 14px;
+                                color: #9ca3af;
+                            }
+                        </style>
+                    </head>
+                    <body>
+                        <div class="header">
+                            <div class="business-name">${business.name}</div>
+                            <div class="subtitle">Loyalty Program QR Code</div>
+                        </div>
+                        
+                        <div class="qr-container">
+                            <img src="${qrCodeUrl}" alt="QR Code" class="qr-code" />
+                        </div>
+                        
+                        <div class="instructions">
+                            Scan to Join Our Loyalty Program
+                        </div>
+                        
+                        <div class="reward-info">
+                            <div class="reward-title">${business.reward_title || 'Loyalty Rewards'}</div>
+                            <div class="reward-description">${business.reward_description || 'Thank you for being a loyal customer!'}</div>
+                            <div class="visit-goal">🎁 Earn rewards after ${business.visit_goal || 5} visits</div>
+                        </div>
+                        
+                        <div class="steps">
+                            <h3>How it works:</h3>
+                            <ol>
+                                <li>Scan this QR code with your phone camera</li>
+                                <li>Fill in your name, phone number, and email</li>
+                                <li>Get your personal QR code sent to your email</li>
+                                <li>Show your personal QR code on each visit</li>
+                                <li>Collect visits and earn amazing rewards!</li>
+                            </ol>
+                        </div>
+                        
+                        <div class="footer">
+                            Powered by LoyalLink • Digital Loyalty Made Simple
+                        </div>
+                    </body>
+                </html>
+            `)
+            printWindow.document.close()
+
+            // Wait for images to load before printing
+            setTimeout(() => {
+                printWindow.print()
+            }, 1000)
         }
     }
 
@@ -177,8 +436,15 @@ export default function FastQRCodePage() {
                                         <span>Download</span>
                                     </button>
                                     <button
-                                        onClick={shareQRCode}
+                                        onClick={printQRCode}
                                         className="bg-green-600 text-white px-6 py-3 rounded-xl hover:bg-green-700 transition-colors flex items-center space-x-2 shadow-md hover:shadow-lg"
+                                    >
+                                        <Printer className="w-4 h-4" />
+                                        <span>Print</span>
+                                    </button>
+                                    <button
+                                        onClick={shareQRCode}
+                                        className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition-colors flex items-center space-x-2 shadow-md hover:shadow-lg"
                                     >
                                         <Share2 className="w-4 h-4" />
                                         <span>Share</span>

@@ -158,7 +158,7 @@ export default function RewardsPage() {
                             </label>
                             <select
                                 {...register('visit_goal', { valueAsNumber: true })}
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
                             >
                                 {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20].map(num => (
                                     <option key={num} value={num}>
@@ -181,7 +181,7 @@ export default function RewardsPage() {
                                 {...register('reward_title')}
                                 type="text"
                                 placeholder="e.g., Free Coffee, 20% Off, Free Dessert"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                             />
                             {errors.reward_title && (
                                 <p className="mt-1 text-sm text-red-600">{errors.reward_title.message}</p>
@@ -197,11 +197,113 @@ export default function RewardsPage() {
                                 {...register('reward_description')}
                                 rows={3}
                                 placeholder="Describe what customers get when they earn this reward..."
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
                             />
                             {errors.reward_description && (
                                 <p className="mt-1 text-sm text-red-600">{errors.reward_description.message}</p>
                             )}
+                        </div>
+
+                        {/* Reward Templates */}
+                        <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                            <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                                <Gift className="w-4 h-4 mr-2" />
+                                Quick Templates:
+                            </h4>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        reset({
+                                            reward_title: 'Free Coffee',
+                                            reward_description: 'Enjoy a complimentary coffee of your choice on us! Valid for any size, any blend.',
+                                            visit_goal: 5
+                                        })
+                                    }}
+                                    className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                                >
+                                    <div className="font-medium text-gray-900 text-sm">☕ Free Coffee</div>
+                                    <div className="text-xs text-gray-600 mt-1">After 5 visits</div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        reset({
+                                            reward_title: '20% Off Next Purchase',
+                                            reward_description: 'Get 20% discount on your next purchase. Valid for 30 days from earning date.',
+                                            visit_goal: 3
+                                        })
+                                    }}
+                                    className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                                >
+                                    <div className="font-medium text-gray-900 text-sm">💰 20% Off</div>
+                                    <div className="text-xs text-gray-600 mt-1">After 3 visits</div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        reset({
+                                            reward_title: 'Free Dessert',
+                                            reward_description: 'Choose any dessert from our menu absolutely free! Perfect way to end your meal.',
+                                            visit_goal: 4
+                                        })
+                                    }}
+                                    className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                                >
+                                    <div className="font-medium text-gray-900 text-sm">🍰 Free Dessert</div>
+                                    <div className="text-xs text-gray-600 mt-1">After 4 visits</div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        reset({
+                                            reward_title: 'Buy 1 Get 1 Free',
+                                            reward_description: 'Purchase any item and get another of equal or lesser value absolutely free!',
+                                            visit_goal: 6
+                                        })
+                                    }}
+                                    className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                                >
+                                    <div className="font-medium text-gray-900 text-sm">🎁 Buy 1 Get 1</div>
+                                    <div className="text-xs text-gray-600 mt-1">After 6 visits</div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        reset({
+                                            reward_title: 'VIP Treatment',
+                                            reward_description: 'Skip the line and get priority service plus a complimentary upgrade on your order.',
+                                            visit_goal: 8
+                                        })
+                                    }}
+                                    className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                                >
+                                    <div className="font-medium text-gray-900 text-sm">👑 VIP Treatment</div>
+                                    <div className="text-xs text-gray-600 mt-1">After 8 visits</div>
+                                </button>
+
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        reset({
+                                            reward_title: 'Free Meal',
+                                            reward_description: 'Enjoy a complete meal on the house! Choose from our special loyalty menu.',
+                                            visit_goal: 10
+                                        })
+                                    }}
+                                    className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                                >
+                                    <div className="font-medium text-gray-900 text-sm">🍽️ Free Meal</div>
+                                    <div className="text-xs text-gray-600 mt-1">After 10 visits</div>
+                                </button>
+                            </div>
+                            <p className="text-xs text-gray-500 mt-3">
+                                Click any template to auto-fill the form, then customize as needed
+                            </p>
                         </div>
 
                         {/* Preview */}
