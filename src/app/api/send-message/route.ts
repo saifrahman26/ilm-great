@@ -68,13 +68,13 @@ export async function POST(request: NextRequest) {
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'LoyalLink <onboarding@resend.dev>', // Using Resend's verified test domain
-                to: 'warriorsaifdurer@gmail.com', // Resend sandbox mode - can only send to verified email
+                from: 'LoyalLink <onboarding@resend.dev>',
+                to: 'warriorsaifdurer@gmail.com', // Use verified email to avoid failures
                 subject: `[LoyalLink] ${subject || 'Loyalty Program Update'} - For: ${email}`,
                 html: `
                     <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
                         <strong>📧 SANDBOX MODE:</strong> This email was originally intended for: <strong>${email}</strong><br>
-                        <small style="color: #666;">Resend is in sandbox mode - emails are redirected to the verified address for testing.</small>
+                        <small style="color: #666;">Resend is in sandbox mode - emails are redirected to the verified address.</small>
                     </div>
                     ${htmlContent}
                 `,
