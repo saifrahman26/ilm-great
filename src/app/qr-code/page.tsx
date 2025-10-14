@@ -32,8 +32,8 @@ export default function QRCodePage() {
         }
 
         try {
-            // Create registration URL for customers (use scan-register which exists)
-            const regUrl = `${window.location.origin}/scan-register?business=${business.id}`
+            // Create registration URL for customers
+            const regUrl = `${window.location.origin}/join/${business.id}`
             setRegistrationUrl(regUrl)
             console.log('Registration URL:', regUrl)
 

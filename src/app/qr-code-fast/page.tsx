@@ -21,8 +21,8 @@ export default function FastQRCodePage() {
 
     useEffect(() => {
         if (business?.id) {
-            // Create registration URL immediately
-            const regUrl = `${window.location.origin}/scan-register?business=${business.id}`
+            // Create customer registration URL
+            const regUrl = `${window.location.origin}/join/${business.id}`
             setRegistrationUrl(regUrl)
 
             // Generate QR code URL immediately
