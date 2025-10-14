@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Use service role key for admin operations
+// Use service role key to bypass RLS for business creation
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -14,42 +14,72 @@ const supabaseAdmin = createClient(
 )
 
 export async function POST(request: NextRequest) {
-    try {
-        const { userId, businessData } = await request.json()
+    console.log('🏢 Create business API called')
 
-        if (!userId || !businessData) {
-            return NextResponse.json(
-                { error: 'Missing userId or businessData' },
-                { status: 400 }
-            )
+    try {
+        const body = await request.json()
+        const { userId, businessData } = body
+
+        console.log('📝 Request data:', { userId, businessData })
+
+        // Validate input
+        if (!userId) {
+            console.log('❌ Missing userId')
+            return NextResponse.json({ error: 'User ID is required' }, { status: 400 })
         }
 
-        // Create business record using service role
-        const { data, error } = await supabaseAdmin
+        if (!businessData || !businessData.name || !businessData.email || !businessData.phone) {
+            console.log('❌ Missing required business fields')
+            return NextResponse.json({
+                error: 'Business name, email, and phone are required'
+            }, { status: 400 })
+        }
+
+        // Try to create business directly (simpler approach)
+        console.log('🏢 Creating business...')
+
+        const businessRecord = {
+            id: userId,
+            name: businessData.name,
+            email: businessData.email,
+            phone: businessData.phone,
+            reward_title: businessData.reward_title || '',
+            reward_description: businessData.reward_description || '',
+            visit_goal: businessData.visit_goal || 5,
+            reward_setup_completed: businessData.reward_setup_completed || false,
+            business_logo_url: businessData.business_logo_url || null
+        }
+
+        const { data: newBusiness, error: createError } = await supabaseAdmin
             .from('businesses')
-            .insert({
-                id: userId,
-                ...businessData,
+            .upsert(businessRecord, {
+                onConflict: 'id',
+                ignoreDuplicates: false
             })
             .select()
             .single()
 
-        if (error) {
-            console.error('❌ Business creation error:', error)
-            return NextResponse.json(
-                { error: error.message },
-                { status: 500 }
-            )
+        if (createError) {
+            console.error('❌ Error creating/updating business:', createError)
+            return NextResponse.json({
+                error: `Database error: ${createError.message}`,
+                details: createError
+            }, { status: 500 })
         }
 
-        console.log('✅ Business created successfully:', data.id)
-        return NextResponse.json({ business: data })
+        console.log('✅ Business created/updated successfully:', newBusiness?.id)
+
+        return NextResponse.json({
+            success: true,
+            business: newBusiness,
+            message: 'Business created successfully'
+        })
 
     } catch (error) {
-        console.error('❌ Create business API error:', error)
-        return NextResponse.json(
-            { error: 'Internal server error' },
-            { status: 500 }
-        )
+        console.error('❌ Create business error:', error)
+        return NextResponse.json({
+            error: 'Internal server error',
+            details: error instanceof Error ? error.message : 'Unknown error'
+        }, { status: 500 })
     }
 }

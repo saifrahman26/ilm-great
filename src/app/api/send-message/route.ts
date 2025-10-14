@@ -60,6 +60,10 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Log API key info for debugging (without exposing the full key)
+        console.log('🔑 API key configured, length:', process.env.RESEND_API_KEY.length)
+        console.log('🔑 API key starts with:', process.env.RESEND_API_KEY.substring(0, 10) + '...')
+
         // Send email using Resend API
         const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',

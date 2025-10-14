@@ -312,10 +312,16 @@ export default function SignupPage() {
                                         </svg>
                                     </div>
                                     <div className="ml-3">
+                                        <p className="text-sm font-medium">Signup Error</p>
                                         <p className="text-sm">{error}</p>
                                         {error.includes('Too many') && (
                                             <p className="text-xs mt-2 text-red-500">
                                                 💡 Tip: If you're testing, try waiting 5-10 minutes or use a different email address.
+                                            </p>
+                                        )}
+                                        {error.includes('create-business') && (
+                                            <p className="text-xs mt-2 text-red-500">
+                                                💡 This might be a temporary server issue. Please try again in a moment.
                                             </p>
                                         )}
                                     </div>
@@ -517,7 +523,7 @@ export default function SignupPage() {
                             </p>
                         </div>
 
-                        <div>
+                        <div className="space-y-3">
                             <button
                                 type="submit"
                                 disabled={loading || uploadingLogo}
@@ -528,6 +534,43 @@ export default function SignupPage() {
                                 ) : (
                                     'Create Business Account'
                                 )}
+                            </button>
+
+                            {/* Debug Test Button - Remove in production */}
+                            <button
+                                type="button"
+                                onClick={async () => {
+                                    setError('')
+                                    setSuccess('')
+                                    try {
+                                        const response = await fetch('/api/test-signup', {
+                                            method: 'POST',
+                                            headers: { 'Content-Type': 'application/json' },
+                                            body: JSON.stringify({
+                                                email: 'test@example.com',
+                                                password: 'testpass123',
+                                                businessData: {
+                                                    name: 'Test Business',
+                                                    email: 'business@example.com',
+                                                    phone: '+1234567890'
+                                                }
+                                            })
+                                        })
+                                        const result = await response.json()
+                                        if (result.success) {
+                                            setSuccess('Test passed! Signup should work.')
+                                        } else {
+                                            setError(`Test failed: ${result.error}`)
+                                        }
+                                        console.log('Test result:', result)
+                                    } catch (err) {
+                                        setError('Test request failed')
+                                        console.error('Test error:', err)
+                                    }
+                                }}
+                                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                            >
+                                🧪 Test Signup Configuration
                             </button>
                         </div>
                     </form>

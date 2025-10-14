@@ -87,8 +87,8 @@ function ScanRegisterContent() {
         setError('')
 
         try {
-            // Register the customer and record the visit
-            const response = await fetch('/api/register-customer', {
+            // Register the customer and record the visit (using no-email endpoint to avoid API key issues)
+            const response = await fetch('/api/register-customer-no-email', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -171,7 +171,7 @@ function ScanRegisterContent() {
                         <div className="bg-blue-50 rounded-lg p-4 mb-6">
                             <h3 className="font-semibold text-blue-900 mb-2">What's Next?</h3>
                             <ul className="text-sm text-blue-800 space-y-1 text-left">
-                                <li>• Check your email for your personal QR code</li>
+                                <li>• Your QR code is ready (email sending temporarily disabled)</li>
                                 <li>• Show your QR code on each visit</li>
                                 <li>• Earn rewards after {business?.visit_goal} visits</li>
                                 <li>• Enjoy your {business?.reward_title}!</li>
@@ -192,7 +192,19 @@ function ScanRegisterContent() {
                             </div>
                         </div>
 
-                        <p className="text-xs text-gray-500">
+                        <div className="mt-6">
+                            <a
+                                href={`/customer-qr?id=${registeredCustomer.id}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center space-x-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200"
+                            >
+                                <QrCode className="w-4 h-4" />
+                                <span>View Your QR Code</span>
+                            </a>
+                        </div>
+
+                        <p className="text-xs text-gray-500 mt-4">
                             Thank you for joining our loyalty program!
                         </p>
                     </div>
@@ -311,7 +323,7 @@ function ScanRegisterContent() {
 
                         <div className="mt-6 text-center">
                             <p className="text-xs text-gray-500 mb-2">
-                                Your personal QR code will be sent to your email
+                                Your QR code will be generated (email sending temporarily disabled)
                             </p>
                             <p className="text-xs text-gray-400">
                                 Already registered? Just enter your phone number to record your visit and optionally add/update your email

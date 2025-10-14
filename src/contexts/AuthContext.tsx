@@ -97,30 +97,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
     }, [])
 
+    const [currentFetchUserId, setCurrentFetchUserId] = useState<string | null>(null)
+
     const fetchBusiness = async (userId: string) => {
         if (!userId) {
             setBusiness(null)
             return
         }
 
+        // Prevent multiple simultaneous fetches for the same user
+        if (currentFetchUserId === userId) {
+            console.log('🔄 Business fetch already in progress for user:', userId)
+            return
+        }
+
+        setCurrentFetchUserId(userId)
+
         try {
             console.log('📊 Fetching business for user:', userId)
 
-            // Add timeout to prevent hanging
-            const businessPromise = supabase
+            // Simplified fetch without timeout to avoid issues
+            const { data, error } = await supabase
                 .from('businesses')
                 .select('*')
                 .eq('id', userId)
                 .single()
-
-            const timeoutPromise = new Promise((_, reject) =>
-                setTimeout(() => reject(new Error('Business fetch timeout')), 8000)
-            )
-
-            const { data, error } = await Promise.race([
-                businessPromise,
-                timeoutPromise
-            ]) as any
 
             if (error) {
                 console.error('❌ Error fetching business:', error)
@@ -143,6 +144,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         } catch (err) {
             console.error('❌ Business fetch exception:', err)
             setBusiness(null)
+        } finally {
+            setCurrentFetchUserId(null)
         }
     }
 
