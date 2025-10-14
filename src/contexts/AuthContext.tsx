@@ -32,18 +32,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             try {
-                // Check if session is stale first
-                const isStale = await SessionUtils.isSessionStale()
-                if (isStale) {
-                    console.log('🧹 Stale session detected, clearing...')
-                    await SessionUtils.clearAllSessionData()
-                    if (mounted) {
-                        setUser(null)
-                        setBusiness(null)
-                        setLoading(false)
-                    }
-                    return
-                }
+                // Skip stale session check for faster loading - only check on errors
+                // const isStale = await SessionUtils.isSessionStale()
+                // if (isStale) {
+                //     console.log('🧹 Stale session detected, clearing...')
+                //     await SessionUtils.clearAllSessionData()
+                //     if (mounted) {
+                //         setUser(null)
+                //         setBusiness(null)
+                //         setLoading(false)
+                //     }
+                //     return
+                // }
 
                 // Get initial session
                 const { data: { session }, error } = await supabase.auth.getSession()

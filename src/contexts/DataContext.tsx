@@ -34,9 +34,10 @@ export function DataProvider({ children }: { children: React.ReactNode }) {
     const refreshData = useCallback(async (force = false) => {
         if (!business?.id || fetchingRef.current) return
 
-        // Smart caching - only refetch if data is older than 2 minutes or forced
+        // Smart caching - only refetch if data is older than 5 minutes or forced
         const now = Date.now()
-        if (!force && customers.length > 0 && (now - lastFetchTime) < 120000) {
+        if (!force && customers.length > 0 && (now - lastFetchTime) < 300000) {
+            console.log('📊 Using cached data, skipping fetch')
             return
         }
 

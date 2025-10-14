@@ -32,8 +32,8 @@ export default function QRCodePage() {
         }
 
         try {
-            // Create registration URL for customers
-            const regUrl = `${window.location.origin}/join/${business.id}`
+            // Create registration URL for customers (use scan-register which exists)
+            const regUrl = `${window.location.origin}/scan-register?business=${business.id}`
             setRegistrationUrl(regUrl)
             console.log('Registration URL:', regUrl)
 
@@ -42,10 +42,8 @@ export default function QRCodePage() {
             console.log('Generated QR URL:', qrUrl)
             setQrCodeUrl(qrUrl)
 
-            // Generate scan-to-register QR code for in-store scanning
-            const scanRegUrl = `${window.location.origin}/scan-register?business=${business.id}`
-            const scanRegQR = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(scanRegUrl)}`
-            setScanRegisterQR(scanRegQR)
+            // Same QR for both purposes since we're using scan-register
+            setScanRegisterQR(qrUrl)
         } catch (error) {
             console.error('Error generating QR code:', error)
         }
@@ -176,32 +174,14 @@ export default function QRCodePage() {
         }
     }
 
-    if (loading || loadingQR) {
+    if (loading) {
         return (
-            <DashboardLayout
-                title="QR Code"
-                subtitle="Let customers scan this to join your loyalty program"
-            >
-                <QRCodeSkeleton />
-                <div className="grid lg:grid-cols-2 gap-6">
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
-                        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-                        <div className="space-y-3">
-                            {[1, 2, 3, 4].map((i) => (
-                                <div key={i} className="h-4 bg-gray-200 rounded"></div>
-                            ))}
-                        </div>
-                    </div>
-                    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 animate-pulse">
-                        <div className="h-6 bg-gray-200 rounded w-1/3 mb-4"></div>
-                        <div className="space-y-3">
-                            <div className="h-16 bg-gray-200 rounded"></div>
-                            <div className="h-4 bg-gray-200 rounded"></div>
-                            <div className="h-4 bg-gray-200 rounded w-2/3"></div>
-                        </div>
-                    </div>
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p className="text-gray-600">Loading QR Code...</p>
                 </div>
-            </DashboardLayout>
+            </div>
         )
     }
 
