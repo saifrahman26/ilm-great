@@ -122,16 +122,16 @@ function CustomerQRContent() {
     const progressPercentage = (customer.visits / business.visit_goal) * 100
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-8 px-4">
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-4 px-4">
             <div className="max-w-md mx-auto">
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
                     {/* Header */}
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 text-center">
-                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Logo size={32} />
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-center">
+                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3">
+                            <QrCode className="w-6 h-6 text-blue-600" />
                         </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">{customer.name}</h1>
-                        <p className="text-blue-100">Your Loyalty QR Code</p>
+                        <h1 className="text-xl font-bold text-white mb-1">{customer.name}</h1>
+                        <p className="text-blue-100 text-sm">Your Loyalty QR Code</p>
                     </div>
 
                     {/* Business Info */}
@@ -141,12 +141,12 @@ function CustomerQRContent() {
                     </div>
 
                     {/* QR Code */}
-                    <div className="px-8 py-8 text-center">
-                        <div className="bg-white border-4 border-gray-200 rounded-2xl p-6 mb-6 inline-block">
+                    <div className="px-6 py-6 text-center">
+                        <div className="bg-white border-2 border-gray-200 rounded-xl p-4 mb-4 inline-block">
                             <img
                                 src={customer.qr_code_url}
                                 alt="Your Loyalty QR Code"
-                                className="w-48 h-48 mx-auto"
+                                className="w-40 h-40 mx-auto"
                             />
                         </div>
 

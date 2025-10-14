@@ -12,7 +12,7 @@ export default function QRCodePage() {
     const [copied, setCopied] = useState(false)
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const registrationUrl = business ? `${baseUrl}/scan-register?business=${business.id}` : ''
+    const registrationUrl = business ? `${baseUrl}/join-simple/${business.id}` : ''
     const qrCodeUrl = business ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(registrationUrl)}` : ''
 
     const downloadQRCode = () => {
