@@ -32,7 +32,7 @@ export default function ScannerPage() {
     const streamRef = useRef<MediaStream | null>(null)
     const scanIntervalRef = useRef<NodeJS.Timeout | null>(null)
 
-    // Load jsQR library
+    // Load jsQR library with better error handling
     useEffect(() => {
         const loadJsQR = async () => {
             if ((window as any).jsQR) {
@@ -41,27 +41,39 @@ export default function ScannerPage() {
             }
 
             try {
+                // Try loading from CDN first
                 const script = document.createElement('script')
                 script.src = 'https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js'
+                script.crossOrigin = 'anonymous'
 
                 const loadPromise = new Promise((resolve, reject) => {
-                    script.onload = resolve
-                    script.onerror = reject
+                    script.onload = () => {
+                        console.log('✅ jsQR library loaded successfully')
+                        resolve(true)
+                    }
+                    script.onerror = (error) => {
+                        console.error('❌ Failed to load jsQR from CDN:', error)
+                        reject(error)
+                    }
                 })
 
                 document.head.appendChild(script)
                 await loadPromise
 
+                // Wait a bit for the library to initialize
                 setTimeout(() => {
                     if ((window as any).jsQR) {
+                        console.log('✅ jsQR is ready')
                         setJsQRLoaded(true)
                     } else {
-                        setError('QR scanner library failed to initialize')
+                        console.error('❌ jsQR not available after loading')
+                        setError('QR scanner library failed to initialize. Please refresh the page.')
                     }
-                }, 100)
+                }, 200)
 
             } catch (err) {
-                setError('Failed to load QR scanner. Please refresh the page.')
+                console.error('❌ Error loading jsQR:', err)
+                setError('Failed to load QR scanner. Please check your internet connection and refresh.')
             }
         }
 
@@ -77,17 +89,33 @@ export default function ScannerPage() {
             setError('')
             setCameraStarted(true)
 
+            console.log('📷 Starting camera...')
+
+            // Check if camera is supported
             if (!navigator.mediaDevices?.getUserMedia) {
-                throw new Error('Camera not supported')
+                throw new Error('Camera not supported on this device')
             }
 
-            const stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: facingMode,
-                    width: { ideal: 1280 },
-                    height: { ideal: 720 }
-                }
-            })
+            // Request camera permission with fallback constraints
+            let stream: MediaStream
+            try {
+                // Try with ideal constraints first
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: facingMode,
+                        width: { ideal: 1280, min: 640 },
+                        height: { ideal: 720, min: 480 }
+                    }
+                })
+            } catch (err) {
+                console.log('⚠️ Ideal constraints failed, trying basic constraints')
+                // Fallback to basic constraints
+                stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: facingMode
+                    }
+                })
+            }
 
             if (videoRef.current) {
                 videoRef.current.srcObject = stream
@@ -95,24 +123,49 @@ export default function ScannerPage() {
 
                 videoRef.current.onloadedmetadata = () => {
                     if (videoRef.current) {
+                        console.log('📷 Video metadata loaded, starting playback')
                         videoRef.current.play().then(() => {
+                            console.log('✅ Video playback started')
                             setScanning(true)
+                            // Start scanning after a short delay
                             setTimeout(() => {
-                                scanIntervalRef.current = setInterval(scanForQRCode, 150)
-                            }, 500)
+                                if (scanIntervalRef.current) {
+                                    clearInterval(scanIntervalRef.current)
+                                }
+                                scanIntervalRef.current = setInterval(scanForQRCode, 200)
+                                console.log('🔍 QR scanning started')
+                            }, 1000)
                         }).catch(err => {
-                            setError('Failed to start video playback')
+                            console.error('❌ Video playback failed:', err)
+                            setError('Failed to start video playback. Please try again.')
                         })
                     }
                 }
+
+                videoRef.current.onerror = (err) => {
+                    console.error('❌ Video error:', err)
+                    setError('Video error occurred. Please try again.')
+                }
             }
         } catch (err: any) {
+            console.error('❌ Camera error:', err)
+            setCameraStarted(false)
+
             if (err.name === 'NotAllowedError') {
-                setError('Camera permission denied. Please allow camera access and refresh.')
+                setError('Camera permission denied. Please allow camera access in your browser settings and refresh the page.')
             } else if (err.name === 'NotFoundError') {
-                setError('No camera found on this device.')
+                setError('No camera found on this device. Please ensure your device has a camera.')
+            } else if (err.name === 'NotReadableError') {
+                setError('Camera is being used by another application. Please close other camera apps and try again.')
+            } else if (err.name === 'OverconstrainedError') {
+                setError('Camera constraints not supported. Trying with basic settings...')
+                // Try again with minimal constraints
+                setTimeout(() => {
+                    setFacingMode('user')
+                    startCamera()
+                }, 1000)
             } else {
-                setError('Camera access failed. Please try again.')
+                setError(`Camera access failed: ${err.message || 'Unknown error'}. Please try again.`)
             }
         }
     }
@@ -136,6 +189,7 @@ export default function ScannerPage() {
         }
 
         if (!(window as any).jsQR) {
+            console.log('⚠️ jsQR not available')
             return
         }
 
@@ -144,6 +198,7 @@ export default function ScannerPage() {
         const context = canvas.getContext('2d', { willReadFrequently: true })
 
         if (!context) {
+            console.log('⚠️ Canvas context not available')
             return
         }
 
@@ -152,34 +207,62 @@ export default function ScannerPage() {
         }
 
         try {
+            // Set canvas size to match video
             canvas.width = video.videoWidth
             canvas.height = video.videoHeight
+
+            // Draw current video frame to canvas
             context.drawImage(video, 0, 0, canvas.width, canvas.height)
 
+            // Get image data for QR detection
             const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
-            // Try multiple detection methods for better success rate
-            let code = (window as any).jsQR(imageData.data, imageData.width, imageData.height, {
-                inversionAttempts: "dontInvert"
-            })
 
-            // If no code found, try with inversion
-            if (!code) {
+            // Try QR detection with different settings for better success rate
+            let code = null
+
+            // First attempt: standard detection
+            try {
                 code = (window as any).jsQR(imageData.data, imageData.width, imageData.height, {
-                    inversionAttempts: "attemptBoth"
+                    inversionAttempts: "dontInvert"
                 })
+            } catch (err) {
+                console.log('⚠️ First QR detection attempt failed')
+            }
+
+            // Second attempt: with inversion if first failed
+            if (!code) {
+                try {
+                    code = (window as any).jsQR(imageData.data, imageData.width, imageData.height, {
+                        inversionAttempts: "attemptBoth"
+                    })
+                } catch (err) {
+                    console.log('⚠️ Second QR detection attempt failed')
+                }
+            }
+
+            // Third attempt: try with different region (center crop)
+            if (!code && canvas.width > 200 && canvas.height > 200) {
+                try {
+                    const centerX = Math.floor(canvas.width / 4)
+                    const centerY = Math.floor(canvas.height / 4)
+                    const centerWidth = Math.floor(canvas.width / 2)
+                    const centerHeight = Math.floor(canvas.height / 2)
+
+                    const centerImageData = context.getImageData(centerX, centerY, centerWidth, centerHeight)
+                    code = (window as any).jsQR(centerImageData.data, centerImageData.width, centerImageData.height, {
+                        inversionAttempts: "attemptBoth"
+                    })
+                } catch (err) {
+                    console.log('⚠️ Center crop QR detection failed')
+                }
             }
 
             if (code && code.data) {
                 console.log('✅ QR Code detected:', code.data)
                 handleQRCodeDetected(code.data)
-            } else {
-                // Log scanning attempts every 10th try to avoid spam
-                if (Math.random() < 0.1) {
-                    console.log('🔍 Scanning... no QR detected')
-                }
             }
         } catch (err) {
-            console.error('QR scan error:', err)
+            console.error('❌ QR scan error:', err)
         }
     }
 
@@ -516,13 +599,29 @@ export default function ScannerPage() {
                         <button
                             onClick={startCamera}
                             disabled={!jsQRLoaded}
-                            className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 text-white py-5 px-8 rounded-2xl font-bold text-xl hover:shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center space-x-4 mb-8 shadow-md"
+                            className="w-full bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 text-white py-5 px-8 rounded-2xl font-bold text-xl hover:shadow-lg hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:hover:scale-100 flex items-center justify-center space-x-4 mb-6 shadow-md"
                         >
                             <div className="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
                                 <Scan className="w-5 h-5" />
                             </div>
                             <span>{jsQRLoaded ? 'Start Scanning' : 'Loading Scanner...'}</span>
                         </button>
+
+                        {/* Test QR Code Button */}
+                        {jsQRLoaded && (
+                            <button
+                                onClick={() => {
+                                    // Test with a sample customer ID
+                                    const testCustomerId = 'test-customer-123'
+                                    console.log('🧪 Testing QR detection with:', testCustomerId)
+                                    handleQRCodeDetected(testCustomerId)
+                                }}
+                                className="w-full bg-gray-600 text-white py-3 px-6 rounded-xl font-medium hover:bg-gray-700 transition-colors mb-8 flex items-center justify-center space-x-2"
+                            >
+                                <QrCode className="w-4 h-4" />
+                                <span>Test Scanner (Demo)</span>
+                            </button>
+                        )}
 
                         {/* Enhanced Alternative Options */}
                         <div className="space-y-4">
