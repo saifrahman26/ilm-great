@@ -16,7 +16,7 @@ import {
     QrCode,
     Loader
 } from 'lucide-react'
-import Logo from '@/components/Logo'
+
 
 const customerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
@@ -56,22 +56,31 @@ function ScanRegisterContent() {
 
     useEffect(() => {
         const fetchBusiness = async () => {
+            console.log('🔍 Fetching business with ID:', businessId)
+
             if (!businessId) {
+                console.log('❌ No business ID provided')
                 setError('No business ID provided')
                 setLoading(false)
                 return
             }
 
             try {
+                console.log('📡 Making API call to:', `/api/business/${businessId}`)
                 const response = await fetch(`/api/business/${businessId}`)
                 const result = await response.json()
 
+                console.log('📊 API Response:', { status: response.status, result })
+
                 if (!response.ok) {
+                    console.log('❌ API Error:', result.error)
                     setError(result.error || 'Business not found')
                 } else {
+                    console.log('✅ Business loaded:', result.business)
                     setBusiness(result.business)
                 }
             } catch (err) {
+                console.error('❌ Fetch error:', err)
                 setError('Failed to load business information')
             }
             setLoading(false)
@@ -220,7 +229,7 @@ function ScanRegisterContent() {
                     {/* Header */}
                     <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-8 py-6 text-center">
                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Logo size={32} />
+                            <QrCode className="w-8 h-8 text-blue-600" />
                         </div>
                         <h1 className="text-2xl font-bold text-white mb-2">Join {business?.name}</h1>
                         <p className="text-blue-100">Complete your registration or update your info to earn points</p>
