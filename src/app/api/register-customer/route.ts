@@ -32,6 +32,27 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Fetch business information
+        console.log('🏢 Fetching business information...')
+        const { data: businessData, error: businessError } = await supabaseAdmin
+            .from('businesses')
+            .select('name, reward_title, visit_goal')
+            .eq('id', businessId)
+            .single()
+
+        let actualBusinessName = businessName || 'Business'
+        let actualRewardTitle = rewardTitle || 'Loyalty Reward'
+        let actualVisitGoal = visitGoal || 5
+
+        if (businessData && !businessError) {
+            actualBusinessName = businessData.name
+            actualRewardTitle = businessData.reward_title
+            actualVisitGoal = businessData.visit_goal
+            console.log('✅ Business info loaded:', businessData)
+        } else {
+            console.log('⚠️ Could not load business info, using defaults')
+        }
+
         // Check if customer already exists
         console.log('🔍 Checking for existing customer...')
         const { data: existingCustomer, error: checkError } = await supabaseAdmin
@@ -119,9 +140,9 @@ export async function POST(request: NextRequest) {
                     }
 
                     const businessInfo = {
-                        name: businessName || 'LoyalLink Business',
-                        rewardTitle: rewardTitle || 'Loyalty Reward',
-                        visitGoal: visitGoal || 5
+                        name: actualBusinessName,
+                        rewardTitle: actualRewardTitle,
+                        visitGoal: actualVisitGoal
                     }
 
                     const { sendQRCodeToCustomer } = await import('@/lib/messaging')
@@ -136,7 +157,10 @@ export async function POST(request: NextRequest) {
                 success: true,
                 customer: updatedCustomer,
                 message: `Welcome back ${name}! Visit recorded and information updated.`,
-                isExistingCustomer: true
+                isExistingCustomer: true,
+                businessName: actualBusinessName,
+                rewardTitle: actualRewardTitle,
+                visitGoal: actualVisitGoal
             })
         }
 
@@ -232,9 +256,9 @@ export async function POST(request: NextRequest) {
 
                 // Create business info object for email
                 const businessInfo = {
-                    name: businessName || 'LoyalLink Business',
-                    rewardTitle: rewardTitle || 'Loyalty Reward',
-                    visitGoal: visitGoal || 5
+                    name: actualBusinessName,
+                    rewardTitle: actualRewardTitle,
+                    visitGoal: actualVisitGoal
                 }
 
                 console.log('📧 Customer object for email:', customerWithQR)
@@ -265,7 +289,10 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({
             success: true,
             customer: updatedCustomer,
-            message: `Customer ${name} registered successfully with first visit recorded!`
+            message: `Customer ${name} registered successfully with first visit recorded!`,
+            businessName: actualBusinessName,
+            rewardTitle: actualRewardTitle,
+            visitGoal: actualVisitGoal
         })
 
     } catch (error) {

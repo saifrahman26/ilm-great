@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState, Suspense } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -17,7 +17,6 @@ import {
     Loader
 } from 'lucide-react'
 
-
 const customerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     phone: z.string().min(10, 'Phone number must be at least 10 digits'),
@@ -26,24 +25,15 @@ const customerSchema = z.object({
 
 type CustomerForm = z.infer<typeof customerSchema>
 
-interface Business {
-    id: string
-    name: string
-    reward_title: string
-    reward_description: string
-    visit_goal: number
-}
-
 function ScanRegisterContent() {
     const searchParams = useSearchParams()
     const businessId = searchParams.get('business')
 
-    const [business, setBusiness] = useState<Business | null>(null)
-    const [loading, setLoading] = useState(true)
     const [submitting, setSubmitting] = useState(false)
     const [success, setSuccess] = useState(false)
     const [error, setError] = useState('')
     const [registeredCustomer, setRegisteredCustomer] = useState<any>(null)
+    const [businessName, setBusinessName] = useState('')
 
     const {
         register,
@@ -54,62 +44,32 @@ function ScanRegisterContent() {
         resolver: zodResolver(customerSchema),
     })
 
-    useEffect(() => {
-        const fetchBusiness = async () => {
-            console.log('🔍 Fetching business with ID:', businessId)
-
-            if (!businessId) {
-                console.log('❌ No business ID provided')
-                setError('No business ID provided')
-                setLoading(false)
-                return
-            }
-
-            try {
-                console.log('📡 Making API call to:', `/api/business/${businessId}`)
-                const response = await fetch(`/api/business/${businessId}`)
-                const result = await response.json()
-
-                console.log('📊 API Response:', { status: response.status, result })
-
-                if (!response.ok) {
-                    console.log('❌ API Error:', result.error)
-                    setError(result.error || 'Business not found')
-                } else {
-                    console.log('✅ Business loaded:', result.business)
-                    setBusiness(result.business)
-                }
-            } catch (err) {
-                console.error('❌ Fetch error:', err)
-                setError('Failed to load business information')
-            }
-            setLoading(false)
-        }
-
-        fetchBusiness()
-    }, [businessId])
+    // No more business fetching - just handle registration directly
 
     const onSubmit = async (data: CustomerForm) => {
-        if (!business) return
+        if (!businessId) {
+            setError('No business ID provided')
+            return
+        }
 
         setSubmitting(true)
         setError('')
 
         try {
-            // Register the customer and record the visit
+            // Register the customer and record the visit - let the API handle business lookup
             const response = await fetch('/api/register-customer', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    businessId: business.id,
+                    businessId: businessId,
                     name: data.name,
                     phone: data.phone,
                     email: data.email || null,
-                    businessName: business.name,
-                    rewardTitle: business.reward_title,
-                    visitGoal: business.visit_goal
+                    businessName: 'Business', // Fallback name
+                    rewardTitle: 'Loyalty Reward',
+                    visitGoal: 5
                 }),
             })
 
@@ -120,6 +80,9 @@ function ScanRegisterContent() {
                 setSubmitting(false)
                 return
             }
+
+            // Extract business info from response
+            setBusinessName(result.businessName || 'Business')
 
             setRegisteredCustomer({
                 ...result.customer,
@@ -134,26 +97,16 @@ function ScanRegisterContent() {
         setSubmitting(false)
     }
 
-    if (loading) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
-                <div className="text-center">
-                    <Loader className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
-                    <p className="text-gray-600">Loading...</p>
-                </div>
-            </div>
-        )
-    }
-
-    if (error && !business) {
+    // Show error only if no business ID
+    if (!businessId) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
                 <div className="text-center max-w-md mx-auto px-4">
                     <div className="bg-red-100 rounded-full p-3 mx-auto w-16 h-16 flex items-center justify-center mb-4">
                         <AlertCircle className="w-8 h-8 text-red-600" />
                     </div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
-                    <p className="text-gray-600">{error}</p>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Invalid QR Code</h2>
+                    <p className="text-gray-600">This QR code doesn't contain valid business information.</p>
                 </div>
             </div>
         )
@@ -168,7 +121,7 @@ function ScanRegisterContent() {
                             <CheckCircle className="w-10 h-10 text-green-600" />
                         </div>
                         <h2 className="text-2xl font-bold text-gray-900 mb-4">
-                            {registeredCustomer.isExistingCustomer ? `Welcome back to ${business?.name}!` : `Welcome to ${business?.name}!`}
+                            {registeredCustomer.isExistingCustomer ? `Welcome back to ${businessName}!` : `Welcome to ${businessName}!`}
                         </h2>
                         <p className="text-gray-600 mb-6">
                             {registeredCustomer.isExistingCustomer
@@ -182,8 +135,8 @@ function ScanRegisterContent() {
                             <ul className="text-sm text-blue-800 space-y-1 text-left">
                                 <li>• Your QR code has been sent to your email</li>
                                 <li>• Show your QR code on each visit</li>
-                                <li>• Earn rewards after {business?.visit_goal} visits</li>
-                                <li>• Enjoy your {business?.reward_title}!</li>
+                                <li>• Earn rewards after 5 visits</li>
+                                <li>• Enjoy your loyalty rewards!</li>
                             </ul>
                         </div>
 
@@ -192,11 +145,11 @@ function ScanRegisterContent() {
                                 <Gift className="w-5 h-5 text-teal-600 mr-2" />
                                 <span className="font-medium text-teal-900">Current Progress</span>
                             </div>
-                            <p className="text-teal-800">{registeredCustomer.visits} of {business?.visit_goal} visits completed</p>
+                            <p className="text-teal-800">{registeredCustomer.visits} of 5 visits completed</p>
                             <div className="w-full bg-teal-200 rounded-full h-2 mt-2">
                                 <div
                                     className="bg-teal-600 h-2 rounded-full transition-all duration-500"
-                                    style={{ width: `${(registeredCustomer.visits / (business?.visit_goal || 5)) * 100}%` }}
+                                    style={{ width: `${(registeredCustomer.visits / 5) * 100}%` }}
                                 ></div>
                             </div>
                         </div>
@@ -231,17 +184,17 @@ function ScanRegisterContent() {
                         <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center mx-auto mb-4">
                             <QrCode className="w-8 h-8 text-blue-600" />
                         </div>
-                        <h1 className="text-2xl font-bold text-white mb-2">Join {business?.name}</h1>
-                        <p className="text-blue-100">Complete your registration or update your info to earn points</p>
+                        <h1 className="text-2xl font-bold text-white mb-2">Join Our Loyalty Program</h1>
+                        <p className="text-blue-100">Complete your registration to start earning rewards</p>
                     </div>
 
                     {/* Reward Info */}
                     <div className="px-8 py-6 bg-gray-50 border-b">
                         <div className="text-center">
-                            <h3 className="font-semibold text-gray-900 mb-2">{business?.reward_title}</h3>
-                            <p className="text-sm text-gray-600 mb-3">{business?.reward_description}</p>
+                            <h3 className="font-semibold text-gray-900 mb-2">Loyalty Rewards</h3>
+                            <p className="text-sm text-gray-600 mb-3">Earn points with every visit and unlock exclusive rewards</p>
                             <div className="inline-flex items-center bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm font-medium">
-                                Earn rewards after {business?.visit_goal} visits
+                                Earn rewards after 5 visits
                             </div>
                         </div>
                     </div>
