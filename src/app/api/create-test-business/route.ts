@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         console.log('✅ Test business created:', business)
 
         // Generate the join URL and QR code
-        const joinUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/join/${business.id}`
+        const joinUrl = `${process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'}/customer-register/${business.id}`
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(joinUrl)}`
 
         return NextResponse.json({

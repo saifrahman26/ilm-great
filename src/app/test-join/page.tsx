@@ -5,8 +5,8 @@ import { QrCode, Users, ExternalLink } from 'lucide-react'
 
 export default function TestJoinPage() {
     const [businessId] = useState('bba780b3-bde5-4647-9e74-68bcfdb6e903')
-    const [joinUrl] = useState(`http://localhost:3000/join/${businessId}`)
-    const [qrCodeUrl] = useState(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`http://localhost:3000/join/${businessId}`)}`)
+    const [joinUrl] = useState(`http://localhost:3000/customer-register/${businessId}`)
+    const [qrCodeUrl] = useState(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(`http://localhost:3000/customer-register/${businessId}`)}`)
 
     return (
         <div className="min-h-screen bg-gray-50 p-8">
@@ -99,8 +99,8 @@ export default function TestJoinPage() {
                             <h3 className="font-medium text-gray-900 mb-2">Expected Flow:</h3>
                             <ol className="text-sm text-gray-600 space-y-1">
                                 <li>1. Customer scans business QR code</li>
-                                <li>2. Opens join page: /join/{businessId}</li>
-                                <li>3. Join page fetches business info via API</li>
+                                <li>2. Opens customer registration: /customer-register/{businessId}</li>
+                                <li>3. Registration page shows form (name, phone, email)</li>
                                 <li>4. Customer fills registration form</li>
                                 <li>5. Form submits to /api/register-customer</li>
                                 <li>6. Customer gets personal QR code via email</li>

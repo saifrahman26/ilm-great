@@ -190,6 +190,13 @@ export default function FastQRCodePage() {
                                         {copied ? <CheckCircle className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
                                         <span>{copied ? 'Copied!' : 'Copy Link'}</span>
                                     </button>
+                                    <button
+                                        onClick={() => window.open(registrationUrl, '_blank')}
+                                        className="bg-purple-600 text-white px-6 py-3 rounded-xl hover:bg-purple-700 transition-colors flex items-center space-x-2 shadow-md hover:shadow-lg"
+                                    >
+                                        <QrCode className="w-4 h-4" />
+                                        <span>Test Link</span>
+                                    </button>
                                 </div>
                             </div>
 
@@ -240,6 +247,9 @@ export default function FastQRCodePage() {
                                     <div className="bg-white rounded-lg p-3 border text-sm text-gray-600 break-all">
                                         {registrationUrl}
                                     </div>
+                                    <p className="text-xs text-gray-500 mt-2">
+                                        ✅ This link opens the customer self-registration form (separate from your dashboard)
+                                    </p>
                                 </div>
                             </div>
                         </div>
