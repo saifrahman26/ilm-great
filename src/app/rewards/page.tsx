@@ -1,0 +1,263 @@
+'use client'
+
+import { useState, useEffect } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
+import { useForm } from 'react-hook-form'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { z } from 'zod'
+import DashboardLayout from '@/components/DashboardLayout'
+import {
+    Gift,
+    Target,
+    Award,
+    Save,
+    CheckCircle,
+    AlertCircle
+} from 'lucide-react'
+import Link from 'next/link'
+
+const rewardSchema = z.object({
+    reward_title: z.string().min(3, 'Reward title must be at least 3 characters'),
+    reward_description: z.string().min(10, 'Reward description must be at least 10 characters'),
+    visit_goal: z.number().min(1, 'Visit goal must be at least 1').max(20, 'Visit goal cannot exceed 20'),
+})
+
+type RewardForm = z.infer<typeof rewardSchema>
+
+export default function RewardsPage() {
+    const { user, business, loading } = useAuth()
+    const [saving, setSaving] = useState(false)
+    const [error, setError] = useState('')
+    const [success, setSuccess] = useState('')
+
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+        watch
+    } = useForm<RewardForm>({
+        resolver: zodResolver(rewardSchema),
+        defaultValues: {
+            reward_title: '',
+            reward_description: '',
+            visit_goal: 5
+        }
+    })
+
+    // Load existing business data
+    useEffect(() => {
+        if (business) {
+            reset({
+                reward_title: business.reward_title || '',
+                reward_description: business.reward_description || '',
+                visit_goal: business.visit_goal || 5
+            })
+        }
+    }, [business, reset])
+
+    const onSubmit = async (data: RewardForm) => {
+        if (!business) return
+
+        setSaving(true)
+        setError('')
+        setSuccess('')
+
+        try {
+            const response = await fetch('/api/update-business', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    businessId: business.id,
+                    ...data
+                })
+            })
+
+            const result = await response.json()
+
+            if (response.ok) {
+                setSuccess('Reward settings updated successfully!')
+                // Refresh the page after a short delay
+                setTimeout(() => {
+                    window.location.reload()
+                }, 1500)
+            } else {
+                setError(result.error || 'Failed to update reward settings')
+            }
+        } catch (err) {
+            setError('Failed to update reward settings')
+        }
+
+        setSaving(false)
+    }
+
+    if (loading) {
+        return (
+            <DashboardLayout title="Reward Settings" subtitle="Configure your loyalty program rewards">
+                <div className="flex items-center justify-center py-12">
+                    <div className="text-center">
+                        <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-teal-600 mb-4"></div>
+                        <p className="text-gray-600">Loading...</p>
+                    </div>
+                </div>
+            </DashboardLayout>
+        )
+    }
+
+    if (!user) {
+        return (
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <p className="text-gray-600">Please log in to access reward settings.</p>
+                    <Link href="/login" className="mt-4 inline-block bg-teal-600 text-white px-4 py-2 rounded">
+                        Go to Login
+                    </Link>
+                </div>
+            </div>
+        )
+    }
+
+    return (
+        <DashboardLayout title="Reward Settings" subtitle="Configure your loyalty program rewards">
+            <div className="max-w-2xl mx-auto">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
+                    <div className="text-center mb-8">
+                        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-pink-500 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+                            <Gift className="w-8 h-8 text-white" />
+                        </div>
+                        <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                            Loyalty Reward Configuration
+                        </h2>
+                        <p className="text-gray-600">
+                            Set up what customers earn when they complete their loyalty journey
+                        </p>
+                    </div>
+
+                    {error && (
+                        <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 flex items-center">
+                            <AlertCircle className="w-4 h-4 mr-2" />
+                            {error}
+                        </div>
+                    )}
+
+                    {success && (
+                        <div className="bg-green-50 border border-green-200 text-green-600 px-4 py-3 rounded-lg mb-6 flex items-center">
+                            <CheckCircle className="w-4 h-4 mr-2" />
+                            {success}
+                        </div>
+                    )}
+
+                    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                        {/* Visit Goal */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <Target className="w-4 h-4 inline mr-1" />
+                                Visits Required for Reward *
+                            </label>
+                            <select
+                                {...register('visit_goal', { valueAsNumber: true })}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            >
+                                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 12, 15, 20].map(num => (
+                                    <option key={num} value={num}>
+                                        {num} visit{num > 1 ? 's' : ''}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.visit_goal && (
+                                <p className="mt-1 text-sm text-red-600">{errors.visit_goal.message}</p>
+                            )}
+                        </div>
+
+                        {/* Reward Title */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <Award className="w-4 h-4 inline mr-1" />
+                                Reward Title *
+                            </label>
+                            <input
+                                {...register('reward_title')}
+                                type="text"
+                                placeholder="e.g., Free Coffee, 20% Off, Free Dessert"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            />
+                            {errors.reward_title && (
+                                <p className="mt-1 text-sm text-red-600">{errors.reward_title.message}</p>
+                            )}
+                        </div>
+
+                        {/* Reward Description */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Reward Description *
+                            </label>
+                            <textarea
+                                {...register('reward_description')}
+                                rows={3}
+                                placeholder="Describe what customers get when they earn this reward..."
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none"
+                            />
+                            {errors.reward_description && (
+                                <p className="mt-1 text-sm text-red-600">{errors.reward_description.message}</p>
+                            )}
+                        </div>
+
+                        {/* Preview */}
+                        <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
+                            <h4 className="font-medium text-purple-900 mb-3 flex items-center">
+                                <CheckCircle className="w-4 h-4 mr-2" />
+                                Reward Preview:
+                            </h4>
+                            <div className="bg-white rounded-lg p-4 border">
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <Gift className="w-5 h-5 text-purple-600" />
+                                    <span className="font-medium text-gray-900">
+                                        {watch('reward_title') || 'Your Reward Title'}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-2">
+                                    {watch('reward_description') || 'Your reward description will appear here...'}
+                                </p>
+                                <p className="text-xs text-purple-600">
+                                    Earned after {watch('visit_goal') || 5} visits
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Submit Button */}
+                        <button
+                            type="submit"
+                            disabled={saving}
+                            className="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-3 rounded-lg font-medium hover:from-purple-700 hover:to-pink-700 transition-all duration-200 disabled:opacity-50 flex items-center justify-center space-x-2"
+                        >
+                            {saving ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    <span>Saving...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Save className="w-4 h-4" />
+                                    <span>Save Reward Settings</span>
+                                </>
+                            )}
+                        </button>
+                    </form>
+
+                    {/* Tips */}
+                    <div className="mt-8 bg-blue-50 border border-blue-200 rounded-lg p-4">
+                        <h4 className="font-medium text-blue-900 mb-2">💡 Tips for Great Rewards:</h4>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                            <li>• Keep visit goals between 3-8 for best engagement</li>
+                            <li>• Make rewards valuable but sustainable for your business</li>
+                            <li>• Clear, specific descriptions work better than vague ones</li>
+                            <li>• Consider seasonal or limited-time rewards to create urgency</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </DashboardLayout>
+    )
+}

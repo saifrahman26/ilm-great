@@ -89,7 +89,7 @@ export default function JoinSimplePage() {
         setError('')
 
         try {
-            const response = await fetch('/api/register-customer', {
+            const response = await fetch('/api/register-customer-simple', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
