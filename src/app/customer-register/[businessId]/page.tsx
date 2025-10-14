@@ -46,6 +46,13 @@ export default function CustomerRegisterPage() {
         setError('')
 
         try {
+            console.log('📤 Sending registration request:', {
+                businessId,
+                name: formData.name.trim(),
+                phone: formData.phone.trim(),
+                email: formData.email.trim()
+            })
+
             const response = await fetch('/api/register-customer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -57,16 +64,20 @@ export default function CustomerRegisterPage() {
                 }),
             })
 
+            console.log('📥 Response status:', response.status)
             const result = await response.json()
+            console.log('📥 Response data:', result)
 
             if (response.ok) {
                 setCustomer(result.customer)
                 setBusinessName(result.businessName || 'Business')
                 setSuccess(true)
             } else {
+                console.error('❌ Registration failed:', result)
                 setError(result.error || 'Registration failed. Please try again.')
             }
         } catch (err) {
+            console.error('❌ Network error:', err)
             setError('Network error. Please check your connection and try again.')
         }
 

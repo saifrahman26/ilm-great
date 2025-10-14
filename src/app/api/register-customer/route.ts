@@ -18,7 +18,7 @@ export async function POST(request: NextRequest) {
 
     try {
         const requestBody = await request.json()
-        console.log('📝 Request body:', requestBody)
+        console.log('📝 Request body:', JSON.stringify(requestBody, null, 2))
 
         const { businessId, name, phone, email, businessName, rewardTitle, visitGoal } = requestBody
 
@@ -50,7 +50,24 @@ export async function POST(request: NextRequest) {
             actualVisitGoal = businessData.visit_goal
             console.log('✅ Business info loaded:', businessData)
         } else {
-            console.log('⚠️ Could not load business info, using defaults')
+            console.log('⚠️ Could not load business info, using defaults. Error:', businessError)
+        }
+
+        // Test Supabase connection
+        console.log('🔗 Testing Supabase connection...')
+        const { data: testData, error: testError } = await supabaseAdmin
+            .from('businesses')
+            .select('count')
+            .limit(1)
+
+        if (testError) {
+            console.error('❌ Supabase connection failed:', testError)
+            return NextResponse.json(
+                { error: 'Database connection failed', details: testError.message },
+                { status: 500 }
+            )
+        } else {
+            console.log('✅ Supabase connection successful')
         }
 
         // Check if customer already exists
