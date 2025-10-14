@@ -122,23 +122,34 @@ export class SetupStatusTracker {
         try {
             const { data, error } = await supabase
                 .from('businesses')
-                .select('reward_title, reward_description, visit_goal')
+                .select('reward_title, reward_description, visit_goal, created_at')
                 .eq('id', businessId)
                 .single()
 
             if (error) {
                 console.error('❌ Error checking reward settings:', error)
-                return true // Assume no rewards on error
+                return false // Be more lenient on error
+            }
+
+            // Check if this is a very new business (created in last 5 minutes)
+            const createdAt = new Date(data.created_at)
+            const now = new Date()
+            const minutesSinceCreation = (now.getTime() - createdAt.getTime()) / (1000 * 60)
+
+            // If business was just created, don't require setup immediately
+            if (minutesSinceCreation < 5) {
+                console.log('🆕 New business detected, skipping setup requirement for now')
+                return false
             }
 
             // Check if rewards are empty or not configured
             const hasNoTitle = !data.reward_title || data.reward_title.trim() === ''
             const hasNoDescription = !data.reward_description || data.reward_description.trim() === ''
 
-            return hasNoTitle || hasNoDescription
+            return hasNoTitle && hasNoDescription // Both must be empty to require setup
         } catch (error) {
             console.error('❌ Error checking reward settings:', error)
-            return true // Assume no rewards on error
+            return false // Be more lenient on error
         }
     }
 

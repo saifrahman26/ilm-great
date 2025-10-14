@@ -223,11 +223,45 @@ export default function RewardSetupPopup({
                                 </button>
                             </div>
 
-                            {/* Enhanced Skip Option */}
-                            <div className="text-center pt-6 border-t border-gray-200">
+                            {/* Enhanced Quick Setup and Skip Options */}
+                            <div className="space-y-4 pt-6 border-t border-gray-200">
+                                <button
+                                    onClick={async () => {
+                                        setSaving(true)
+                                        try {
+                                            const response = await fetch('/api/complete-setup', {
+                                                method: 'POST',
+                                                headers: { 'Content-Type': 'application/json' },
+                                                body: JSON.stringify({ businessId })
+                                            })
+                                            if (response.ok) {
+                                                onComplete()
+                                            } else {
+                                                setError('Failed to complete setup')
+                                            }
+                                        } catch (err) {
+                                            setError('Failed to complete setup')
+                                        }
+                                        setSaving(false)
+                                    }}
+                                    disabled={saving}
+                                    className="w-full bg-green-600 text-white py-3 px-6 rounded-xl font-medium hover:bg-green-700 transition-all duration-200 disabled:opacity-50 flex items-center justify-center space-x-2"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                            <span>Setting up...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <CheckCircle className="w-4 h-4" />
+                                            <span>Quick Setup with Defaults</span>
+                                        </>
+                                    )}
+                                </button>
                                 <button
                                     onClick={onComplete}
-                                    className="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200"
+                                    className="text-gray-500 hover:text-gray-700 text-sm font-medium px-4 py-2 rounded-lg hover:bg-gray-100 transition-all duration-200 w-full"
                                 >
                                     Skip for now - I'll set this up later
                                 </button>
