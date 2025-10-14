@@ -36,9 +36,17 @@ const createMockClient = (): SupabaseClient => {
     } as any
 }
 
-// Create Supabase client with fallback for development
+// Create Supabase client with proper session storage configuration
 export const supabase = hasValidSupabaseConfig
-    ? createClient(supabaseUrl!, supabaseAnonKey!)
+    ? createClient(supabaseUrl!, supabaseAnonKey!, {
+        auth: {
+            storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+            autoRefreshToken: true,
+            persistSession: true,
+            detectSessionInUrl: true,
+            flowType: 'pkce'
+        }
+    })
     : createMockClient()
 
 // Database types

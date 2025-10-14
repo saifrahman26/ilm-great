@@ -3,7 +3,7 @@
 import { createContext, useContext, useEffect, useState } from 'react'
 import { supabase, Business, hasValidSupabaseConfig } from '@/lib/supabase'
 import { User } from '@supabase/supabase-js'
-import { SessionUtils } from '@/lib/sessionUtils'
+import { SessionDebug } from '@/lib/sessionDebug'
 
 interface AuthContextType {
     user: User | null
@@ -32,12 +32,37 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
             }
 
             try {
-                // Simple session check without complex validation
-                const { data: { session } } = await supabase.auth.getSession()
+                // Get session with retry mechanism for better reliability
+                let session = null
+                let attempts = 0
+                const maxAttempts = 3
+
+                while (!session && attempts < maxAttempts) {
+                    const { data: { session: currentSession }, error } = await supabase.auth.getSession()
+
+                    if (error) {
+                        console.error('❌ Session fetch error:', error)
+                        break
+                    }
+
+                    session = currentSession
+                    attempts++
+
+                    if (!session && attempts < maxAttempts) {
+                        // Wait a bit before retrying
+                        await new Promise(resolve => setTimeout(resolve, 500))
+                    }
+                }
 
                 if (!mounted) return
 
-                console.log('🔍 Session check:', session ? 'Found' : 'None')
+                console.log('🔍 Session check:', session ? `Found (attempt ${attempts})` : 'None')
+
+                // Debug session storage
+                if (!session) {
+                    SessionDebug.logSessionInfo()
+                }
+
                 setUser(session?.user ?? null)
 
                 if (session?.user) {

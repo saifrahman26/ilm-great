@@ -22,7 +22,7 @@ export default function FastQRCodePage() {
     useEffect(() => {
         if (business?.id) {
             // Create customer registration URL
-            const regUrl = `${window.location.origin}/join/${business.id}`
+            const regUrl = `${window.location.origin}/customer-register/${business.id}`
             setRegistrationUrl(regUrl)
 
             // Generate QR code URL immediately
@@ -215,8 +215,8 @@ export default function FastQRCodePage() {
                                         <div className="flex items-start space-x-3">
                                             <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center text-blue-600 font-bold text-sm">3</div>
                                             <div>
-                                                <p className="font-medium text-gray-900">Instant Registration</p>
-                                                <p className="text-sm text-gray-600">They join your loyalty program automatically</p>
+                                                <p className="font-medium text-gray-900">Quick Registration</p>
+                                                <p className="text-sm text-gray-600">They fill name, phone & email to join</p>
                                             </div>
                                         </div>
                                     </div>

@@ -12,7 +12,7 @@ export default function QRCodePage() {
     const [copied, setCopied] = useState(false)
 
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const registrationUrl = business ? `${baseUrl}/join-simple/${business.id}` : ''
+    const registrationUrl = business ? `${baseUrl}/customer-register/${business.id}` : ''
     const qrCodeUrl = business ? `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(registrationUrl)}` : ''
 
     const downloadQRCode = () => {
@@ -169,7 +169,7 @@ export default function QRCodePage() {
                                         </div>
                                         <div>
                                             <p className="font-medium text-gray-900">Registration Form</p>
-                                            <p className="text-sm text-gray-600">They fill in name, phone, and email (optional)</p>
+                                            <p className="text-sm text-gray-600">They fill in name, phone, and email (all required)</p>
                                         </div>
                                     </div>
                                     <div className="flex items-start space-x-3">
@@ -227,7 +227,7 @@ export default function QRCodePage() {
                         <code className="text-sm text-gray-700 break-all">{registrationUrl}</code>
                     </div>
                     <p className="text-sm text-gray-600 mb-3">
-                        You can also share this direct link with customers who prefer not to scan QR codes.
+                        Share this link directly with customers or they can scan the QR code above.
                     </p>
                     <div className="flex space-x-2">
                         <button
