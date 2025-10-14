@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Use service role key to bypass RLS for customer registration
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -17,11 +16,16 @@ export async function POST(request: NextRequest) {
     console.log('🚀 Simple register customer API called')
 
     try {
-        const { businessId, name, phone, email } = await request.json()
+        // Add timeout to prevent hanging
+        const timeoutPromise = new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Request timeout')), 10000)
+        )
 
-        console.log('📝 Registration data:', { businessId, name, phone, email })
+        const requestPromise = request.json()
+        const { businessId, name, phone, email } = await Promise.race([requestPromise, timeoutPromise]) as any
 
-        // Validate required fields
+        console.log('📝 Simple registration data:', { businessId, name, phone, email })
+
         if (!businessId || !name || !phone) {
             return NextResponse.json(
                 { error: 'Business ID, name, and phone are required' },
@@ -29,68 +33,68 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Generate a simple customer ID
-        const customerId = `customer_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+        // Check if customer exists
+        console.log('🔍 Checking for existing customer...')
+        const { data: existingCustomer } = await supabaseAdmin
+            .from('customers')
+            .select('*')
+            .eq('business_id', businessId)
+            .eq('phone', phone)
+            .single()
 
-        // Create customer record
-        const customerData = {
-            id: customerId,
-            business_id: businessId,
-            name: name.trim(),
-            phone: phone.trim(),
-            email: email?.trim() || null,
-            visits: 1,
-            last_visit: new Date().toISOString(),
-            created_at: new Date().toISOString()
+        if (existingCustomer) {
+            console.log('✅ Customer exists, updating...')
+            const { data: updatedCustomer, error: updateError } = await supabaseAdmin
+                .from('customers')
+                .update({
+                    visits: existingCustomer.visits + 1,
+                    last_visit: new Date().toISOString(),
+                    email: email?.trim() || existingCustomer.email
+                })
+                .eq('id', existingCustomer.id)
+                .select()
+                .single()
+
+            if (updateError) {
+                console.error('❌ Update error:', updateError)
+                return NextResponse.json({ error: updateError.message }, { status: 500 })
+            }
+
+            return NextResponse.json({
+                success: true,
+                customer: updatedCustomer,
+                isExistingCustomer: true,
+                businessName: 'Business'
+            })
         }
 
-        console.log('👤 Creating customer:', customerData)
-
+        // Create new customer
+        console.log('👤 Creating new customer...')
         const { data: customer, error: customerError } = await supabaseAdmin
             .from('customers')
-            .insert(customerData)
+            .insert({
+                business_id: businessId,
+                name: name.trim(),
+                phone: phone.trim(),
+                email: email?.trim() || null,
+                visits: 1,
+                last_visit: new Date().toISOString(),
+                created_at: new Date().toISOString()
+            })
             .select()
             .single()
 
         if (customerError) {
-            console.error('❌ Error creating customer:', customerError)
-            return NextResponse.json(
-                { error: `Failed to create customer: ${customerError.message}` },
-                { status: 500 }
-            )
+            console.error('❌ Customer creation error:', customerError)
+            return NextResponse.json({ error: customerError.message }, { status: 500 })
         }
 
-        // Generate QR code
-        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://loyallinkk.vercel.app'
-        const qrData = `${baseUrl}/scan?customer=${customer.id}`
-        const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
-
-        // Update customer with QR code
-        const { error: updateError } = await supabaseAdmin
-            .from('customers')
-            .update({
-                qr_code_url: qrCodeUrl,
-                qr_data: customer.id
-            })
-            .eq('id', customer.id)
-
-        if (updateError) {
-            console.error('⚠️ Error updating QR code (non-critical):', updateError)
-        }
-
-        console.log('✅ Customer created successfully:', customer.id)
-
-        // Return customer with QR code
-        const finalCustomer = {
-            ...customer,
-            qr_code_url: qrCodeUrl,
-            qr_data: customer.id
-        }
+        console.log('✅ Customer created:', customer.id)
 
         return NextResponse.json({
             success: true,
-            customer: finalCustomer,
-            message: `Customer ${name} registered successfully!`
+            customer: customer,
+            businessName: 'Business'
         })
 
     } catch (error) {
