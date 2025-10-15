@@ -66,7 +66,11 @@ export default function RewardsPage() {
         try {
             console.log('🚀 Submitting reward update:', data)
 
-            const response = await fetch('/api/test-update-business', {
+            // Add timeout to prevent hanging
+            const controller = new AbortController()
+            const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+
+            const response = await fetch('/api/test-simple-save', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -74,8 +78,11 @@ export default function RewardsPage() {
                 body: JSON.stringify({
                     businessId: business.id,
                     ...data
-                })
+                }),
+                signal: controller.signal
             })
+
+            clearTimeout(timeoutId)
 
             console.log('📡 Response status:', response.status)
             const result = await response.json()
@@ -93,7 +100,11 @@ export default function RewardsPage() {
             }
         } catch (err) {
             console.error('❌ Submit error:', err)
-            setError('Failed to update reward settings: ' + (err instanceof Error ? err.message : 'Unknown error'))
+            if (err instanceof Error && err.name === 'AbortError') {
+                setError('Request timed out after 10 seconds. Please check your internet connection and try again.')
+            } else {
+                setError('Failed to update reward settings: ' + (err instanceof Error ? err.message : 'Unknown error'))
+            }
         }
 
         setSaving(false)
