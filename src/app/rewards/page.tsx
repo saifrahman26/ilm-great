@@ -63,36 +63,39 @@ export default function RewardsPage() {
         setError('')
         setSuccess('')
 
-        // Use authenticated Supabase client
+        // Use API endpoint with service role key to bypass RLS issues
         try {
-            console.log('🚀 Submitting reward update directly to Supabase:', data)
+            console.log('🚀 Submitting reward update via API:', data)
             console.log('👤 User ID:', user?.id)
             console.log('🏢 Business ID:', business.id)
 
-            const { supabase } = await import('@/lib/supabase')
-
-            const { data: updatedBusiness, error } = await supabase
-                .from('businesses')
-                .update({
+            const response = await fetch('/api/update-rewards', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    businessId: business.id,
+                    userId: user?.id,
                     reward_title: data.reward_title,
                     reward_description: data.reward_description,
-                    visit_goal: data.visit_goal,
-                    reward_setup_completed: true
+                    visit_goal: data.visit_goal
                 })
-                .eq('id', business.id)
-                .select()
-                .single()
+            })
 
-            if (error) {
-                console.error('❌ Supabase error:', error)
-                setError(`Database error: ${error.message}`)
-            } else {
-                console.log('✅ Business updated successfully:', updatedBusiness)
+            const result = await response.json()
+            console.log('📡 API Response:', result)
+
+            if (response.ok) {
+                console.log('✅ Rewards updated successfully')
                 setSuccess('Reward settings updated successfully!')
                 // Refresh the page after a short delay
                 setTimeout(() => {
                     window.location.reload()
                 }, 1500)
+            } else {
+                console.error('❌ API Error:', result)
+                setError(result.error || 'Failed to update reward settings')
             }
         } catch (err) {
             console.error('❌ Submit error:', err)
