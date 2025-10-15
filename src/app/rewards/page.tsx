@@ -63,15 +63,13 @@ export default function RewardsPage() {
         setError('')
         setSuccess('')
 
-        // For now, let's use direct Supabase client instead of API
+        // Use authenticated Supabase client
         try {
             console.log('🚀 Submitting reward update directly to Supabase:', data)
+            console.log('👤 User ID:', user?.id)
+            console.log('🏢 Business ID:', business.id)
 
-            const { createClient } = await import('@supabase/supabase-js')
-            const supabase = createClient(
-                process.env.NEXT_PUBLIC_SUPABASE_URL!,
-                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-            )
+            const { supabase } = await import('@/lib/supabase')
 
             const { data: updatedBusiness, error } = await supabase
                 .from('businesses')
