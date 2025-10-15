@@ -63,38 +63,59 @@ export default function RewardsPage() {
         setError('')
         setSuccess('')
 
-        // Use API endpoint with service role key to bypass RLS issues
         try {
-            console.log('🚀 Submitting reward update via API:', data)
-            console.log('👤 User ID:', user?.id)
+            console.log('🚀 Submitting reward update directly to Supabase:', data)
+            console.log('� Usemr ID:', user?.id)
             console.log('🏢 Business ID:', business.id)
 
-            const response = await fetch('/api/update-business', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    businessId: business.id,
+            // Import Supabase client directly
+            const { supabase } = await import('@/lib/supabase')
+
+            // Try direct Supabase update with service role simulation
+            const { data: updatedBusiness, error } = await supabase
+                .from('businesses')
+                .update({
                     reward_title: data.reward_title,
                     reward_description: data.reward_description,
-                    visit_goal: data.visit_goal
+                    visit_goal: data.visit_goal,
+                    reward_setup_completed: true
                 })
-            })
+                .eq('id', business.id)
+                .select()
+                .single()
 
-            const result = await response.json()
-            console.log('📡 API Response:', result)
+            if (error) {
+                console.error('❌ Direct Supabase error:', error)
 
-            if (response.ok) {
-                console.log('✅ Rewards updated successfully')
-                setSuccess('Reward settings updated successfully!')
-                // Refresh the page after a short delay
-                setTimeout(() => {
-                    window.location.reload()
-                }, 1500)
+                // Fallback: Try API call
+                console.log('🔄 Trying API fallback...')
+                const response = await fetch('/api/update-business', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        businessId: business.id,
+                        reward_title: data.reward_title,
+                        reward_description: data.reward_description,
+                        visit_goal: data.visit_goal
+                    })
+                })
+
+                if (response.ok) {
+                    const result = await response.json()
+                    console.log('✅ API fallback successful:', result)
+                    setSuccess('Reward settings updated successfully!')
+                    setTimeout(() => window.location.reload(), 1500)
+                } else {
+                    const result = await response.json()
+                    console.error('❌ API fallback failed:', result)
+                    setError(`Failed to update rewards: ${error.message}`)
+                }
             } else {
-                console.error('❌ API Error:', result)
-                setError(result.error || 'Failed to update reward settings')
+                console.log('✅ Direct Supabase update successful:', updatedBusiness)
+                setSuccess('Reward settings updated successfully!')
+                setTimeout(() => window.location.reload(), 1500)
             }
         } catch (err) {
             console.error('❌ Submit error:', err)
