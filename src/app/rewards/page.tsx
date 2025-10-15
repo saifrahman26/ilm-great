@@ -69,14 +69,13 @@ export default function RewardsPage() {
             console.log('👤 User ID:', user?.id)
             console.log('🏢 Business ID:', business.id)
 
-            const response = await fetch('/api/update-rewards', {
+            const response = await fetch('/api/update-business', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
                     businessId: business.id,
-                    userId: user?.id,
                     reward_title: data.reward_title,
                     reward_description: data.reward_description,
                     visit_goal: data.visit_goal
