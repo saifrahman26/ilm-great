@@ -64,7 +64,9 @@ export default function RewardsPage() {
         setSuccess('')
 
         try {
-            const response = await fetch('/api/update-business', {
+            console.log('🚀 Submitting reward update:', data)
+
+            const response = await fetch('/api/test-update-business', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -75,7 +77,9 @@ export default function RewardsPage() {
                 })
             })
 
+            console.log('📡 Response status:', response.status)
             const result = await response.json()
+            console.log('📋 Response data:', result)
 
             if (response.ok) {
                 setSuccess('Reward settings updated successfully!')
@@ -85,9 +89,11 @@ export default function RewardsPage() {
                 }, 1500)
             } else {
                 setError(result.error || 'Failed to update reward settings')
+                console.error('❌ Update failed:', result)
             }
         } catch (err) {
-            setError('Failed to update reward settings')
+            console.error('❌ Submit error:', err)
+            setError('Failed to update reward settings: ' + (err instanceof Error ? err.message : 'Unknown error'))
         }
 
         setSaving(false)
@@ -134,6 +140,43 @@ export default function RewardsPage() {
                             Set up what customers earn when they complete their loyalty journey
                         </p>
                     </div>
+
+                    {/* Current Active Reward Display */}
+                    {business && (business.reward_title || business.reward_description) && (
+                        <div className="bg-gradient-to-r from-green-50 to-emerald-50 border border-green-200 rounded-lg p-6 mb-8">
+                            <div className="flex items-center mb-3">
+                                <CheckCircle className="w-5 h-5 text-green-600 mr-2" />
+                                <h3 className="text-lg font-semibold text-green-900">Current Active Reward</h3>
+                            </div>
+                            <div className="bg-white rounded-lg p-4 border border-green-200">
+                                <div className="flex items-center space-x-2 mb-2">
+                                    <Gift className="w-5 h-5 text-green-600" />
+                                    <span className="font-medium text-gray-900">
+                                        {business.reward_title || 'No reward title set'}
+                                    </span>
+                                </div>
+                                <p className="text-sm text-gray-600 mb-2">
+                                    {business.reward_description || 'No reward description set'}
+                                </p>
+                                <p className="text-xs text-green-600 font-medium">
+                                    Earned after {business.visit_goal || 5} visits
+                                </p>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* No Reward Set Message */}
+                    {business && !business.reward_title && !business.reward_description && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-6 mb-8">
+                            <div className="flex items-center mb-3">
+                                <AlertCircle className="w-5 h-5 text-yellow-600 mr-2" />
+                                <h3 className="text-lg font-semibold text-yellow-900">No Reward Configured</h3>
+                            </div>
+                            <p className="text-yellow-800">
+                                Set up your first loyalty reward below to start engaging customers with your loyalty program.
+                            </p>
+                        </div>
+                    )}
 
                     {error && (
                         <div className="bg-red-50 border border-red-200 text-red-600 px-4 py-3 rounded-lg mb-6 flex items-center">
