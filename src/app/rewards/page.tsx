@@ -63,48 +63,42 @@ export default function RewardsPage() {
         setError('')
         setSuccess('')
 
+        // For now, let's use direct Supabase client instead of API
         try {
-            console.log('🚀 Submitting reward update:', data)
+            console.log('🚀 Submitting reward update directly to Supabase:', data)
 
-            // Add timeout to prevent hanging
-            const controller = new AbortController()
-            const timeoutId = setTimeout(() => controller.abort(), 10000) // 10 second timeout
+            const { createClient } = await import('@supabase/supabase-js')
+            const supabase = createClient(
+                process.env.NEXT_PUBLIC_SUPABASE_URL!,
+                process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+            )
 
-            const response = await fetch('/api/test-simple-save', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    businessId: business.id,
-                    ...data
-                }),
-                signal: controller.signal
-            })
+            const { data: updatedBusiness, error } = await supabase
+                .from('businesses')
+                .update({
+                    reward_title: data.reward_title,
+                    reward_description: data.reward_description,
+                    visit_goal: data.visit_goal,
+                    reward_setup_completed: true
+                })
+                .eq('id', business.id)
+                .select()
+                .single()
 
-            clearTimeout(timeoutId)
-
-            console.log('📡 Response status:', response.status)
-            const result = await response.json()
-            console.log('📋 Response data:', result)
-
-            if (response.ok) {
+            if (error) {
+                console.error('❌ Supabase error:', error)
+                setError(`Database error: ${error.message}`)
+            } else {
+                console.log('✅ Business updated successfully:', updatedBusiness)
                 setSuccess('Reward settings updated successfully!')
                 // Refresh the page after a short delay
                 setTimeout(() => {
                     window.location.reload()
                 }, 1500)
-            } else {
-                setError(result.error || 'Failed to update reward settings')
-                console.error('❌ Update failed:', result)
             }
         } catch (err) {
             console.error('❌ Submit error:', err)
-            if (err instanceof Error && err.name === 'AbortError') {
-                setError('Request timed out after 10 seconds. Please check your internet connection and try again.')
-            } else {
-                setError('Failed to update reward settings: ' + (err instanceof Error ? err.message : 'Unknown error'))
-            }
+            setError('Failed to update reward settings: ' + (err instanceof Error ? err.message : 'Unknown error'))
         }
 
         setSaving(false)
