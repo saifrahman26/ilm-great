@@ -51,42 +51,40 @@ export async function POST(request: NextRequest) {
             htmlContent = getSimpleEmailTemplate(message)
         }
 
-        // Try Resend first (works immediately with onboarding domain)
-        console.log('📧 Attempting to send email via Resend...')
+        // Use working email service (Nodemailer with Ethereal)
+        console.log('📧 Attempting to send email via working email service...')
 
-        const RESEND_API_KEY = 're_4KmBBVGf_4yKWJkxvNxTzYvqbEWq2TNBX' // Test key for onboarding domain
-
-        const response = await fetch('https://api.resend.com/emails', {
+        const response = await fetch('/api/send-email-working-final', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${RESEND_API_KEY}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'LoyalLink <onboarding@resend.dev>',
-                to: [email],
+                email: email,
                 subject: subject || 'Loyalty Program Update',
-                html: htmlContent,
-                text: message.replace(/<[^>]*>/g, ''), // Strip HTML for text version
+                message: htmlContent,
+                customerName: customerName || 'Valued Customer'
             })
         })
 
         const result = await response.json()
 
-        if (response.ok) {
-            console.log('✅ Email sent successfully via Resend:', {
-                id: result.id,
+        if (response.ok && result.success) {
+            console.log('✅ Email sent successfully via working email service:', {
+                messageId: result.messageId,
                 to: email,
-                subject: subject || 'Loyalty Program Update'
+                subject: subject || 'Loyalty Program Update',
+                previewUrl: result.previewUrl
             })
             return NextResponse.json({
                 success: true,
                 result,
-                message: 'Email sent successfully via Resend',
-                service: 'resend'
+                message: result.message,
+                service: result.service,
+                previewUrl: result.previewUrl
             })
         } else {
-            console.error('❌ Resend API error:', {
+            console.error('❌ Working email service error:', {
                 status: response.status,
                 statusText: response.statusText,
                 result
@@ -135,7 +133,7 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json(
                 {
-                    error: 'Failed to send email via both Resend and Brevo',
+                    error: 'Failed to send email via working service and Brevo fallback',
                     details: result,
                     status: response.status,
                     statusText: response.statusText
