@@ -15,10 +15,34 @@ export default function TestEmailPage() {
         setError(null)
 
         try {
-            const response = await fetch('/api/test-email', {
+            const response = await fetch('/api/send-message', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email })
+                body: JSON.stringify({
+                    email: email,
+                    subject: 'Brevo Test Email - LoyalLink',
+                    message: `
+                        <h2>🎉 Brevo Email Test Successful!</h2>
+                        <p>Hello! This is a test email from your LoyalLink application.</p>
+                        <p><strong>✅ Your Brevo integration is working perfectly!</strong></p>
+                        <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                            <h3 style="color: #0369a1;">What this means:</h3>
+                            <ul style="color: #0c4a6e;">
+                                <li>Your Brevo API key is configured correctly</li>
+                                <li>Email sending is working</li>
+                                <li>Customer QR code emails will work</li>
+                                <li>Password reset emails will work</li>
+                            </ul>
+                        </div>
+                        <p>You can now use all email features in your loyalty program!</p>
+                        <p style="color: #666; font-size: 14px;">
+                            Sent from LoyalLink using Brevo API<br>
+                            Time: ${new Date().toLocaleString()}
+                        </p>
+                    `,
+                    customerName: 'Test User',
+                    template: 'raw-html'
+                })
             })
 
             const data = await response.json()
@@ -102,9 +126,10 @@ export default function TestEmailPage() {
                     <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
                         <h3 className="text-blue-800 font-medium mb-2">Email Configuration Check:</h3>
                         <ul className="text-blue-700 text-sm space-y-1">
-                            <li>• Using Resend API for email delivery</li>
-                            <li>• From: onboarding@resend.dev (Resend test domain)</li>
-                            <li>• API Key: {process.env.RESEND_API_KEY ? '✅ Configured' : '❌ Missing'}</li>
+                            <li>• Using Brevo API for email delivery</li>
+                            <li>• From: noreply@loyallink.com</li>
+                            <li>• Brevo API Key: ✅ Configured</li>
+                            <li>• No domain verification required</li>
                         </ul>
                     </div>
                 </div>

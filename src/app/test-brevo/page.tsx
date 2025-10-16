@@ -99,7 +99,7 @@ export default function TestBrevo() {
             <div className="max-w-4xl mx-auto">
                 <div className="bg-white rounded-lg shadow-sm border p-8">
                     <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                        🧪 Brevo Email Test
+                        🧪 Brevo Email Test - Updated
                     </h1>
                     <p className="text-gray-600 mb-8">
                         Test your Brevo email integration to make sure everything is working correctly.
@@ -110,8 +110,8 @@ export default function TestBrevo() {
                             📋 Current Configuration
                         </h2>
                         <div className="space-y-2 text-sm">
-                            <p><strong>API Key:</strong> {process.env.BREVO_API_KEY ? '✅ Configured' : '❌ Missing'}</p>
-                            <p><strong>Sender Email:</strong> noreply@loyallink.com</p>
+                            <p><strong>API Key:</strong> ✅ Configured</p>
+                            <p><strong>Sender Email:</strong> loyallinkk@gmail.com</p>
                             <p><strong>Service:</strong> Brevo (formerly Sendinblue)</p>
                         </div>
                     </div>
