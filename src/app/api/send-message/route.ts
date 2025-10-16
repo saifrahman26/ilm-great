@@ -51,44 +51,56 @@ export async function POST(request: NextRequest) {
             htmlContent = getSimpleEmailTemplate(message)
         }
 
-        // Use working email service (Nodemailer with Ethereal)
-        console.log('📧 Attempting to send email via working email service...')
+        // Direct email sending using Nodemailer (no internal API calls)
+        console.log('📧 Sending email directly via Nodemailer...')
 
-        const response = await fetch('/api/send-email-working-final', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                email: email,
-                subject: subject || 'Loyalty Program Update',
-                message: htmlContent,
-                customerName: customerName || 'Valued Customer'
+        try {
+            const nodemailer = require('nodemailer')
+
+            // Create test account for immediate working email
+            const testAccount = await nodemailer.createTestAccount()
+
+            // Create transporter
+            const transporter = nodemailer.createTransporter({
+                host: 'smtp.ethereal.email',
+                port: 587,
+                secure: false,
+                auth: {
+                    user: testAccount.user,
+                    pass: testAccount.pass,
+                },
             })
-        })
 
-        const result = await response.json()
-
-        if (response.ok && result.success) {
-            console.log('✅ Email sent successfully via working email service:', {
-                messageId: result.messageId,
+            // Send email
+            const info = await transporter.sendMail({
+                from: `"LoyalLink" <${testAccount.user}>`,
                 to: email,
                 subject: subject || 'Loyalty Program Update',
-                previewUrl: result.previewUrl
+                text: htmlContent.replace(/<[^>]*>/g, ''),
+                html: htmlContent,
             })
+
+            const previewUrl = nodemailer.getTestMessageUrl(info)
+
+            console.log('✅ Email sent successfully via Nodemailer:', {
+                messageId: info.messageId,
+                to: email,
+                subject: subject || 'Loyalty Program Update',
+                previewUrl: previewUrl
+            })
+
             return NextResponse.json({
                 success: true,
-                result,
-                message: result.message,
-                service: result.service,
-                previewUrl: result.previewUrl
+                result: {
+                    messageId: info.messageId,
+                    previewUrl: previewUrl
+                },
+                message: 'Email sent successfully! Check the preview URL to view the email.',
+                service: 'nodemailer',
+                previewUrl: previewUrl
             })
-        } else {
-            console.error('❌ Working email service error:', {
-                status: response.status,
-                statusText: response.statusText,
-                result
-            })
+        } catch (nodemailerError) {
+            console.error('❌ Nodemailer error:', nodemailerError)
 
             // Fallback to Brevo if Resend fails
             if (process.env.BREVO_API_KEY) {
@@ -133,10 +145,8 @@ export async function POST(request: NextRequest) {
 
             return NextResponse.json(
                 {
-                    error: 'Failed to send email via working service and Brevo fallback',
-                    details: result,
-                    status: response.status,
-                    statusText: response.statusText
+                    error: 'Failed to send email via Nodemailer and Brevo fallback',
+                    details: nodemailerError instanceof Error ? nodemailerError.message : 'Unknown error'
                 },
                 { status: 500 }
             )
