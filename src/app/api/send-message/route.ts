@@ -51,48 +51,30 @@ export async function POST(request: NextRequest) {
             htmlContent = getSimpleEmailTemplate(message)
         }
 
-        // Check if Brevo API key is configured
-        if (!process.env.BREVO_API_KEY) {
-            console.error('BREVO_API_KEY is not configured')
-            return NextResponse.json(
-                { error: 'Email service not configured' },
-                { status: 500 }
-            )
-        }
+        // Try Resend first (works immediately with onboarding domain)
+        console.log('📧 Attempting to send email via Resend...')
 
-        // Log API key info for debugging (without exposing the full key)
-        console.log('🔑 Brevo API key configured, length:', process.env.BREVO_API_KEY.length)
-        console.log('🔑 API key starts with:', process.env.BREVO_API_KEY.substring(0, 10) + '...')
+        const RESEND_API_KEY = 're_4KmBBVGf_4yKWJkxvNxTzYvqbEWq2TNBX' // Test key for onboarding domain
 
-        // Send email using Brevo API
-        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
+        const response = await fetch('https://api.resend.com/emails', {
             method: 'POST',
             headers: {
-                'api-key': process.env.BREVO_API_KEY,
+                'Authorization': `Bearer ${RESEND_API_KEY}`,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                sender: {
-                    name: 'LoyalLink',
-                    email: process.env.BREVO_SENDER_EMAIL || 'noreply@loyallink.com'
-                },
-                to: [
-                    {
-                        email: email,
-                        name: customerName || 'Valued Customer'
-                    }
-                ],
+                from: 'LoyalLink <onboarding@resend.dev>',
+                to: [email],
                 subject: subject || 'Loyalty Program Update',
-                htmlContent: htmlContent,
-                textContent: message.replace(/<[^>]*>/g, ''), // Strip HTML for text version
-                tags: ['loyalty-program', 'automated']
+                html: htmlContent,
+                text: message.replace(/<[^>]*>/g, ''), // Strip HTML for text version
             })
         })
 
         const result = await response.json()
 
         if (response.ok) {
-            console.log('✅ Email sent successfully:', {
+            console.log('✅ Email sent successfully via Resend:', {
                 id: result.id,
                 to: email,
                 subject: subject || 'Loyalty Program Update'
@@ -100,18 +82,60 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({
                 success: true,
                 result,
-                message: 'Email sent successfully'
+                message: 'Email sent successfully via Resend',
+                service: 'resend'
             })
         } else {
             console.error('❌ Resend API error:', {
                 status: response.status,
                 statusText: response.statusText,
-                result,
-                apiKey: process.env.RESEND_API_KEY ? 'Present' : 'Missing'
+                result
             })
+
+            // Fallback to Brevo if Resend fails
+            if (process.env.BREVO_API_KEY) {
+                console.log('🔄 Falling back to Brevo...')
+
+                const brevoResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+                    method: 'POST',
+                    headers: {
+                        'api-key': process.env.BREVO_API_KEY,
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        sender: {
+                            name: 'LoyalLink',
+                            email: process.env.BREVO_SENDER_EMAIL || 'noreply@loyallink.com'
+                        },
+                        to: [
+                            {
+                                email: email,
+                                name: customerName || 'Valued Customer'
+                            }
+                        ],
+                        subject: subject || 'Loyalty Program Update',
+                        htmlContent: htmlContent,
+                        textContent: message.replace(/<[^>]*>/g, ''),
+                        tags: ['loyalty-program', 'automated']
+                    })
+                })
+
+                const brevoResult = await brevoResponse.json()
+
+                if (brevoResponse.ok) {
+                    console.log('✅ Email sent successfully via Brevo fallback')
+                    return NextResponse.json({
+                        success: true,
+                        result: brevoResult,
+                        message: 'Email sent successfully via Brevo (fallback)',
+                        service: 'brevo'
+                    })
+                }
+            }
+
             return NextResponse.json(
                 {
-                    error: 'Failed to send email',
+                    error: 'Failed to send email via both Resend and Brevo',
                     details: result,
                     status: response.status,
                     statusText: response.statusText
