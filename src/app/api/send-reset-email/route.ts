@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { Resend } from 'resend'
 import { supabase } from '@/lib/supabase'
 import { createClient } from '@supabase/supabase-js'
 import crypto from 'crypto'
@@ -15,8 +14,6 @@ const supabaseAdmin = createClient(
         }
     }
 )
-
-const resend = new Resend(process.env.RESEND_API_KEY)
 
 export async function POST(request: NextRequest) {
     try {
@@ -58,12 +55,26 @@ export async function POST(request: NextRequest) {
         // Create the reset URL
         const resetUrl = `${process.env.NEXT_PUBLIC_APP_URL}/reset-password?token=${resetToken}`
 
-        // Send the email
-        const { error: emailError } = await resend.emails.send({
-            from: 'LoyalLink <onboarding@resend.dev>',
-            to: [email],
-            subject: 'Reset Your Password - LoyalLink',
-            html: `
+        // Send the email using Brevo
+        const emailResponse = await fetch('https://api.brevo.com/v3/smtp/email', {
+            method: 'POST',
+            headers: {
+                'api-key': process.env.BREVO_API_KEY!,
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                sender: {
+                    name: 'LoyalLink',
+                    email: process.env.BREVO_SENDER_EMAIL || 'noreply@loyallink.com'
+                },
+                to: [
+                    {
+                        email: email,
+                        name: finalBusinessName
+                    }
+                ],
+                subject: 'Reset Your Password - LoyalLink',
+                htmlContent: `
                 <!DOCTYPE html>
                 <html>
                 <head>
@@ -119,11 +130,15 @@ export async function POST(request: NextRequest) {
                     </div>
                 </body>
                 </html>
-            `,
+                `,
+                textContent: `Reset Your Password - LoyalLink\n\nHello ${finalBusinessName},\n\nWe received a request to reset your password for your LoyalLink account.\n\nClick this link to create a new password: ${resetUrl}\n\nThis link will expire in 1 hour. If you didn't request this reset, please ignore this email.\n\nBest regards,\nThe LoyalLink Team`,
+                tags: ['password-reset']
+            })
         })
 
-        if (emailError) {
-            console.error('Error sending email:', emailError)
+        if (!emailResponse.ok) {
+            const errorData = await emailResponse.json()
+            console.error('Error sending email:', errorData)
             return NextResponse.json(
                 { error: 'Failed to send reset email' },
                 { status: 500 }

@@ -51,9 +51,9 @@ export async function POST(request: NextRequest) {
             htmlContent = getSimpleEmailTemplate(message)
         }
 
-        // Check if API key is configured
-        if (!process.env.RESEND_API_KEY) {
-            console.error('RESEND_API_KEY is not configured')
+        // Check if Brevo API key is configured
+        if (!process.env.BREVO_API_KEY) {
+            console.error('BREVO_API_KEY is not configured')
             return NextResponse.json(
                 { error: 'Email service not configured' },
                 { status: 500 }
@@ -61,28 +61,31 @@ export async function POST(request: NextRequest) {
         }
 
         // Log API key info for debugging (without exposing the full key)
-        console.log('🔑 API key configured, length:', process.env.RESEND_API_KEY.length)
-        console.log('🔑 API key starts with:', process.env.RESEND_API_KEY.substring(0, 10) + '...')
+        console.log('🔑 Brevo API key configured, length:', process.env.BREVO_API_KEY.length)
+        console.log('🔑 API key starts with:', process.env.BREVO_API_KEY.substring(0, 10) + '...')
 
-        // Send email using Resend API
-        const response = await fetch('https://api.resend.com/emails', {
+        // Send email using Brevo API
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                'api-key': process.env.BREVO_API_KEY,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'LoyalLink <onboarding@resend.dev>',
-                to: 'warriorsaifdurer@gmail.com', // Use verified email to avoid failures
-                subject: `[LoyalLink] ${subject || 'Loyalty Program Update'} - For: ${email}`,
-                html: `
-                    <div style="background: #e3f2fd; border: 1px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
-                        <strong>📧 SANDBOX MODE:</strong> This email was originally intended for: <strong>${email}</strong><br>
-                        <small style="color: #666;">Resend is in sandbox mode - emails are redirected to the verified address.</small>
-                    </div>
-                    ${htmlContent}
-                `,
-                text: `[SANDBOX MODE] Originally for: ${email}\n\n${message}`,
+                sender: {
+                    name: 'LoyalLink',
+                    email: process.env.BREVO_SENDER_EMAIL || 'noreply@loyallink.com'
+                },
+                to: [
+                    {
+                        email: email,
+                        name: customerName || 'Valued Customer'
+                    }
+                ],
+                subject: subject || 'Loyalty Program Update',
+                htmlContent: htmlContent,
+                textContent: message.replace(/<[^>]*>/g, ''), // Strip HTML for text version
+                tags: ['loyalty-program', 'automated']
             })
         })
 

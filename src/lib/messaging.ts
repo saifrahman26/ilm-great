@@ -35,26 +35,30 @@ export async function sendWhatsAppMessage(customer: Customer, message: string): 
     }
 }
 
-// Email messaging using Resend API
+// Email messaging using Brevo API
 export async function sendEmail(customer: Customer, subject: string, htmlContent: string): Promise<boolean> {
     try {
-        const response = await fetch('https://api.resend.com/emails', {
+        const response = await fetch('https://api.brevo.com/v3/smtp/email', {
             method: 'POST',
             headers: {
-                'Authorization': `Bearer ${process.env.RESEND_API_KEY}`,
+                'api-key': process.env.BREVO_API_KEY!,
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                from: 'LoyalLink <onboarding@resend.dev>',
-                to: 'warriorsaifdurer@gmail.com', // Resend sandbox mode - can only send to verified email
-                subject: `[LoyalLink] ${subject} - For: ${customer.email}`,
-                html: `
-                    <div style="background: #e3f2fd; border: 2px solid #2196f3; padding: 15px; margin-bottom: 20px; border-radius: 8px;">
-                        <strong>📧 SANDBOX MODE:</strong> This email was originally intended for: <strong>${customer.email}</strong><br>
-                        <small style="color: #666;">Resend is in sandbox mode - emails are redirected to the verified address for testing.</small>
-                    </div>
-                    ${htmlContent}
-                `
+                sender: {
+                    name: 'LoyalLink',
+                    email: process.env.BREVO_SENDER_EMAIL || 'noreply@loyallink.com'
+                },
+                to: [
+                    {
+                        email: customer.email,
+                        name: customer.name
+                    }
+                ],
+                subject: `[LoyalLink] ${subject}`,
+                htmlContent: htmlContent,
+                textContent: htmlContent.replace(/<[^>]*>/g, ''), // Strip HTML for text version
+                tags: ['loyalty-program', 'automated']
             })
         })
 
