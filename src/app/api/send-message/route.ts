@@ -57,15 +57,10 @@ export async function POST(request: NextRequest) {
 
         // Create Gmail transporter with explicit SMTP settings
         const transporter = nodemailer.createTransporter({
-            host: 'smtp.gmail.com',
-            port: 587,
-            secure: false, // true for 465, false for other ports
+            service: 'gmail',
             auth: {
                 user: process.env.GMAIL_USER || 'loyallinkk@gmail.com',
                 pass: process.env.GMAIL_APP_PASSWORD || 'jeoy gdhp idsl mzzd'
-            },
-            tls: {
-                rejectUnauthorized: false
             }
         })
 
@@ -112,13 +107,20 @@ export async function POST(request: NextRequest) {
         })
 
     } catch (error) {
-        console.error('Error in email service:', error)
+        console.error('❌ Gmail SMTP Error Details:', error)
 
-        // Always return success to not break customer registration
+        // Return the actual error for debugging
         return NextResponse.json({
-            success: true,
-            message: 'Email queued for delivery',
-            service: 'fallback'
+            success: false,
+            message: 'Gmail SMTP failed',
+            service: 'gmail_error',
+            error: error instanceof Error ? error.message : 'Unknown error',
+            stack: error instanceof Error ? error.stack : undefined,
+            debug: {
+                gmailUser: process.env.GMAIL_USER,
+                hasPassword: !!process.env.GMAIL_APP_PASSWORD,
+                passwordLength: process.env.GMAIL_APP_PASSWORD?.length || 0
+            }
         })
     }
 }
