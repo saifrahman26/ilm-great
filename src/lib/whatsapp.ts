@@ -42,6 +42,9 @@ export class WhatsAppService {
         try {
             const formattedPhone = this.formatPhone(data.phone)
 
+            console.log('📱 WhatsApp API URL:', `${this.baseUrl}/sendMessage/${this.accessToken}`)
+            console.log('📱 Sending to phone:', formattedPhone)
+
             const response = await fetch(`${this.baseUrl}/sendMessage/${this.accessToken}`, {
                 method: 'POST',
                 headers: {
@@ -53,10 +56,22 @@ export class WhatsAppService {
                 })
             })
 
+            console.log('📱 Response status:', response.status)
+            console.log('📱 Response headers:', Object.fromEntries(response.headers.entries()))
+
+            // Check if response is HTML (error page)
+            const contentType = response.headers.get('content-type') || ''
+            if (contentType.includes('text/html')) {
+                const htmlText = await response.text()
+                console.error('❌ WhatsApp API returned HTML (auth error):', htmlText.substring(0, 300))
+                throw new Error(`WhatsApp API authentication failed. Check Instance ID: ${this.instanceId} and Access Token`)
+            }
+
             const result = await response.json()
+            console.log('📱 WhatsApp API result:', result)
 
             if (!response.ok) {
-                throw new Error(`WhatsApp API error: ${result.error || 'Unknown error'}`)
+                throw new Error(`WhatsApp API error: ${result.error || result.message || 'Unknown error'}`)
             }
 
             return {
@@ -143,18 +158,53 @@ export class WhatsAppService {
     // Test connection
     async testConnection(): Promise<any> {
         try {
+            console.log('🔍 Testing WhatsApp connection...')
+            console.log('🔍 Instance ID:', this.instanceId)
+            console.log('🔍 Access Token:', this.accessToken ? 'Set' : 'Missing')
+            console.log('🔍 Test URL:', `${this.baseUrl}/getSettings/${this.accessToken}`)
+
             const response = await fetch(`${this.baseUrl}/getSettings/${this.accessToken}`)
+
+            console.log('🔍 Test response status:', response.status)
+
+            // Check if response is HTML (error page)
+            const contentType = response.headers.get('content-type') || ''
+            if (contentType.includes('text/html')) {
+                const htmlText = await response.text()
+                console.error('❌ Test returned HTML:', htmlText.substring(0, 200))
+                return {
+                    success: false,
+                    error: 'Authentication failed - check Instance ID and Access Token',
+                    debug: {
+                        instanceId: this.instanceId,
+                        hasToken: !!this.accessToken,
+                        responseType: 'HTML'
+                    }
+                }
+            }
+
             const result = await response.json()
+            console.log('🔍 Test result:', result)
 
             return {
                 success: response.ok,
                 status: result.stateInstance || 'unknown',
-                phone: result.wid || 'unknown'
+                phone: result.wid || 'unknown',
+                debug: {
+                    instanceId: this.instanceId,
+                    hasToken: !!this.accessToken,
+                    responseStatus: response.status
+                }
             }
         } catch (error) {
+            console.error('❌ Test connection error:', error)
             return {
                 success: false,
-                error: error instanceof Error ? error.message : 'Connection failed'
+                error: error instanceof Error ? error.message : 'Connection failed',
+                debug: {
+                    instanceId: this.instanceId,
+                    hasToken: !!this.accessToken
+                }
             }
         }
     }
