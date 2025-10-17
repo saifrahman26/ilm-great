@@ -47,62 +47,39 @@ export async function POST(request: NextRequest) {
             htmlContent = getSimpleEmailTemplate(message)
         }
 
-        console.log('📧 Starting Gmail SMTP email process...')
-        console.log('🔑 Gmail user:', process.env.GMAIL_USER)
-        console.log('🔑 Gmail password configured:', process.env.GMAIL_APP_PASSWORD ? 'Yes' : 'No')
-        console.log('🔑 Gmail password length:', process.env.GMAIL_APP_PASSWORD?.length || 0)
+        console.log('📧 Starting Resend email process...')
+        console.log('🔑 Resend API key configured:', process.env.RESEND_API_KEY ? 'Yes' : 'No')
 
-        // Force Gmail SMTP with explicit configuration
-        const nodemailer = require('nodemailer')
+        // Use Resend API (much more reliable than Gmail SMTP)
+        const { Resend } = require('resend')
+        const resend = new Resend(process.env.RESEND_API_KEY)
 
-        // Create Gmail transporter with explicit SMTP settings
-        const transporter = nodemailer.createTransporter({
-            service: 'gmail',
-            auth: {
-                user: process.env.GMAIL_USER || 'loyallinkk@gmail.com',
-                pass: process.env.GMAIL_APP_PASSWORD || 'jeoy gdhp idsl mzzd'
-            }
-        })
+        console.log('📤 Sending email via Resend...')
 
-        console.log('📤 Verifying Gmail SMTP connection...')
-
-        try {
-            // Verify connection first
-            await transporter.verify()
-            console.log('✅ Gmail SMTP connection verified!')
-        } catch (verifyError) {
-            console.error('❌ Gmail SMTP verification failed:', verifyError)
-            throw new Error(`Gmail SMTP verification failed: ${verifyError}`)
-        }
-
-        console.log('📤 Sending email via Gmail SMTP...')
-
-        const info = await transporter.sendMail({
-            from: '"LoyalLink" <loyallinkk@gmail.com>',
-            to: email,
+        const emailData = {
+            from: 'LoyalLink <onboarding@resend.dev>', // Resend's default sender
+            to: [email],
             subject: subject || 'Loyalty Program Update',
             html: htmlContent,
-            text: htmlContent.replace(/<[^>]*>/g, ''),
-        })
+        }
 
-        console.log('✅ Email sent successfully via Gmail SMTP!')
-        console.log('📧 Message ID:', info.messageId)
-        console.log('📧 Response:', info.response)
+        console.log('📧 Email data:', { ...emailData, html: 'HTML content...' })
+
+        const result = await resend.emails.send(emailData)
+
+        console.log('✅ Email sent successfully via Resend!')
+        console.log('📧 Resend result:', result)
 
         return NextResponse.json({
             success: true,
-            result: {
-                messageId: info.messageId,
-                response: info.response
-            },
-            message: 'Email sent successfully via Gmail SMTP! Check your inbox.',
-            service: 'gmail',
-            from: 'loyallinkk@gmail.com',
+            result: result.data,
+            message: 'Email sent successfully via Resend! Check your inbox.',
+            service: 'resend',
+            from: 'onboarding@resend.dev',
             to: email,
             debug: {
-                messageId: info.messageId,
-                accepted: info.accepted,
-                rejected: info.rejected
+                id: result.data?.id,
+                error: result.error
             }
         })
 
