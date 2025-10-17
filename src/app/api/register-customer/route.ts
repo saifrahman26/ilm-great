@@ -207,9 +207,9 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Generate QR code with customer ID that links to scanner page
+        // Generate QR code with customer ID that links to mark-visit page
         const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-        const qrData = `${baseUrl}/scanner?customer=${customer.id}`
+        const qrData = `${baseUrl}/mark-visit/${customer.id}`
         const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
 
         // Update customer with QR code info

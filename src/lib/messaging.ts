@@ -336,3 +336,273 @@ export async function sendInactiveCustomerOffer(customer: Customer): Promise<voi
         await sendEmail(customer, 'We Miss You - Special 20% Off Offer!', emailHtml)
     }
 }
+
+// Send visit confirmation email
+export async function sendVisitConfirmationEmail(
+    customer: any,
+    business: any,
+    visitCount: number
+): Promise<void> {
+    if (!customer.email) {
+        console.log('No email provided for customer:', customer.name)
+        return
+    }
+
+    try {
+        const visitsLeft = business.visit_goal - visitCount
+        const progressPercentage = Math.min((visitCount / business.visit_goal) * 100, 100)
+        const isRewardReached = visitCount >= business.visit_goal
+
+        const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Visit Recorded - ${business.name}</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 40px 30px; text-align: center;">
+            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); font-size: 20px; font-weight: 800; letter-spacing: 1px;">
+                🔗 LoyalLink
+            </div>
+            <h1 style="margin: 0; font-size: 28px; font-weight: 700;">✅ Visit Recorded!</h1>
+            <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.95;">${business.name}</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <div style="font-size: 18px; color: #333; margin-bottom: 20px;">
+                Hello ${customer.name}! 👋
+            </div>
+            
+            ${isRewardReached ? `
+            <!-- Reward Reached -->
+            <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">
+                <div style="font-size: 48px; margin-bottom: 10px;">🎉</div>
+                <h2 style="margin: 0 0 10px 0; font-size: 24px;">Congratulations!</h2>
+                <p style="margin: 0; font-size: 18px; opacity: 0.95;">You've earned your reward!</p>
+                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; margin-top: 20px;">
+                    <p style="margin: 0; font-size: 20px; font-weight: bold;">${business.reward_title}</p>
+                </div>
+                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">Show this email to claim your reward!</p>
+            </div>
+            ` : `
+            <!-- Progress Card -->
+            <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); padding: 30px; border-radius: 12px; margin: 30px 0; border: 2px solid #0ea5e9;">
+                <h3 style="margin: 0 0 15px 0; color: #0c4a6e; text-align: center;">Your Progress</h3>
+                
+                <!-- Progress Bar -->
+                <div style="background-color: #e0e0e0; border-radius: 25px; height: 20px; margin: 20px 0; overflow: hidden;">
+                    <div style="background: linear-gradient(90deg, #10b981 0%, #059669 100%); height: 100%; width: ${progressPercentage}%; border-radius: 25px; transition: width 0.3s ease;"></div>
+                </div>
+                
+                <!-- Visit Stats -->
+                <div style="display: flex; justify-content: space-around; margin: 20px 0; text-align: center;">
+                    <div>
+                        <div style="font-size: 32px; font-weight: bold; color: #0ea5e9;">${visitCount}</div>
+                        <div style="font-size: 14px; color: #64748b;">Visits</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 32px; font-weight: bold; color: #0ea5e9;">${business.visit_goal}</div>
+                        <div style="font-size: 14px; color: #64748b;">Goal</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 32px; font-weight: bold; color: #0ea5e9;">${visitsLeft}</div>
+                        <div style="font-size: 14px; color: #64748b;">To Go</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Reward Preview -->
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; border: 2px solid #f59e0b;">
+                <h3 style="margin: 0; color: #92400e;">🎁 Your Reward</h3>
+                <p style="margin: 10px 0; color: #b45309; font-size: 18px; font-weight: bold;">${business.reward_title}</p>
+                <p style="margin: 10px 0; color: #d97706;">Just ${visitsLeft} more visit${visitsLeft === 1 ? '' : 's'} to go!</p>
+            </div>
+            `}
+            
+            <!-- Message -->
+            <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; border-left: 4px solid #10b981; margin: 25px 0; font-size: 16px; color: #555;">
+                ${isRewardReached
+                ? `🎉 Amazing! You've completed ${visitCount} visits and earned your <strong>${business.reward_title}</strong>! Show this email at your next visit to claim it.`
+                : `Thank you for your visit! You now have <strong>${visitCount} of ${business.visit_goal}</strong> visits. Keep going to earn your <strong>${business.reward_title}</strong>!`
+            }
+            </div>
+            
+            <!-- QR Code Reminder -->
+            <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px;">
+                <h3 style="color: #333; margin-bottom: 15px;">📱 Your QR Code</h3>
+                <img src="${customer.qr_code_url}" alt="Your QR Code" style="width: 150px; height: 150px; border: 3px solid #10b981; border-radius: 12px; padding: 10px; background: white;" />
+                <p style="color: #666; font-size: 14px; margin-top: 15px;">Show this at your next visit!</p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;"><strong>${business.name}</strong></p>
+            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;">Thank you for your loyalty!</p>
+            <p style="font-size: 14px; color: #666; margin-top: 15px; font-weight: 600;">
+                Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
+            </p>
+        </div>
+    </div>
+</body>
+</html>`
+
+        const baseUrl = typeof window !== 'undefined'
+            ? window.location.origin
+            : (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+
+        const response = await fetch(`${baseUrl}/api/send-message`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: customer.email,
+                message: emailHtml,
+                subject: isRewardReached
+                    ? `🎉 Reward Earned at ${business.name}!`
+                    : `✅ Visit #${visitCount} Recorded - ${business.name}`,
+                template: 'raw-html'
+            })
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(`Failed to send visit email: ${errorData.error || 'Unknown error'}`)
+        }
+
+        console.log('Visit confirmation email sent successfully to:', customer.email)
+    } catch (error) {
+        console.error('Error sending visit confirmation email:', error)
+        throw error
+    }
+}
+
+// Send reward completion email
+export async function sendRewardCompletionEmail(
+    customer: any,
+    business: any
+): Promise<void> {
+    if (!customer.email) {
+        console.log('No email provided for customer:', customer.name)
+        return
+    }
+
+    try {
+        const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎉 Reward Earned!</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 40px 30px; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; font-size: 100px; opacity: 0.1; top: -20px; right: -20px;">🎉</div>
+            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); font-size: 20px; font-weight: 800; letter-spacing: 1px;">
+                🔗 LoyalLink
+            </div>
+            <h1 style="margin: 0; font-size: 32px; font-weight: bold;">🎉 CONGRATULATIONS!</h1>
+            <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">You've Earned Your Reward!</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <div style="font-size: 20px; color: #333; margin-bottom: 20px; text-align: center;">
+                Hello ${customer.name}! 🎊
+            </div>
+            
+            <!-- Celebration Banner -->
+            <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 30px; border-radius: 15px; text-align: center; margin: 30px 0; border: 3px solid #ff6b6b; position: relative;">
+                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: white; padding: 10px; border-radius: 50%; font-size: 30px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);">
+                    🏆
+                </div>
+                <div style="font-size: 28px; font-weight: bold; color: #d63031; margin: 20px 0 10px 0;">
+                    ${business.reward_title}
+                </div>
+                <div style="font-size: 18px; color: #2d3436; margin: 15px 0; line-height: 1.5;">
+                    ${business.reward_description || 'Your loyalty reward is ready!'}
+                </div>
+            </div>
+            
+            <!-- Visit Achievement -->
+            <div style="background: linear-gradient(135deg, #a8e6cf 0%, #7fcdcd 100%); padding: 25px; border-radius: 12px; text-align: center; margin: 25px 0; border: 2px solid #00b894;">
+                <div style="font-size: 48px; font-weight: bold; color: #00b894; margin: 0;">${customer.visits}</div>
+                <div style="font-size: 16px; color: #2d3436; margin: 5px 0;">Visits Completed!</div>
+                <p style="margin: 10px 0; color: #00b894; font-weight: bold;">
+                    🎯 Goal: ${business.visit_goal} visits ✅
+                </p>
+            </div>
+            
+            <!-- Claim Section -->
+            <div style="background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%); padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0; color: white;">
+                <div style="font-size: 24px; font-weight: bold; margin: 0 0 15px 0;">🎁 How to Claim Your Reward</div>
+                <div style="font-size: 16px; margin: 15px 0; line-height: 1.5;">
+                    Show this email to any staff member at <strong>${business.name}</strong> to claim your reward!
+                    <br><br>
+                    <strong>Valid for your next visit</strong>
+                </div>
+                <div style="display: inline-block; background: white; color: #fd79a8; padding: 15px 30px; border-radius: 25px; font-weight: bold; margin: 20px 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
+                    📱 Save This Email
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <p style="font-size: 18px; color: #2d3436;">
+                    Thank you for being such a loyal customer! 💝
+                </p>
+                <p style="font-size: 16px; color: #636e72;">
+                    Keep visiting to earn more rewards!
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;"><strong>${business.name}</strong></p>
+            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;">🏪 We appreciate your loyalty and look forward to seeing you again!</p>
+            <p style="font-size: 14px; color: #666; margin-top: 15px; font-weight: 600;">
+                Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
+            </p>
+            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                This reward email was generated automatically when you completed ${business.visit_goal} visits.
+            </p>
+        </div>
+    </div>
+</body>
+</html>`
+
+        const baseUrl = typeof window !== 'undefined'
+            ? window.location.origin
+            : (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+
+        const response = await fetch(`${baseUrl}/api/send-message`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: customer.email,
+                message: emailHtml,
+                subject: `🎉 Congratulations! You've Earned Your Reward at ${business.name}!`,
+                template: 'raw-html'
+            })
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(`Failed to send reward email: ${errorData.error || 'Unknown error'}`)
+        }
+
+        console.log('Reward completion email sent successfully to:', customer.email)
+    } catch (error) {
+        console.error('Error sending reward completion email:', error)
+        throw error
+    }
+}

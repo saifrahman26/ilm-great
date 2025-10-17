@@ -271,33 +271,10 @@ export default function ScannerPage() {
             setScanning(true)
             setError('')
 
-            // Record the visit
-            const response = await fetch('/api/record-visit', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({
-                    customerId: customerId,
-                    businessId: business?.id
-                }),
-            })
-
-            const result = await response.json()
-
-            if (response.ok) {
-                // Show success message and redirect to dashboard
-                alert(`Visit recorded successfully for ${result.customer?.name || 'customer'}!`)
-                router.push('/dashboard')
-            } else {
-                setError(result.error || 'Failed to record visit')
-                setTimeout(() => {
-                    setError('')
-                    startCamera()
-                }, 3000)
-            }
+            // Redirect to mark-visit page to show customer info
+            router.push(`/mark-visit/${customerId}`)
         } catch (error) {
-            setError('Failed to record visit')
+            setError('Failed to load customer')
             setTimeout(() => {
                 setError('')
                 startCamera()

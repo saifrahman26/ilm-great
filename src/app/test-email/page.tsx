@@ -1,18 +1,20 @@
 'use client'
 
 import { useState } from 'react'
-import { Mail, Send, CheckCircle, XCircle } from 'lucide-react'
 
 export default function TestEmailPage() {
-    const [email, setEmail] = useState('warriorsaifdurer@gmail.com')
+    const [email, setEmail] = useState('')
     const [loading, setLoading] = useState(false)
     const [result, setResult] = useState<any>(null)
-    const [error, setError] = useState<string | null>(null)
 
     const sendTestEmail = async () => {
+        if (!email) {
+            alert('Please enter an email address')
+            return
+        }
+
         setLoading(true)
         setResult(null)
-        setError(null)
 
         try {
             const response = await fetch('/api/send-message', {
@@ -20,117 +22,99 @@ export default function TestEmailPage() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
                     email: email,
-                    subject: 'Brevo Test Email - LoyalLink',
+                    subject: '🧪 Test Email from LoyalLink',
                     message: `
-                        <h2>🎉 Brevo Email Test Successful!</h2>
-                        <p>Hello! This is a test email from your LoyalLink application.</p>
-                        <p><strong>✅ Your Brevo integration is working perfectly!</strong></p>
-                        <div style="background: #f0f9ff; padding: 20px; border-radius: 8px; margin: 20px 0;">
-                            <h3 style="color: #0369a1;">What this means:</h3>
-                            <ul style="color: #0c4a6e;">
-                                <li>Your Brevo API key is configured correctly</li>
-                                <li>Email sending is working</li>
-                                <li>Customer QR code emails will work</li>
-                                <li>Password reset emails will work</li>
-                            </ul>
-                        </div>
-                        <p>You can now use all email features in your loyalty program!</p>
+                        <h2>✅ Email Test Successful!</h2>
+                        <p>If you're reading this, your Resend email integration is working perfectly!</p>
+                        <p><strong>Sent to:</strong> ${email}</p>
+                        <p><strong>Time:</strong> ${new Date().toLocaleString()}</p>
+                        <hr>
                         <p style="color: #666; font-size: 14px;">
-                            Sent from LoyalLink using Brevo API<br>
-                            Time: ${new Date().toLocaleString()}
+                            Powered by <strong>🔗 LoyalLink</strong> using Resend API
                         </p>
                     `,
-                    customerName: 'Test User',
                     template: 'raw-html'
                 })
             })
 
             const data = await response.json()
+            setResult(data)
 
-            if (response.ok) {
-                setResult(data)
+            if (data.success) {
+                alert('✅ Email sent successfully! Check your inbox.')
             } else {
-                setError(data.error || 'Failed to send test email')
+                alert('❌ Email failed: ' + (data.error || 'Unknown error'))
             }
-        } catch (err) {
-            setError('Network error occurred')
+        } catch (error) {
+            console.error('Test email error:', error)
+            setResult({ error: error instanceof Error ? error.message : 'Unknown error' })
+            alert('❌ Error sending email')
         } finally {
             setLoading(false)
         }
     }
 
     return (
-        <div className="min-h-screen bg-gray-50 py-12">
-            <div className="max-w-md mx-auto bg-white rounded-lg shadow-md p-6">
-                <div className="text-center mb-6">
-                    <Mail className="w-12 h-12 text-teal-600 mx-auto mb-3" />
-                    <h1 className="text-2xl font-bold text-gray-900">Email Test</h1>
-                    <p className="text-gray-600 mt-2">Test your email configuration</p>
-                </div>
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 p-8">
+            <div className="max-w-2xl mx-auto">
+                <div className="bg-white rounded-2xl shadow-xl p-8">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-2">📧 Email Test</h1>
+                    <p className="text-gray-600 mb-8">Test if Resend email integration is working</p>
 
-                <div className="space-y-4">
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-2">
-                            Test Email Address
-                        </label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-teal-500"
-                            placeholder="Enter email to test"
-                        />
+                    <div className="space-y-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                Your Email Address
+                            </label>
+                            <input
+                                type="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                placeholder="your@email.com"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                            />
+                        </div>
+
+                        <button
+                            onClick={sendTestEmail}
+                            disabled={loading}
+                            className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white py-4 px-6 rounded-lg font-semibold hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            {loading ? '📤 Sending...' : '🚀 Send Test Email'}
+                        </button>
                     </div>
 
-                    <button
-                        onClick={sendTestEmail}
-                        disabled={loading || !email}
-                        className="w-full bg-teal-600 text-white py-2 px-4 rounded-md hover:bg-teal-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                    >
-                        {loading ? (
-                            <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                <span>Sending...</span>
-                            </>
-                        ) : (
-                            <>
-                                <Send className="w-4 h-4" />
-                                <span>Send Test Email</span>
-                            </>
-                        )}
-                    </button>
-
                     {result && (
-                        <div className="bg-green-50 border border-green-200 rounded-md p-4">
-                            <div className="flex items-center space-x-2">
-                                <CheckCircle className="w-5 h-5 text-green-600" />
-                                <span className="text-green-800 font-medium">Success!</span>
+                        <div className="mt-8">
+                            <h3 className="text-lg font-semibold mb-3">
+                                {result.success ? '✅ Success' : '❌ Error'}
+                            </h3>
+                            <div className="bg-gray-50 rounded-lg p-4 overflow-auto">
+                                <pre className="text-sm text-gray-800 whitespace-pre-wrap">
+                                    {JSON.stringify(result, null, 2)}
+                                </pre>
                             </div>
-                            <p className="text-green-700 mt-2">{result.message}</p>
-                            {result.result?.id && (
-                                <p className="text-green-600 text-sm mt-1">Email ID: {result.result.id}</p>
-                            )}
                         </div>
                     )}
 
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-md p-4">
-                            <div className="flex items-center space-x-2">
-                                <XCircle className="w-5 h-5 text-red-600" />
-                                <span className="text-red-800 font-medium">Error</span>
-                            </div>
-                            <p className="text-red-700 mt-2">{error}</p>
-                        </div>
-                    )}
-
-                    <div className="bg-blue-50 border border-blue-200 rounded-md p-4">
-                        <h3 className="text-blue-800 font-medium mb-2">Email Configuration Check:</h3>
-                        <ul className="text-blue-700 text-sm space-y-1">
-                            <li>• Using Brevo API for email delivery</li>
-                            <li>• From: noreply@loyallink.com</li>
-                            <li>• Brevo API Key: ✅ Configured</li>
-                            <li>• No domain verification required</li>
+                    <div className="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+                        <h4 className="font-semibold text-blue-900 mb-2">📋 What to check:</h4>
+                        <ul className="text-sm text-blue-800 space-y-1">
+                            <li>✓ Email arrives in your inbox</li>
+                            <li>✓ Sender shows as "LoyalLink &lt;onboarding@resend.dev&gt;"</li>
+                            <li>✓ Subject line is correct</li>
+                            <li>✓ HTML formatting looks good</li>
+                            <li>✓ Check spam folder if not in inbox</li>
                         </ul>
+                    </div>
+
+                    <div className="mt-6 text-center">
+                        <a
+                            href="/dashboard"
+                            className="text-purple-600 hover:text-purple-700 font-medium"
+                        >
+                            ← Back to Dashboard
+                        </a>
                     </div>
                 </div>
             </div>
