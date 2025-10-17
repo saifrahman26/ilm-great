@@ -42,10 +42,11 @@ export class WhatsAppService {
         try {
             const formattedPhone = this.formatPhone(data.phone)
 
-            console.log('📱 WhatsApp API URL:', `${this.baseUrl}/sendMessage/${this.accessToken}`)
+            const sendUrl = `https://api.green-api.com/waInstance${this.instanceId}/sendMessage/${this.accessToken}`
+            console.log('📱 WhatsApp API URL:', sendUrl)
             console.log('📱 Sending to phone:', formattedPhone)
 
-            const response = await fetch(`${this.baseUrl}/sendMessage/${this.accessToken}`, {
+            const response = await fetch(sendUrl, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
@@ -161,9 +162,14 @@ export class WhatsAppService {
             console.log('🔍 Testing WhatsApp connection v2...')
             console.log('🔍 Instance ID:', this.instanceId)
             console.log('🔍 Access Token:', this.accessToken ? 'Set' : 'Missing')
-            console.log('🔍 Test URL:', `${this.baseUrl}/getSettings/${this.accessToken}`)
+            // Try different API endpoint formats for Green API
+            const testUrl1 = `${this.baseUrl}/getSettings/${this.accessToken}`
+            const testUrl2 = `https://api.green-api.com/waInstance${this.instanceId}/getSettings/${this.accessToken}`
 
-            const response = await fetch(`${this.baseUrl}/getSettings/${this.accessToken}`)
+            console.log('🔍 Test URL 1:', testUrl1)
+            console.log('🔍 Test URL 2:', testUrl2)
+
+            const response = await fetch(testUrl2)
 
             console.log('🔍 Test response status:', response.status)
 
