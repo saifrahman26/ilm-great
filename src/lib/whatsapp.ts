@@ -158,7 +158,7 @@ export class WhatsAppService {
     // Test connection
     async testConnection(): Promise<any> {
         try {
-            console.log('🔍 Testing WhatsApp connection...')
+            console.log('🔍 Testing WhatsApp connection v2...')
             console.log('🔍 Instance ID:', this.instanceId)
             console.log('🔍 Access Token:', this.accessToken ? 'Set' : 'Missing')
             console.log('🔍 Test URL:', `${this.baseUrl}/getSettings/${this.accessToken}`)
