@@ -15,7 +15,7 @@ export default function TestEmailFinalWorkingPage() {
         try {
             console.log('📧 Testing final working email service...')
 
-            const response = await fetch('/api/send-email-working-final', {
+            const response = await fetch('/api/test-env-basic', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
