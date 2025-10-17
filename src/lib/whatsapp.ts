@@ -183,8 +183,45 @@ export class WhatsAppService {
                 }
             }
 
-            const result = await response.json()
-            console.log('🔍 Test result:', result)
+            // Get response text first to check what we're getting
+            const responseText = await response.text()
+            console.log('🔍 Raw response:', responseText.substring(0, 500))
+            console.log('🔍 Response headers:', Object.fromEntries(response.headers.entries()))
+
+            // Check if response is empty
+            if (!responseText.trim()) {
+                console.error('❌ Empty response from WhatsApp API')
+                return {
+                    success: false,
+                    error: 'Empty response - WhatsApp may not be connected. Scan QR code in Green API dashboard.',
+                    debug: {
+                        instanceId: this.instanceId,
+                        hasToken: !!this.accessToken,
+                        responseType: 'Empty',
+                        responseStatus: response.status
+                    }
+                }
+            }
+
+            // Try to parse JSON
+            let result
+            try {
+                result = JSON.parse(responseText)
+                console.log('🔍 Test result:', result)
+            } catch (parseError) {
+                console.error('❌ JSON parse error:', parseError)
+                return {
+                    success: false,
+                    error: `Invalid JSON response. WhatsApp may not be connected. Error: ${parseError}`,
+                    debug: {
+                        instanceId: this.instanceId,
+                        hasToken: !!this.accessToken,
+                        responseType: 'Invalid JSON',
+                        responsePreview: responseText.substring(0, 200),
+                        parseError: parseError instanceof Error ? parseError.message : 'Unknown parse error'
+                    }
+                }
+            }
 
             return {
                 success: response.ok,
@@ -193,7 +230,8 @@ export class WhatsAppService {
                 debug: {
                     instanceId: this.instanceId,
                     hasToken: !!this.accessToken,
-                    responseStatus: response.status
+                    responseStatus: response.status,
+                    rawResponse: responseText.substring(0, 100)
                 }
             }
         } catch (error) {
