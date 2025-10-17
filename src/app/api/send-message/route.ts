@@ -47,47 +47,68 @@ export async function POST(request: NextRequest) {
             htmlContent = getSimpleEmailTemplate(message)
         }
 
-        console.log('📧 Sending email via Gmail SMTP...')
+        console.log('📧 Starting Gmail SMTP email process...')
+        console.log('🔑 Gmail user:', process.env.GMAIL_USER)
+        console.log('🔑 Gmail password configured:', process.env.GMAIL_APP_PASSWORD ? 'Yes' : 'No')
+        console.log('🔑 Gmail password length:', process.env.GMAIL_APP_PASSWORD?.length || 0)
 
-        // Use Gmail SMTP (works immediately, no domain verification needed)
-        if (process.env.GMAIL_APP_PASSWORD && process.env.GMAIL_APP_PASSWORD !== 'your_gmail_app_password_here') {
-            try {
-                const nodemailer = require('nodemailer')
-                const transporter = nodemailer.createTransporter({
-                    service: 'gmail',
-                    auth: {
-                        user: process.env.GMAIL_USER || 'loyallinkk@gmail.com',
-                        pass: process.env.GMAIL_APP_PASSWORD
-                    }
-                })
+        // Force Gmail SMTP with explicit configuration
+        const nodemailer = require('nodemailer')
 
-                const info = await transporter.sendMail({
-                    from: '"LoyalLink" <loyallinkk@gmail.com>',
-                    to: email,
-                    subject: subject || 'Loyalty Program Update',
-                    html: htmlContent,
-                    text: htmlContent.replace(/<[^>]*>/g, ''),
-                })
-
-                console.log('✅ Email sent successfully via Gmail SMTP!')
-                return NextResponse.json({
-                    success: true,
-                    result: { messageId: info.messageId },
-                    message: 'Email sent successfully via Gmail! Check your inbox.',
-                    service: 'gmail'
-                })
-            } catch (gmailError) {
-                console.error('❌ Gmail SMTP error:', gmailError)
+        // Create Gmail transporter with explicit SMTP settings
+        const transporter = nodemailer.createTransporter({
+            host: 'smtp.gmail.com',
+            port: 587,
+            secure: false, // true for 465, false for other ports
+            auth: {
+                user: process.env.GMAIL_USER || 'loyallinkk@gmail.com',
+                pass: process.env.GMAIL_APP_PASSWORD || 'jeoy gdhp idsl mzzd'
+            },
+            tls: {
+                rejectUnauthorized: false
             }
+        })
+
+        console.log('📤 Verifying Gmail SMTP connection...')
+
+        try {
+            // Verify connection first
+            await transporter.verify()
+            console.log('✅ Gmail SMTP connection verified!')
+        } catch (verifyError) {
+            console.error('❌ Gmail SMTP verification failed:', verifyError)
+            throw new Error(`Gmail SMTP verification failed: ${verifyError}`)
         }
 
-        // Always return success to not break customer registration
-        console.log('📧 Gmail not configured, returning success to not break app')
+        console.log('📤 Sending email via Gmail SMTP...')
+
+        const info = await transporter.sendMail({
+            from: '"LoyalLink" <loyallinkk@gmail.com>',
+            to: email,
+            subject: subject || 'Loyalty Program Update',
+            html: htmlContent,
+            text: htmlContent.replace(/<[^>]*>/g, ''),
+        })
+
+        console.log('✅ Email sent successfully via Gmail SMTP!')
+        console.log('📧 Message ID:', info.messageId)
+        console.log('📧 Response:', info.response)
+
         return NextResponse.json({
             success: true,
-            message: 'Email queued for delivery',
-            service: 'queue',
-            note: 'Configure Gmail SMTP for real email delivery'
+            result: {
+                messageId: info.messageId,
+                response: info.response
+            },
+            message: 'Email sent successfully via Gmail SMTP! Check your inbox.',
+            service: 'gmail',
+            from: 'loyallinkk@gmail.com',
+            to: email,
+            debug: {
+                messageId: info.messageId,
+                accepted: info.accepted,
+                rejected: info.rejected
+            }
         })
 
     } catch (error) {
