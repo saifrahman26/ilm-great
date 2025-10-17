@@ -130,7 +130,7 @@ export default function SimpleScanner() {
     }
 
     return (
-        <DashboardLayout>
+        <DashboardLayout title="QR Scanner">
             <div className="max-w-2xl mx-auto">
                 <div className="bg-white rounded-lg shadow-md p-6">
                     <div className="flex items-center gap-3 mb-6">

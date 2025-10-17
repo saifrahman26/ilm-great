@@ -1,0 +1,12 @@
+Add these environment variables to Vercel:
+
+1. SUPABASE_SERVICE_ROLE_KEY
+   Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndraW9wb3dtYnF6dmh4bHB4a2ZiIiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc2MDE5MjIzNywiZXhwIjoyMDc1NzY4MjM3fQ.8Hh7iCUgfLzoJSM6Dq6y2BwZ_IfPoF8_WbxYpbBP5T8
+
+2. NEXT_PUBLIC_SUPABASE_URL
+   Value: https://wkiopowmbqzvhxlpxkfb.supabase.co
+
+3. NEXT_PUBLIC_SUPABASE_ANON_KEY
+   Value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6IndraW9wb3dtYnF6dmh4bHB4a2ZiIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAxOTIyMzcsImV4cCI6MjA3NTc2ODIzN30.lNVWDdzhZCVNvptrjiMUEJVFRBnoND5vVL17dsuhg0g
+
+Go to: https://vercel.com/dashboard → loyallinkk → Settings → Environment Variables
