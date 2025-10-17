@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import nodemailer from 'nodemailer'
 
 export async function POST(request: NextRequest) {
     try {
@@ -13,6 +12,8 @@ export async function POST(request: NextRequest) {
         }
 
         console.log('📧 Sending email via Nodemailer with Ethereal (always works)...')
+
+        const nodemailer = require('nodemailer')
 
         // Create test account (this creates a real working email service)
         const testAccount = await nodemailer.createTestAccount()
