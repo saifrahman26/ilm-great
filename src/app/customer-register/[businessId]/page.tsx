@@ -53,7 +53,7 @@ export default function CustomerRegisterPage() {
                 email: formData.email.trim()
             })
 
-            const response = await fetch('/api/test-basic', {
+            const response = await fetch('/api/register-customer', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
