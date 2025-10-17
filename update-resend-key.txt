@@ -1,0 +1,7 @@
+Add this environment variable to Vercel:
+
+Name: RESEND_API_KEY
+Value: re_YtqzM8fm_FsKHEhkoEGkEbbfkKMxPPfbN
+Environment: Production, Preview, Development
+
+Go to: https://vercel.com/dashboard → loyallinkk → Settings → Environment Variables

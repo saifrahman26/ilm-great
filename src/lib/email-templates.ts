@@ -200,7 +200,17 @@ export function getLoyaltyEmailTemplate({
             </div>
             
             <div style="text-align: center;">
-                <a href="#" class="cta-button">View My Account</a>
+                <div style="margin: 30px 0;">
+                    <h3 style="color: #333; margin-bottom: 15px;">📱 Quick Check-In</h3>
+                    <p style="color: #666; margin-bottom: 20px;">Show this QR code at your next visit:</p>
+                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${process.env.NEXT_PUBLIC_APP_URL || 'https://loyallinkk.vercel.app'}/customer-qr?name=${encodeURIComponent(customerName)}&business=${businessName}`)}" 
+                         alt="Customer QR Code" 
+                         style="border: 3px solid #667eea; border-radius: 12px; padding: 10px; background: white;" />
+                    <p style="color: #666; font-size: 14px; margin-top: 15px;">
+                        Or visit: <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://loyallinkk.vercel.app'}/customer-qr" style="color: #667eea;">loyallinkk.vercel.app/customer-qr</a>
+                    </p>
+                </div>
+                <a href="${process.env.NEXT_PUBLIC_APP_URL || 'https://loyallinkk.vercel.app'}/customer-qr" class="cta-button">View My Account</a>
             </div>
         </div>
         
