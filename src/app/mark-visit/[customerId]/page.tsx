@@ -86,10 +86,10 @@ export default function MarkVisitPage() {
 
     if (authLoading || loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center">
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
-                    <p className="text-gray-600">Loading customer information...</p>
+                    <p className="text-gray-600 text-lg">Loading customer information...</p>
                 </div>
             </div>
         )
@@ -97,8 +97,8 @@ export default function MarkVisitPage() {
 
     if (error && !customer) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
+                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <span className="text-3xl">❌</span>
                     </div>
@@ -117,8 +117,8 @@ export default function MarkVisitPage() {
 
     if (success) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center px-4">
+                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
                     <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <CheckCircle className="w-12 h-12 text-green-600" />
                     </div>
@@ -145,8 +145,8 @@ export default function MarkVisitPage() {
     // Check if user is logged in AND is a business owner
     if (!user || !business) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
+                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
                     <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <User className="w-8 h-8 text-purple-600" />
                     </div>
@@ -171,8 +171,8 @@ export default function MarkVisitPage() {
     // Verify the customer belongs to this business
     if (customer && customer.business_id !== business.id) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center p-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 max-w-md w-full text-center">
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
+                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
                     <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
                         <span className="text-3xl">⚠️</span>
                     </div>
@@ -192,18 +192,18 @@ export default function MarkVisitPage() {
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 p-4">
-            <div className="max-w-2xl mx-auto pt-8">
+        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50">
+            <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
                 {/* Header */}
                 <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
-                    <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 p-6 text-white">
-                        <h1 className="text-2xl font-bold mb-1">Record Customer Visit</h1>
-                        <p className="text-purple-100">{business?.name}</p>
+                    <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 p-6 md:p-8 text-white">
+                        <h1 className="text-2xl md:text-3xl font-bold mb-1">Record Customer Visit</h1>
+                        <p className="text-purple-100 text-sm md:text-base">{business?.name}</p>
                     </div>
                 </div>
 
                 {/* Customer Info Card */}
-                <div className="bg-white rounded-2xl shadow-xl p-8 mb-6">
+                <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10 mb-6">
                     <div className="flex items-start space-x-4 mb-6">
                         <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
                             <User className="w-8 h-8 text-white" />
@@ -226,7 +226,7 @@ export default function MarkVisitPage() {
                     </div>
 
                     {/* Visit Stats */}
-                    <div className="grid grid-cols-2 gap-4 mb-6">
+                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4 md:gap-6 mb-6">
                         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
                             <div className="flex items-center justify-between mb-2">
                                 <Calendar className="w-5 h-5 text-blue-600" />
@@ -293,30 +293,32 @@ export default function MarkVisitPage() {
                     )}
 
                     {/* Mark Visit Button */}
-                    <button
-                        onClick={markVisit}
-                        disabled={marking}
-                        className="w-full bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                    >
-                        {marking ? (
-                            <>
-                                <Loader2 className="w-5 h-5 animate-spin" />
-                                <span>Recording Visit...</span>
-                            </>
-                        ) : (
-                            <>
-                                <CheckCircle className="w-5 h-5" />
-                                <span>Mark Visit</span>
-                            </>
-                        )}
-                    </button>
+                    <div className="flex flex-col md:flex-row gap-3 md:gap-4">
+                        <button
+                            onClick={markVisit}
+                            disabled={marking}
+                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                        >
+                            {marking ? (
+                                <>
+                                    <Loader2 className="w-5 h-5 animate-spin" />
+                                    <span>Recording Visit...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <CheckCircle className="w-5 h-5" />
+                                    <span>Mark Visit</span>
+                                </>
+                            )}
+                        </button>
 
-                    <button
-                        onClick={() => router.push('/dashboard')}
-                        className="w-full mt-3 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
-                    >
-                        Cancel
-                    </button>
+                        <button
+                            onClick={() => router.push('/dashboard')}
+                            className="md:w-auto md:px-8 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
