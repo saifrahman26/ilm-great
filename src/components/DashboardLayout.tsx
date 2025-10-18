@@ -43,7 +43,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
     ]
 
     return (
-        <div className="min-h-screen bg-gray-50 flex">
+        <div className="min-h-screen bg-gray-50 flex overflow-x-hidden">
             {/* Mobile sidebar overlay */}
             {sidebarOpen && (
                 <div className="fixed inset-0 z-40 lg:hidden">
@@ -119,7 +119,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
             </div>
 
             {/* Main content */}
-            <div className="flex-1 lg:pl-0 transition-all duration-200 ease-in-out">
+            <div className="flex-1 lg:pl-0 transition-all duration-200 ease-in-out overflow-x-hidden w-full">
                 {/* Top bar */}
                 <div className="bg-white shadow-sm border-b border-gray-200 lg:hidden">
                     <div className="flex items-center justify-between h-16 px-4">
