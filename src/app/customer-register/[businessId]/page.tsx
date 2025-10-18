@@ -74,7 +74,13 @@ export default function CustomerRegisterPage() {
                 setSuccess(true)
             } else {
                 console.error('❌ Registration failed:', result)
-                setError(result.error || 'Registration failed. Please try again.')
+
+                // Show specific message for existing customers
+                if (result.isExistingCustomer && result.existingCustomer) {
+                    setError(`Customer already registered!\n\n${result.existingCustomer.name} (${result.existingCustomer.phone}) already has ${result.existingCustomer.visits} visit(s).\n\nPlease use the QR scanner or manual visit to record new visits.`)
+                } else {
+                    setError(result.message || result.error || 'Registration failed. Please try again.')
+                }
             }
         } catch (err) {
             console.error('❌ Network error:', err)

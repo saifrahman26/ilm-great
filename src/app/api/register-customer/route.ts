@@ -88,97 +88,20 @@ export async function POST(request: NextRequest) {
         }
 
         if (existingCustomer) {
-            console.log('✅ Customer already exists, updating information...')
-
-            // Update existing customer with new email if provided
-            const updateData: any = {
-                visits: existingCustomer.visits + 1,
-                last_visit: new Date().toISOString()
-            }
-
-            // Only update email if it's provided and different from existing
-            if (email?.trim() && email.trim() !== existingCustomer.email) {
-                updateData.email = email.trim()
-                console.log('📧 Updating email for existing customer')
-            }
-
-            // Update name if it's different (in case of typos or name changes)
-            if (name.trim() !== existingCustomer.name) {
-                updateData.name = name.trim()
-                console.log('👤 Updating name for existing customer')
-            }
-
-            const { data: updatedCustomer, error: updateError } = await supabaseAdmin
-                .from('customers')
-                .update(updateData)
-                .eq('id', existingCustomer.id)
-                .select()
-                .single()
-
-            if (updateError) {
-                console.error('❌ Error updating existing customer:', updateError)
-                return NextResponse.json(
-                    { error: `Failed to update customer: ${updateError.message}` },
-                    { status: 500 }
-                )
-            }
-
-            // Record the visit
-            console.log('📝 Recording visit for existing customer...')
-            try {
-                const { error: visitError } = await supabaseAdmin
-                    .from('visits')
-                    .insert({
-                        business_id: businessId,
-                        customer_id: existingCustomer.id,
-                        visit_date: new Date().toISOString(),
-                        points_earned: 1,
-                        notes: 'Visit recorded - Welcome back!',
-                        created_at: new Date().toISOString()
-                    })
-
-                if (visitError) {
-                    console.error('❌ Error recording visit:', visitError)
-                } else {
-                    console.log('✅ Visit recorded successfully')
-                }
-            } catch (visitException) {
-                console.error('❌ Exception recording visit:', visitException)
-            }
-
-            // Send QR code email if email was added/updated
-            if (email?.trim() && email.trim() !== existingCustomer.email) {
-                console.log('📧 Sending QR code email to updated email address...')
-                try {
-                    const customerWithQR = {
-                        ...updatedCustomer,
-                        qr_code_url: existingCustomer.qr_code_url,
-                        qr_data: existingCustomer.qr_data
-                    }
-
-                    const businessInfo = {
-                        name: actualBusinessName,
-                        rewardTitle: actualRewardTitle,
-                        visitGoal: actualVisitGoal
-                    }
-
-                    const { sendQRCodeToCustomer } = await import('@/lib/messaging')
-                    await sendQRCodeToCustomer(customerWithQR, businessInfo)
-                    console.log('✅ QR code email sent to updated email address')
-                } catch (emailError) {
-                    console.error('❌ Failed to send QR code email:', emailError)
-                }
-            }
+            console.log('⚠️ Customer already exists with this phone number')
 
             return NextResponse.json({
-                success: true,
-                customer: updatedCustomer,
-                message: `Welcome back ${name}! Visit recorded and information updated.`,
-                isExistingCustomer: true,
-                businessName: actualBusinessName,
-                rewardTitle: actualRewardTitle,
-                visitGoal: actualVisitGoal
-            })
+                success: false,
+                error: 'Customer already exists',
+                message: `A customer with phone number ${phone} is already registered. Please use the scanner or manual visit to record visits.`,
+                existingCustomer: {
+                    name: existingCustomer.name,
+                    phone: existingCustomer.phone,
+                    email: existingCustomer.email,
+                    visits: existingCustomer.visits
+                },
+                isExistingCustomer: true
+            }, { status: 409 }) // 409 Conflict status code
         }
 
         console.log('✅ No existing customer found')
