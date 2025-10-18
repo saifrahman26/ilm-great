@@ -93,15 +93,53 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({
                 success: false,
                 error: 'Customer already exists',
-                message: `A customer with phone number ${phone} is already registered. Please use the scanner or manual visit to record visits.`,
+                message: `A customer with phone number ${phone} is already registered.`,
                 existingCustomer: {
                     name: existingCustomer.name,
                     phone: existingCustomer.phone,
                     email: existingCustomer.email,
                     visits: existingCustomer.visits
                 },
-                isExistingCustomer: true
-            }, { status: 409 }) // 409 Conflict status code
+                isExistingCustomer: true,
+                duplicateField: 'phone'
+            }, { status: 409 })
+        }
+
+        // Check if customer already exists by email (if email provided)
+        if (email?.trim()) {
+            console.log('🔍 Checking for existing customer by email...')
+            const { data: existingByEmail, error: emailCheckError } = await supabaseAdmin
+                .from('customers')
+                .select('*')
+                .eq('business_id', businessId)
+                .eq('email', email.trim())
+                .single()
+
+            if (emailCheckError && emailCheckError.code !== 'PGRST116') {
+                console.error('❌ Error checking existing customer by email:', emailCheckError)
+                return NextResponse.json(
+                    { error: `Database error: ${emailCheckError.message}` },
+                    { status: 500 }
+                )
+            }
+
+            if (existingByEmail) {
+                console.log('⚠️ Customer already exists with this email address')
+
+                return NextResponse.json({
+                    success: false,
+                    error: 'Customer already exists',
+                    message: `A customer with email ${email} is already registered.`,
+                    existingCustomer: {
+                        name: existingByEmail.name,
+                        phone: existingByEmail.phone,
+                        email: existingByEmail.email,
+                        visits: existingByEmail.visits
+                    },
+                    isExistingCustomer: true,
+                    duplicateField: 'email'
+                }, { status: 409 })
+            }
         }
 
         console.log('✅ No existing customer found')
