@@ -115,6 +115,27 @@ export default function ScannerPage() {
                         </ol>
                     </div>
 
+                    {/* Open Google Lens Button */}
+                    <div className="text-center mb-6">
+                        <a
+                            href="google://lens"
+                            onClick={(e) => {
+                                // Fallback for devices without Google Lens app
+                                setTimeout(() => {
+                                    // If Google Lens didn't open, try Google app
+                                    window.location.href = 'https://lens.google.com/'
+                                }, 500)
+                            }}
+                            className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:shadow-lg transition-all w-full md:w-auto"
+                        >
+                            <Camera className="w-6 h-6" />
+                            <span>Open Google Lens</span>
+                        </a>
+                        <p className="text-sm text-gray-500 mt-3">
+                            Or use your phone's default camera app
+                        </p>
+                    </div>
+
                     {/* Quick Tips */}
                     <div className="bg-yellow-50 border-2 border-yellow-200 rounded-xl p-4 mb-6">
                         <h4 className="font-bold text-yellow-900 mb-2">💡 Quick Tips:</h4>
