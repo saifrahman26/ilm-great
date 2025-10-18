@@ -84,22 +84,35 @@ export default function ScannerPage() {
                             Use your phone's native camera app or Google Lens to scan customer QR codes
                         </p>
 
-                        {/* Open Google Lens Button - Prominent placement */}
-                        <a
-                            href="google://lens"
-                            onClick={(e) => {
-                                // Fallback for devices without Google Lens app
-                                setTimeout(() => {
-                                    window.location.href = 'https://lens.google.com/'
-                                }, 500)
-                            }}
-                            className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-5 px-10 rounded-2xl font-bold text-xl hover:shadow-2xl hover:scale-105 transition-all w-full md:w-auto shadow-lg"
-                        >
-                            <Camera className="w-7 h-7" />
-                            <span>Open Google Lens</span>
-                        </a>
+                        {/* Quick Action Buttons */}
+                        <div className="flex flex-col md:flex-row gap-4 justify-center">
+                            <button
+                                onClick={() => {
+                                    const userAgent = navigator.userAgent.toLowerCase()
+                                    if (userAgent.includes('android')) {
+                                        alert('📱 Android:\n\n1. Open your Camera app\n2. Or tap the Google Lens icon in your camera\n3. Point at the QR code\n4. Tap the link that appears')
+                                    } else if (userAgent.includes('iphone') || userAgent.includes('ipad')) {
+                                        alert('📱 iPhone:\n\n1. Open your Camera app\n2. Point at the QR code\n3. Tap the yellow notification at the top\n4. The page will open automatically')
+                                    } else {
+                                        alert('📱 Please use your phone\'s camera app to scan QR codes')
+                                    }
+                                }}
+                                className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-5 px-8 rounded-2xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all shadow-lg"
+                            >
+                                <Camera className="w-6 h-6" />
+                                <span>How to Scan</span>
+                            </button>
+
+                            <Link
+                                href="/manual-visit"
+                                className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-teal-600 to-green-600 text-white py-5 px-8 rounded-2xl font-bold text-lg hover:shadow-2xl hover:scale-105 transition-all shadow-lg"
+                            >
+                                <QrCode className="w-6 h-6" />
+                                <span>Manual Entry</span>
+                            </Link>
+                        </div>
                         <p className="text-sm text-gray-500 mt-4">
-                            Or use your phone's default camera app
+                            Use your phone's camera app or enter customer info manually
                         </p>
                     </div>
 
