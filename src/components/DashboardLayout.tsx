@@ -37,6 +37,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
         { name: 'Add Customer', href: '/register', icon: UserPlus },
         { name: 'Manual Visit', href: '/manual-visit', icon: User },
         { name: 'QR Scanner', href: '/scanner', icon: Camera },
+        { name: 'Claim Reward', href: '/claim-reward', icon: Gift },
         { name: 'QR Code', href: '/qr-code-fast', icon: QrCode },
         { name: 'Rewards', href: '/rewards', icon: Gift },
         { name: 'Settings', href: '/settings', icon: Settings },

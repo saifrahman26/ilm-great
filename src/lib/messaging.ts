@@ -606,3 +606,140 @@ export async function sendRewardCompletionEmail(
         throw error
     }
 }
+// Send reward token email
+export async function sendRewardTokenEmail(
+    customer: any,
+    business: any,
+    token: string
+): Promise<void> {
+    if (!customer.email) {
+        console.log('No email provided for customer:', customer.name)
+        return
+    }
+
+    try {
+        const emailHtml = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎁 Your Reward is Ready!</title>
+</head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
+    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+        
+        <!-- Header -->
+        <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; padding: 40px 30px; text-align: center; position: relative; overflow: hidden;">
+            <div style="position: absolute; font-size: 120px; opacity: 0.1; top: -30px; right: -30px;">🎁</div>
+            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); font-size: 20px; font-weight: 800; letter-spacing: 1px;">
+                🔗 LoyalLink
+            </div>
+            <h1 style="margin: 0; font-size: 32px; font-weight: bold;">🎉 REWARD READY!</h1>
+            <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.95;">Your ${business.reward_title} is waiting!</p>
+        </div>
+        
+        <!-- Content -->
+        <div style="padding: 40px 30px;">
+            <div style="font-size: 20px; color: #333; margin-bottom: 20px; text-align: center;">
+                Hello ${customer.name}! 🎊
+            </div>
+            
+            <!-- Token Display -->}
+            <div style="background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); padding: 40px; border-radius: 20px; text-align: center; margin: 30px 0; border: 3px solid #fbbf24; position: relative;">
+                <div style="position: absolute; top: -15px; left: 50%; transform: translateX(-50%); background: white; padding: 10px; border-radius: 50%; font-size: 30px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);">
+                    🎫
+                </div>
+                <h2 style="color: #1f2937; margin: 20px 0 10px 0; font-size: 18px;">Your Reward Token</h2>
+                <div style="background: white; display: inline-block; padding: 20px 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); border: 2px solid #fbbf24; margin: 20px 0;">
+                    <div style="font-size: 48px; font-weight: bold; color: #f59e0b; letter-spacing: 8px; font-family: 'Courier New', monospace;">
+                        ${token}
+                    </div>
+                </div>
+                <p style="color: #6b7280; font-size: 14px; margin: 15px 0 0 0;">
+                    Show this token to claim your reward
+                </p>
+            </div>
+            
+            <!-- Reward Details -->}
+            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 30px; border-radius: 16px; margin: 30px 0; border: 2px solid #f59e0b; text-align: center;">
+                <h3 style="color: #92400e; margin: 0 0 15px 0; font-size: 24px; font-weight: bold;">
+                    ${business.reward_title}
+                </h3>
+                <p style="color: #b45309; margin: 0; font-size: 16px;">
+                    Congratulations! You've completed ${business.visit_goal} visits and earned your reward!
+                </p>
+            </div>
+            
+            <!-- Instructions */}
+            <div style="background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); padding: 30px; border-radius: 16px; margin: 30px 0; border: 2px solid #3b82f6;">
+                <h3 style="color: #1e40af; margin: 0 0 20px 0; font-size: 18px; font-weight: bold;">
+                    📋 How to Claim Your Reward:
+                </h3>
+                <ol style="color: #1e3a8a; margin: 0; padding-left: 20px; line-height: 1.8;">
+                    <li><strong>Visit ${business.name}</strong></li>
+                    <li><strong>Show this email</strong> or tell them your token: <strong>${token}</strong></li>
+                    <li><strong>Staff will enter the token</strong> in their system</li>
+                    <li><strong>Enjoy your ${business.reward_title}!</strong> 🎉</li>
+                </ol>
+            </div>
+            
+            <!-- Important Notes */}
+            <div style="background: #fef2f2; border: 2px solid #fecaca; border-radius: 12px; padding: 20px; margin: 20px 0;">
+                <h4 style="color: #dc2626; margin: 0 0 10px 0; font-size: 16px; font-weight: bold;">⚠️ Important:</h4>
+                <ul style="color: #dc2626; margin: 0; padding-left: 20px; font-size: 14px; line-height: 1.6;">
+                    <li>This token can only be used once</li>
+                    <li>Valid only at ${business.name}</li>
+                    <li>Keep this email safe until you claim your reward</li>
+                    <li>After claiming, you'll start earning towards your next reward!</li>
+                </ul>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <p style="font-size: 18px; color: #2d3436; font-weight: bold;">
+                    🎉 Congratulations on your loyalty! 🎉
+                </p>
+                <p style="font-size: 16px; color: #636e72;">
+                    Thank you for being such a valued customer!
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer -->}
+        <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;"><strong>${business.name}</strong></p>
+            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;">We appreciate your loyalty!</p>
+            <p style="font-size: 14px; color: #666; margin-top: 15px; font-weight: 600;">
+                Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
+            </p>
+        </div>
+    </div>
+</body>
+</html>`
+
+        const baseUrl = typeof window !== 'undefined'
+            ? window.location.origin
+            : (process.env.NODE_ENV === 'development' ? 'http://localhost:3000' : process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000')
+
+        const response = await fetch(`${baseUrl}/api/send-message`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                email: customer.email,
+                message: emailHtml,
+                subject: `🎁 Your Reward Token: ${token} - ${business.name}`,
+                template: 'raw-html'
+            })
+        })
+
+        if (!response.ok) {
+            const errorData = await response.json()
+            throw new Error(`Failed to send reward token email: ${errorData.error || 'Unknown error'}`)
+        }
+
+        console.log('Reward token email sent successfully to:', customer.email)
+    } catch (error) {
+        console.error('Error sending reward token email:', error)
+        throw error
+    }
+}

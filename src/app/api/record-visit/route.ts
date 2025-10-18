@@ -115,15 +115,26 @@ export async function POST(request: NextRequest) {
         if (reachedGoal) {
             console.log('🎉 Customer reached reward goal!')
 
-            // Send reward completion email
-            if (customer.email?.trim()) {
-                try {
-                    const { sendRewardCompletionEmail } = await import('@/lib/messaging')
-                    await sendRewardCompletionEmail(updatedCustomer, business)
-                    console.log('✅ Reward completion email sent')
-                } catch (emailError) {
-                    console.error('❌ Failed to send reward email:', emailError)
+            // Generate reward token instead of sending completion email
+            try {
+                const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+                const tokenResponse = await fetch(`${baseUrl}/api/generate-reward-token`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        customerId: customerId,
+                        businessId: businessId
+                    })
+                })
+
+                const tokenResult = await tokenResponse.json()
+                if (tokenResponse.ok) {
+                    console.log('✅ Reward token generated:', tokenResult.token)
+                } else {
+                    console.error('❌ Failed to generate reward token:', tokenResult.error)
                 }
+            } catch (tokenError) {
+                console.error('❌ Error generating reward token:', tokenError)
             }
         }
 
