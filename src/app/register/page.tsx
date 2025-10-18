@@ -22,7 +22,7 @@ import Link from 'next/link'
 const customerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
     phone: z.string().min(10, 'Phone number must be at least 10 digits'),
-    email: z.string().email('Invalid email address').optional().or(z.literal('')),
+    email: z.string().min(1, 'Email is required').email('Invalid email address'),
 })
 
 type CustomerForm = z.infer<typeof customerSchema>
@@ -348,7 +348,7 @@ export default function RegisterPage() {
 
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-2">
-                                Email Address (Optional)
+                                Email Address *
                             </label>
                             <div className="relative">
                                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -365,7 +365,7 @@ export default function RegisterPage() {
                                 <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                             )}
                             <p className="mt-1 text-xs text-gray-500">
-                                Email is recommended to receive QR code and updates
+                                Required to receive QR code and visit notifications
                             </p>
                         </div>
 

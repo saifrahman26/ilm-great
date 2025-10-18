@@ -274,7 +274,7 @@ export default function CustomersPage() {
                             placeholder="Search customers..."
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
-                            className="pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent w-full text-base"
+                            className="pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent w-full text-base text-gray-900 placeholder-gray-500"
                         />
                     </div>
 
@@ -286,7 +286,7 @@ export default function CustomersPage() {
                             <select
                                 value={filterBy}
                                 onChange={(e) => setFilterBy(e.target.value as any)}
-                                className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white w-full text-base"
+                                className="pl-10 pr-8 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent appearance-none bg-white w-full text-base text-gray-900"
                             >
                                 <option value="all">All Customers</option>
                                 <option value="active">Active (30 days)</option>
@@ -304,7 +304,7 @@ export default function CustomersPage() {
                                     setSortBy(field as any)
                                     setSortOrder(order as any)
                                 }}
-                                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent w-full text-base"
+                                className="px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent w-full text-base text-gray-900"
                             >
                                 <option value="lastVisit-desc">Latest Visit</option>
                                 <option value="lastVisit-asc">Oldest Visit</option>

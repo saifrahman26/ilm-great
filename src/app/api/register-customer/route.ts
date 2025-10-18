@@ -24,10 +24,10 @@ export async function POST(request: NextRequest) {
 
         console.log('🔍 Parsed data:', { businessId, name, phone, email, businessName, rewardTitle, visitGoal })
 
-        if (!businessId || !name || !phone) {
+        if (!businessId || !name || !phone || !email?.trim()) {
             console.log('❌ Missing required fields')
             return NextResponse.json(
-                { error: 'Business ID, name, and phone are required' },
+                { error: 'Business ID, name, phone, and email are required' },
                 { status: 400 }
             )
         }
