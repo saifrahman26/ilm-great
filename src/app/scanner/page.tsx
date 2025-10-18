@@ -80,8 +80,26 @@ export default function ScannerPage() {
                             <Camera className="w-16 h-16 text-white" />
                         </div>
                         <h3 className="text-2xl font-bold text-gray-900 mb-3">Use Your Phone Camera</h3>
-                        <p className="text-gray-600 leading-relaxed">
+                        <p className="text-gray-600 leading-relaxed mb-6">
                             Use your phone's native camera app or Google Lens to scan customer QR codes
+                        </p>
+
+                        {/* Open Google Lens Button - Prominent placement */}
+                        <a
+                            href="google://lens"
+                            onClick={(e) => {
+                                // Fallback for devices without Google Lens app
+                                setTimeout(() => {
+                                    window.location.href = 'https://lens.google.com/'
+                                }, 500)
+                            }}
+                            className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-5 px-10 rounded-2xl font-bold text-xl hover:shadow-2xl hover:scale-105 transition-all w-full md:w-auto shadow-lg"
+                        >
+                            <Camera className="w-7 h-7" />
+                            <span>Open Google Lens</span>
+                        </a>
+                        <p className="text-sm text-gray-500 mt-4">
+                            Or use your phone's default camera app
                         </p>
                     </div>
 
@@ -113,27 +131,6 @@ export default function ScannerPage() {
                                 <span>You'll see customer info - click <strong>"Mark Visit"</strong></span>
                             </li>
                         </ol>
-                    </div>
-
-                    {/* Open Google Lens Button */}
-                    <div className="text-center mb-6">
-                        <a
-                            href="google://lens"
-                            onClick={(e) => {
-                                // Fallback for devices without Google Lens app
-                                setTimeout(() => {
-                                    // If Google Lens didn't open, try Google app
-                                    window.location.href = 'https://lens.google.com/'
-                                }, 500)
-                            }}
-                            className="inline-flex items-center justify-center space-x-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white py-4 px-8 rounded-xl font-bold text-lg hover:shadow-lg transition-all w-full md:w-auto"
-                        >
-                            <Camera className="w-6 h-6" />
-                            <span>Open Google Lens</span>
-                        </a>
-                        <p className="text-sm text-gray-500 mt-3">
-                            Or use your phone's default camera app
-                        </p>
                     </div>
 
                     {/* Quick Tips */}
