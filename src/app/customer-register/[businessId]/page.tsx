@@ -77,7 +77,10 @@ export default function CustomerRegisterPage() {
 
                 // Show specific message for existing customers
                 if (result.isExistingCustomer && result.existingCustomer) {
-                    setError(`Customer already registered!\n\n${result.existingCustomer.name} (${result.existingCustomer.phone}) already has ${result.existingCustomer.visits} visit(s).\n\nPlease use the QR scanner or manual visit to record new visits.`)
+                    const duplicateField = result.duplicateField === 'email' ? 'email address' : 'phone number'
+                    const duplicateValue = result.duplicateField === 'email' ? result.existingCustomer.email : result.existingCustomer.phone
+
+                    setError(`Customer already registered!\n\n${result.existingCustomer.name} with ${duplicateField} "${duplicateValue}" already has ${result.existingCustomer.visits} visit(s).\n\nPlease use the QR scanner or manual visit to record new visits.`)
                 } else {
                     setError(result.message || result.error || 'Registration failed. Please try again.')
                 }
