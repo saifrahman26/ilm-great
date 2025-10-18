@@ -119,7 +119,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
             </div>
 
             {/* Main content */}
-            <div className="flex-1 lg:pl-0 transition-all duration-200 ease-in-out overflow-x-hidden w-full">
+            <div className="flex-1 lg:pl-0 transition-all duration-200 ease-in-out overflow-x-hidden w-full max-w-full min-w-0">
                 {/* Top bar */}
                 <div className="bg-white shadow-sm border-b border-gray-200 lg:hidden">
                     <div className="flex items-center justify-between h-16 px-4">
@@ -135,14 +135,14 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
                 </div>
 
                 {/* Main content */}
-                <div className="p-6 animate-in fade-in duration-300">
+                <div className="p-4 md:p-6 animate-in fade-in duration-300 max-w-full">
                     {/* Page header */}
                     <div className="mb-8 hidden lg:block animate-in slide-in-from-top-2 duration-300 delay-100">
                         <h1 className="text-2xl font-bold text-gray-900">{title}</h1>
                         {subtitle && <p className="text-gray-600 mt-1">{subtitle}</p>}
                     </div>
 
-                    <div className="animate-in slide-in-from-bottom-4 duration-500 delay-200">
+                    <div className="animate-in slide-in-from-bottom-4 duration-500 delay-200 max-w-full">
                         {children}
                     </div>
                 </div>
