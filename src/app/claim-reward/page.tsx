@@ -150,7 +150,7 @@ export default function ClaimRewardPage() {
                                     setError('')
                                 }}
                                 placeholder="Enter 6-digit token"
-                                className="w-full px-4 py-4 text-center text-2xl font-mono border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent tracking-widest text-gray-900 placeholder-gray-400"
+                                className="w-full px-4 py-4 text-center text-2xl font-mono border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent tracking-widest text-black placeholder-gray-400"
                                 maxLength={6}
                                 required
                             />
