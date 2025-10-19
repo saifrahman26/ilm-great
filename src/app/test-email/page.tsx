@@ -69,7 +69,7 @@ export default function TestEmailPage() {
 
             console.log('🧪 Testing record-visit API with data:', testData)
 
-            const response = await fetch('/api/record-visit', {
+            const response = await fetch('/api/test-record-visit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(testData)
