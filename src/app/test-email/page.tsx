@@ -59,10 +59,13 @@ export default function TestEmailPage() {
         setResult(null)
 
         try {
+            // Test with both fake and potentially real IDs
             const testData = {
                 customerId: 'test-customer-123',
                 businessId: 'test-business-456'
             }
+
+            console.log('🧪 First test with fake IDs:', testData)
 
             console.log('🧪 Testing record-visit API with data:', testData)
 

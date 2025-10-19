@@ -33,8 +33,30 @@ export async function POST(request: NextRequest) {
 
         if (!customerId || !businessId) {
             console.log('❌ Missing required fields')
+            console.log('❌ Detailed check:', {
+                customerId: customerId,
+                businessId: businessId,
+                customerIdString: String(customerId),
+                businessIdString: String(businessId),
+                customerIdLength: customerId?.length,
+                businessIdLength: businessId?.length,
+                customerIdEmpty: customerId === '',
+                businessIdEmpty: businessId === '',
+                customerIdNull: customerId === null,
+                businessIdNull: businessId === null,
+                customerIdUndefined: customerId === undefined,
+                businessIdUndefined: businessId === undefined
+            })
             return NextResponse.json(
-                { error: 'Customer ID and Business ID are required' },
+                {
+                    error: 'Customer ID and Business ID are required',
+                    debug: {
+                        customerId: customerId,
+                        businessId: businessId,
+                        customerIdType: typeof customerId,
+                        businessIdType: typeof businessId
+                    }
+                },
                 { status: 400 }
             )
         }
