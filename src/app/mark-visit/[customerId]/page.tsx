@@ -65,8 +65,9 @@ export default function MarkVisitPage() {
 
     const markVisit = async () => {
         // More robust validation with string conversion
+        // Priority: business.id -> user.id -> customer.business_id (as fallback)
         const actualCustomerId = String(customer?.id || customerId || '').trim()
-        const actualBusinessId = String(business?.id || user?.id || '').trim()
+        const actualBusinessId = String(business?.id || user?.id || customer?.business_id || '').trim()
 
         // Temporary debugging - log all available data
         console.log('🔍 All available data:', {
