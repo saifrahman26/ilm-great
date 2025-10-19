@@ -349,9 +349,12 @@ export async function sendVisitConfirmationEmail(
     }
 
     try {
-        const visitsLeft = business.visit_goal - visitCount
-        const progressPercentage = Math.min((visitCount / business.visit_goal) * 100, 100)
-        const isRewardReached = visitCount >= business.visit_goal
+        // Calculate progress to NEXT reward milestone
+        const nextRewardMilestone = Math.ceil(visitCount / business.visit_goal) * business.visit_goal
+        const visitsInCurrentCycle = visitCount % business.visit_goal || business.visit_goal
+        const visitsLeft = nextRewardMilestone - visitCount
+        const progressPercentage = Math.min((visitsInCurrentCycle / business.visit_goal) * 100, 100)
+        const isRewardReached = false // Never show reward in visit confirmation email
 
         const emailHtml = `
 <!DOCTYPE html>

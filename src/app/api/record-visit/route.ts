@@ -148,8 +148,18 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if customer reached reward goal (only at exact multiples)
+        console.log('🔍 Reward calculation debug:', {
+            newVisitCount,
+            visitGoal: business.visit_goal,
+            modulo: newVisitCount % business.visit_goal,
+            isExactMultiple: newVisitCount % business.visit_goal === 0,
+            isGreaterThanZero: newVisitCount > 0
+        })
+
         const reachedGoal = newVisitCount > 0 && newVisitCount % business.visit_goal === 0
         const rewardNumber = reachedGoal ? newVisitCount / business.visit_goal : 0
+
+        console.log('🎯 Final reward decision:', { reachedGoal, rewardNumber })
 
         // Send visit confirmation email if customer has email (but not if they reached reward goal)
         if (customer.email?.trim() && !reachedGoal) {
