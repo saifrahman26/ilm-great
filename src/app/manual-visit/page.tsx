@@ -102,30 +102,48 @@ export default function ManualVisitPage() {
         setRecording(true)
         setError('')
 
+        // More robust business ID resolution
+        const actualBusinessId = String(business?.id || user?.id || customer.business_id || '').trim()
+
         console.log('📝 Manual visit - Recording visit:', {
             customerId: customer.id,
-            businessId: business?.id || user?.id || customer.business_id,
+            actualBusinessId,
             businessFromAuth: business?.id,
             userIdFallback: user?.id,
-            customerBusinessId: customer.business_id
+            customerBusinessId: customer.business_id,
+            allData: { business, user, customer }
         })
 
+        if (!actualBusinessId) {
+            setError('Unable to determine business ID. Please refresh the page and try again.')
+            setRecording(false)
+            return
+        }
+
         try {
+            const requestBody = {
+                customerId: customer.id,
+                businessId: actualBusinessId
+            }
+
+            console.log('📤 Manual visit request body:', requestBody)
+
             const response = await fetch('/api/record-visit', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    customerId: customer.id,
-                    businessId: business?.id || user?.id || customer.business_id
-                }),
+                body: JSON.stringify(requestBody),
             })
 
             const result = await response.json()
 
+            console.log('📥 Manual visit API response:', { status: response.status, result })
+
             if (!response.ok) {
-                setError(result.error || 'Failed to record visit')
+                const errorMsg = result.error || 'Failed to record visit'
+                console.error('❌ Manual visit API error:', { status: response.status, error: errorMsg, result })
+                setError(`${errorMsg} (Status: ${response.status})`)
             } else {
                 setCustomer(result.customer)
                 setBusinessData(result.business)
