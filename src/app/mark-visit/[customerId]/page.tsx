@@ -81,13 +81,17 @@ export default function MarkVisitPage() {
                 businessName: business.name
             })
 
+            const requestBody = {
+                customerId: customer.id,
+                businessId: business.id
+            }
+
+            console.log('📤 Request body:', requestBody)
+
             const response = await fetch('/api/record-visit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    customerId: customer.id,
-                    businessId: business.id
-                })
+                body: JSON.stringify(requestBody)
             })
 
             const result = await response.json()

@@ -17,9 +17,22 @@ export async function POST(request: NextRequest) {
     console.log('🚀 Record visit API called')
 
     try {
-        const { customerId, businessId } = await request.json()
+        const requestBody = await request.json()
+        console.log('📥 Received request body:', requestBody)
+
+        const { customerId, businessId } = requestBody
+
+        console.log('🔍 Extracted values:', {
+            customerId,
+            businessId,
+            customerIdType: typeof customerId,
+            businessIdType: typeof businessId,
+            customerIdTruthy: !!customerId,
+            businessIdTruthy: !!businessId
+        })
 
         if (!customerId || !businessId) {
+            console.log('❌ Missing required fields')
             return NextResponse.json(
                 { error: 'Customer ID and Business ID are required' },
                 { status: 400 }
