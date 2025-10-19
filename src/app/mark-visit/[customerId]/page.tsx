@@ -93,6 +93,10 @@ export default function MarkVisitPage() {
             }
 
             console.log('📤 Request body:', requestBody)
+            console.log('📤 Request body stringified:', JSON.stringify(requestBody))
+
+            // Add a temporary alert to see the values
+            alert(`Debug: Customer ID: ${customer.id}, Business ID: ${business.id}`)
 
             const response = await fetch('/api/record-visit', {
                 method: 'POST',
@@ -323,14 +327,20 @@ export default function MarkVisitPage() {
                         </div>
                     )}
 
-                    {/* Debug Info (remove in production) */}
-                    {process.env.NODE_ENV === 'development' && (
-                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                            <p className="text-blue-800 text-sm">
-                                Debug: Business ID: {business?.id || 'null'}, Customer ID: {customer?.id || 'null'}
-                            </p>
-                        </div>
-                    )}
+                    {/* Debug Info (always show for now) */}
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <p className="text-blue-800 text-sm">
+                            <strong>Debug Info:</strong><br />
+                            Business ID: {business?.id || 'null'}<br />
+                            Customer ID: {customer?.id || 'null'}<br />
+                            Business Name: {business?.name || 'null'}<br />
+                            Customer Name: {customer?.name || 'null'}<br />
+                            Auth Loading: {authLoading ? 'true' : 'false'}<br />
+                            Has User: {user ? 'true' : 'false'}<br />
+                            Has Business: {business ? 'true' : 'false'}<br />
+                            Has Customer: {customer ? 'true' : 'false'}
+                        </p>
+                    </div>
 
                     {/* Error Message */}
                     {error && (
