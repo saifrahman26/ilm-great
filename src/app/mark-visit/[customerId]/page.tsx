@@ -19,6 +19,14 @@ export default function MarkVisitPage() {
     const [success, setSuccess] = useState(false)
 
     useEffect(() => {
+        console.log('🔍 Auth state:', {
+            authLoading,
+            hasUser: !!user,
+            hasBusiness: !!business,
+            businessId: business?.id,
+            customerId
+        })
+
         if (!authLoading && user && business) {
             loadCustomer()
         }
@@ -29,6 +37,8 @@ export default function MarkVisitPage() {
             setLoading(true)
             setError('')
 
+            console.log('🔍 Loading customer:', { customerId, businessId: business?.id })
+
             const { data, error: fetchError } = await supabase
                 .from('customers')
                 .select('*')
@@ -37,9 +47,16 @@ export default function MarkVisitPage() {
 
             if (fetchError) throw fetchError
 
+            console.log('✅ Customer loaded:', {
+                id: data.id,
+                name: data.name,
+                business_id: data.business_id,
+                matchesBusiness: data.business_id === business?.id
+            })
+
             setCustomer(data)
         } catch (err) {
-            console.error('Error loading customer:', err)
+            console.error('❌ Error loading customer:', err)
             setError('Customer not found')
         } finally {
             setLoading(false)
@@ -47,11 +64,22 @@ export default function MarkVisitPage() {
     }
 
     const markVisit = async () => {
-        if (!business || !customer) return
+        if (!business || !customer) {
+            console.error('❌ Missing data:', { business: !!business, customer: !!customer })
+            setError('Missing business or customer data')
+            return
+        }
 
         try {
             setMarking(true)
             setError('')
+
+            console.log('📝 Marking visit:', {
+                customerId: customer.id,
+                businessId: business.id,
+                customerName: customer.name,
+                businessName: business.name
+            })
 
             const response = await fetch('/api/record-visit', {
                 method: 'POST',
