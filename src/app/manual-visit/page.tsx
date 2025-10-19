@@ -102,6 +102,14 @@ export default function ManualVisitPage() {
         setRecording(true)
         setError('')
 
+        console.log('📝 Manual visit - Recording visit:', {
+            customerId: customer.id,
+            businessId: business?.id || user?.id || customer.business_id,
+            businessFromAuth: business?.id,
+            userIdFallback: user?.id,
+            customerBusinessId: customer.business_id
+        })
+
         try {
             const response = await fetch('/api/record-visit', {
                 method: 'POST',
@@ -109,7 +117,8 @@ export default function ManualVisitPage() {
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    customerId: customer.id
+                    customerId: customer.id,
+                    businessId: business?.id || user?.id || customer.business_id
                 }),
             })
 
