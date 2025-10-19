@@ -610,7 +610,8 @@ export async function sendRewardCompletionEmail(
 export async function sendRewardTokenEmail(
     customer: any,
     business: any,
-    token: string
+    token: string,
+    rewardNumber?: number
 ): Promise<void> {
     if (!customer.email) {
         console.log('No email provided for customer:', customer.name)
@@ -637,6 +638,7 @@ export async function sendRewardTokenEmail(
             </div>
             <h1 style="margin: 0; font-size: 32px; font-weight: bold;">🎉 REWARD READY!</h1>
             <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.95;">Your ${business.reward_title} is waiting!</p>
+            ${rewardNumber ? `<p style="margin: 5px 0 0 0; font-size: 16px; opacity: 0.8;">Reward #${rewardNumber}</p>` : ''}
         </div>
         
         <!-- Content -->
@@ -667,7 +669,7 @@ export async function sendRewardTokenEmail(
                     ${business.reward_title}
                 </h3>
                 <p style="color: #b45309; margin: 0; font-size: 16px;">
-                    Congratulations! You've completed ${business.visit_goal} visits and earned your reward!
+                    Congratulations! You've completed ${customer.visits} visits and earned your ${rewardNumber ? `${rewardNumber}${rewardNumber === 1 ? 'st' : rewardNumber === 2 ? 'nd' : rewardNumber === 3 ? 'rd' : 'th'} ` : ''}reward!
                 </p>
             </div>
             

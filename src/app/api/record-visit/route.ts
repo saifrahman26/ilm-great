@@ -164,41 +164,65 @@ export async function POST(request: NextRequest) {
             }
         }
 
-        // Check if customer reached reward goal
-        const reachedGoal = newVisitCount >= business.visit_goal
+        // Check if customer reached reward goal (only at exact multiples)
+        const reachedGoal = newVisitCount > 0 && newVisitCount % business.visit_goal === 0
         if (reachedGoal) {
-            console.log('🎉 Customer reached reward goal!', {
+            const rewardNumber = newVisitCount / business.visit_goal
+            console.log('🎉 Customer reached reward milestone!', {
                 newVisitCount,
                 visitGoal: business.visit_goal,
+                rewardNumber: rewardNumber,
                 customerEmail: customer.email
             })
 
-            // Generate reward token instead of sending completion email
+            // Generate reward token directly here instead of separate API call
             try {
-                const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://loyallinkk.vercel.app'
-                console.log('🔗 Calling reward token API:', `${baseUrl}/api/generate-reward-token`)
+                // Generate a unique 6-digit token
+                const generateRewardToken = () => Math.floor(100000 + Math.random() * 900000).toString()
+                let token = generateRewardToken()
 
-                const tokenResponse = await fetch(`${baseUrl}/api/generate-reward-token`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        customerId: customerId,
-                        businessId: businessId
-                    })
-                })
+                console.log('🎫 Generated reward token:', token)
 
-                const tokenResult = await tokenResponse.json()
-                console.log('📥 Token API response:', {
-                    status: tokenResponse.status,
-                    ok: tokenResponse.ok,
-                    result: tokenResult
-                })
+                // Try to create reward record (if table exists)
+                try {
+                    const { data: reward, error: rewardError } = await supabaseAdmin
+                        .from('rewards')
+                        .insert({
+                            customer_id: customerId,
+                            business_id: businessId,
+                            reward_title: business.reward_title,
+                            points_used: business.visit_goal,
+                            claim_token: token,
+                            status: 'pending',
+                            created_at: new Date().toISOString()
+                        })
+                        .select()
+                        .single()
 
-                if (tokenResponse.ok) {
-                    console.log('✅ Reward token generated successfully:', tokenResult.token)
-                } else {
-                    console.error('❌ Failed to generate reward token:', tokenResult.error)
+                    if (rewardError) {
+                        console.log('⚠️ Could not save reward to database (table might not exist):', rewardError.message)
+                        // Continue anyway - we'll still send the email
+                    } else {
+                        console.log('✅ Reward record created:', reward)
+                    }
+                } catch (dbError) {
+                    console.log('⚠️ Rewards table not available, continuing with email only')
                 }
+
+                // Send reward token email directly
+                if (customer.email?.trim()) {
+                    console.log('📧 Sending reward token email for reward #' + rewardNumber)
+                    try {
+                        const { sendRewardTokenEmail } = await import('@/lib/messaging')
+                        await sendRewardTokenEmail(updatedCustomer, business, token, rewardNumber)
+                        console.log('✅ Reward token email sent successfully')
+                    } catch (emailError) {
+                        console.error('❌ Failed to send reward token email:', emailError)
+                    }
+                } else {
+                    console.log('⚠️ No email address for customer, cannot send reward token')
+                }
+
             } catch (tokenError) {
                 console.error('❌ Error generating reward token:', tokenError)
             }
@@ -210,8 +234,8 @@ export async function POST(request: NextRequest) {
             visits: newVisitCount,
             reachedGoal,
             message: reachedGoal
-                ? `🎉 Congratulations! ${customer.name} has earned a reward!`
-                : `Visit recorded! ${customer.name} has ${newVisitCount} of ${business.visit_goal} visits.`
+                ? `🎉 Congratulations! ${customer.name} has earned their ${rewardNumber}${rewardNumber === 1 ? 'st' : rewardNumber === 2 ? 'nd' : rewardNumber === 3 ? 'rd' : 'th'} reward!`
+                : `Visit recorded! ${customer.name} has ${newVisitCount} visit${newVisitCount === 1 ? '' : 's'}. ${Math.ceil(newVisitCount / business.visit_goal) * business.visit_goal - newVisitCount} more to next reward.`
         })
 
     } catch (error) {
