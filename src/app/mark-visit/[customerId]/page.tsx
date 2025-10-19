@@ -64,15 +64,30 @@ export default function MarkVisitPage() {
     }
 
     const markVisit = async () => {
-        if (!business || !customer) {
-            console.error('❌ Missing data:', { business: !!business, customer: !!customer })
-            setError('Missing business or customer data. Please refresh the page.')
-            return
-        }
+        // More robust validation
+        const actualCustomerId = customer?.id || customerId
+        const actualBusinessId = business?.id || user?.id
 
-        if (!business.id || !customer.id) {
-            console.error('❌ Missing IDs:', { businessId: business.id, customerId: customer.id })
-            setError('Invalid business or customer ID. Please refresh the page.')
+        console.log('🔍 Validation check:', {
+            customer: customer,
+            business: business,
+            user: user,
+            actualCustomerId,
+            actualBusinessId,
+            customerId,
+            businessFromAuth: business?.id,
+            userIdFallback: user?.id
+        })
+
+        if (!actualCustomerId || !actualBusinessId) {
+            console.error('❌ Missing required IDs:', {
+                actualCustomerId,
+                actualBusinessId,
+                customerExists: !!customer,
+                businessExists: !!business,
+                userExists: !!user
+            })
+            setError(`Missing required data: Customer ID: ${actualCustomerId || 'missing'}, Business ID: ${actualBusinessId || 'missing'}`)
             return
         }
 
@@ -80,23 +95,20 @@ export default function MarkVisitPage() {
             setMarking(true)
             setError('')
 
-            console.log('📝 Marking visit:', {
-                customerId: customer.id,
-                businessId: business.id,
-                customerName: customer.name,
-                businessName: business.name
+            console.log('📝 Marking visit with validated IDs:', {
+                customerId: actualCustomerId,
+                businessId: actualBusinessId,
+                customerName: customer?.name,
+                businessName: business?.name
             })
 
             const requestBody = {
-                customerId: customer.id,
-                businessId: business.id
+                customerId: actualCustomerId,
+                businessId: actualBusinessId
             }
 
             console.log('📤 Request body:', requestBody)
             console.log('📤 Request body stringified:', JSON.stringify(requestBody))
-
-            // Add a temporary alert to see the values
-            alert(`Debug: Customer ID: ${customer.id}, Business ID: ${business.id}`)
 
             const response = await fetch('/api/record-visit', {
                 method: 'POST',
@@ -333,6 +345,10 @@ export default function MarkVisitPage() {
                             <strong>Debug Info:</strong><br />
                             Business ID: {business?.id || 'null'}<br />
                             Customer ID: {customer?.id || 'null'}<br />
+                            URL Customer ID: {customerId}<br />
+                            User ID (fallback): {user?.id || 'null'}<br />
+                            Final Customer ID: {customer?.id || customerId}<br />
+                            Final Business ID: {business?.id || user?.id}<br />
                             Business Name: {business?.name || 'null'}<br />
                             Customer Name: {customer?.name || 'null'}<br />
                             Auth Loading: {authLoading ? 'true' : 'false'}<br />
@@ -353,7 +369,7 @@ export default function MarkVisitPage() {
                     <div className="flex flex-col md:flex-row gap-3 md:gap-4">
                         <button
                             onClick={markVisit}
-                            disabled={marking || !business || !customer || !business.id || !customer.id}
+                            disabled={marking || !(customer?.id || customerId) || !(business?.id || user?.id)}
                             className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
                         >
                             {marking ? (
