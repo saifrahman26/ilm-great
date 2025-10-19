@@ -37,6 +37,15 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Check environment variables
+        if (!process.env.RAZORPAY_KEY_ID || !process.env.RAZORPAY_KEY_SECRET) {
+            console.error('Missing Razorpay credentials')
+            return NextResponse.json(
+                { error: 'Payment service not configured' },
+                { status: 500 }
+            )
+        }
+
         // Initialize Razorpay
         const Razorpay = require('razorpay')
         const razorpay = new Razorpay({
