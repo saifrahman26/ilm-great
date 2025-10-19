@@ -31,10 +31,27 @@ export async function POST(request: NextRequest) {
             businessIdTruthy: !!businessId
         })
 
-        if (!customerId || !businessId) {
-            console.log('❌ Missing required fields')
+        // More lenient validation with detailed logging
+        if (!customerId || customerId === 'null' || customerId === 'undefined') {
+            console.log('❌ Invalid customer ID:', { customerId, type: typeof customerId })
             return NextResponse.json(
-                { error: 'Customer ID and Business ID are required' },
+                {
+                    error: 'Valid Customer ID is required',
+                    received: { customerId, businessId },
+                    debug: 'Customer ID is missing, null, or undefined'
+                },
+                { status: 400 }
+            )
+        }
+
+        if (!businessId || businessId === 'null' || businessId === 'undefined') {
+            console.log('❌ Invalid business ID:', { businessId, type: typeof businessId })
+            return NextResponse.json(
+                {
+                    error: 'Valid Business ID is required',
+                    received: { customerId, businessId },
+                    debug: 'Business ID is missing, null, or undefined'
+                },
                 { status: 400 }
             )
         }

@@ -64,9 +64,22 @@ export default function MarkVisitPage() {
     }
 
     const markVisit = async () => {
-        // More robust validation
-        const actualCustomerId = customer?.id || customerId
-        const actualBusinessId = business?.id || user?.id
+        // More robust validation with string conversion
+        const actualCustomerId = String(customer?.id || customerId || '').trim()
+        const actualBusinessId = String(business?.id || user?.id || '').trim()
+
+        // Temporary debugging - log all available data
+        console.log('🔍 All available data:', {
+            customer,
+            business,
+            user,
+            customerId,
+            'customer?.id': customer?.id,
+            'business?.id': business?.id,
+            'user?.id': user?.id,
+            actualCustomerId,
+            actualBusinessId
+        })
 
         console.log('🔍 Validation check:', {
             customer: customer,
@@ -79,15 +92,17 @@ export default function MarkVisitPage() {
             userIdFallback: user?.id
         })
 
-        if (!actualCustomerId || !actualBusinessId) {
-            console.error('❌ Missing required IDs:', {
+        if (!actualCustomerId || actualCustomerId === '' || !actualBusinessId || actualBusinessId === '') {
+            console.error('❌ Missing or empty required IDs:', {
                 actualCustomerId,
                 actualBusinessId,
                 customerExists: !!customer,
                 businessExists: !!business,
-                userExists: !!user
+                userExists: !!user,
+                customerIdLength: actualCustomerId?.length,
+                businessIdLength: actualBusinessId?.length
             })
-            setError(`Missing required data: Customer ID: ${actualCustomerId || 'missing'}, Business ID: ${actualBusinessId || 'missing'}`)
+            setError(`Missing required data: Customer ID: "${actualCustomerId || 'missing'}", Business ID: "${actualBusinessId || 'missing'}"`)
             return
         }
 
