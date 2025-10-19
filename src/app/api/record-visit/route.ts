@@ -166,8 +166,9 @@ export async function POST(request: NextRequest) {
 
         // Check if customer reached reward goal (only at exact multiples)
         const reachedGoal = newVisitCount > 0 && newVisitCount % business.visit_goal === 0
+        const rewardNumber = reachedGoal ? newVisitCount / business.visit_goal : 0
+
         if (reachedGoal) {
-            const rewardNumber = newVisitCount / business.visit_goal
             console.log('🎉 Customer reached reward milestone!', {
                 newVisitCount,
                 visitGoal: business.visit_goal,
