@@ -20,7 +20,7 @@ export async function POST(request: NextRequest) {
         const requestBody = await request.json()
         console.log('📥 Received request body:', requestBody)
 
-        const { customerId, businessId } = requestBody
+        let { customerId, businessId } = requestBody
 
         console.log('🔍 Extracted values:', {
             customerId,

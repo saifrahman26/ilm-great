@@ -33,6 +33,7 @@ interface Customer {
     email: string
     visits: number
     points: number
+    business_id: string
 }
 
 interface Business {
