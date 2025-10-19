@@ -436,7 +436,7 @@ export async function sendVisitConfirmationEmail(
             <!-- QR Code Reminder -->
             <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px;">
                 <h3 style="color: #333; margin-bottom: 15px;">📱 Your QR Code</h3>
-                <img src="${customer.qr_code_url}" alt="Your QR Code" style="width: 150px; height: 150px; border: 3px solid #10b981; border-radius: 12px; padding: 10px; background: white;" />
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://loyallinkk.vercel.app/mark-visit/${customer.id}`)}" alt="Your QR Code" style="width: 150px; height: 150px; border: 3px solid #10b981; border-radius: 12px; padding: 10px; background: white;" />
                 <p style="color: #666; font-size: 14px; margin-top: 15px;">Show this at your next visit!</p>
             </div>
         </div>

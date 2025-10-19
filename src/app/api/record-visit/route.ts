@@ -167,11 +167,17 @@ export async function POST(request: NextRequest) {
         // Check if customer reached reward goal
         const reachedGoal = newVisitCount >= business.visit_goal
         if (reachedGoal) {
-            console.log('🎉 Customer reached reward goal!')
+            console.log('🎉 Customer reached reward goal!', {
+                newVisitCount,
+                visitGoal: business.visit_goal,
+                customerEmail: customer.email
+            })
 
             // Generate reward token instead of sending completion email
             try {
-                const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
+                const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://loyallinkk.vercel.app'
+                console.log('🔗 Calling reward token API:', `${baseUrl}/api/generate-reward-token`)
+
                 const tokenResponse = await fetch(`${baseUrl}/api/generate-reward-token`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -182,8 +188,14 @@ export async function POST(request: NextRequest) {
                 })
 
                 const tokenResult = await tokenResponse.json()
+                console.log('📥 Token API response:', {
+                    status: tokenResponse.status,
+                    ok: tokenResponse.ok,
+                    result: tokenResult
+                })
+
                 if (tokenResponse.ok) {
-                    console.log('✅ Reward token generated:', tokenResult.token)
+                    console.log('✅ Reward token generated successfully:', tokenResult.token)
                 } else {
                     console.error('❌ Failed to generate reward token:', tokenResult.error)
                 }
