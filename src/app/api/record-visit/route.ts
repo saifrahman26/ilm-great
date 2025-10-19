@@ -147,8 +147,12 @@ export async function POST(request: NextRequest) {
             console.error('❌ Error recording visit:', visitError)
         }
 
-        // Send visit confirmation email if customer has email
-        if (customer.email?.trim()) {
+        // Check if customer reached reward goal (only at exact multiples)
+        const reachedGoal = newVisitCount > 0 && newVisitCount % business.visit_goal === 0
+        const rewardNumber = reachedGoal ? newVisitCount / business.visit_goal : 0
+
+        // Send visit confirmation email if customer has email (but not if they reached reward goal)
+        if (customer.email?.trim() && !reachedGoal) {
             console.log('📧 Sending visit confirmation email...')
             try {
                 const { sendVisitConfirmationEmail } = await import('@/lib/messaging')
@@ -163,10 +167,6 @@ export async function POST(request: NextRequest) {
                 // Don't fail the visit recording if email fails
             }
         }
-
-        // Check if customer reached reward goal (only at exact multiples)
-        const reachedGoal = newVisitCount > 0 && newVisitCount % business.visit_goal === 0
-        const rewardNumber = reachedGoal ? newVisitCount / business.visit_goal : 0
 
         if (reachedGoal) {
             console.log('🎉 Customer reached reward milestone!', {
