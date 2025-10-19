@@ -56,13 +56,37 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Get customer details
-        const { data: customer, error: customerError } = await supabaseAdmin
+        // Get customer details (first try with business_id match, then without)
+        let customer, customerError
+
+        // Try to find customer with business_id match first
+        const customerQuery1 = await supabaseAdmin
             .from('customers')
             .select('*')
             .eq('id', customerId)
             .eq('business_id', businessId)
             .single()
+
+        if (customerQuery1.data) {
+            customer = customerQuery1.data
+        } else {
+            // If not found, try without business_id constraint and use customer's business_id
+            console.log('🔄 Customer not found with business_id match, trying without constraint...')
+            const customerQuery2 = await supabaseAdmin
+                .from('customers')
+                .select('*')
+                .eq('id', customerId)
+                .single()
+
+            if (customerQuery2.data) {
+                customer = customerQuery2.data
+                // Update businessId to match customer's actual business_id
+                businessId = customer.business_id
+                console.log('✅ Using customer business_id:', businessId)
+            } else {
+                customerError = customerQuery2.error
+            }
+        }
 
         if (customerError || !customer) {
             console.error('❌ Customer not found:', customerError)
