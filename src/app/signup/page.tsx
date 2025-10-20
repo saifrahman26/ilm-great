@@ -108,6 +108,35 @@ export default function SignupPage() {
         setSuccess('')
 
         try {
+            // Step 0: Check if user already exists
+            console.log('🔍 Checking if user already exists...')
+            const { data: existingUser, error: checkError } = await supabase
+                .from('businesses')
+                .select('email')
+                .eq('email', data.email)
+                .single()
+
+            if (existingUser && !checkError) {
+                setError('An account with this email already exists.')
+                setLoading(false)
+                return
+            }
+
+            // Also check by business email if different
+            if (data.businessEmail !== data.email) {
+                const { data: existingBusiness, error: businessCheckError } = await supabase
+                    .from('businesses')
+                    .select('email')
+                    .eq('email', data.businessEmail)
+                    .single()
+
+                if (existingBusiness && !businessCheckError) {
+                    setError('A business with this email already exists.')
+                    setLoading(false)
+                    return
+                }
+            }
+
             // Step 1: Create the user account
             const { error } = await signUp(data.email, data.password, {
                 name: data.businessName,
@@ -323,6 +352,16 @@ export default function SignupPage() {
                                             <p className="text-xs mt-2 text-red-500">
                                                 💡 This might be a temporary server issue. Please try again in a moment.
                                             </p>
+                                        )}
+                                        {error.includes('already exists') && (
+                                            <div className="mt-3">
+                                                <Link
+                                                    href="/login"
+                                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                >
+                                                    Sign In Instead
+                                                </Link>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
