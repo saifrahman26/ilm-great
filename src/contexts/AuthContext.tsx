@@ -159,7 +159,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         try {
-            console.log('🚀 Starting signup process...')
+            console.log('🚀 Starting signup process - v2...')
 
             // Step 1: Sign up the user
             const { data, error } = await supabase.auth.signUp({
