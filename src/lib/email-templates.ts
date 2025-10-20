@@ -21,6 +21,8 @@ export function getLoyaltyEmailTemplate({
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="x-apple-disable-message-reformatting">
     <title>Loyalty Program Update</title>
     <style>
         body {
@@ -160,14 +162,44 @@ export function getLoyaltyEmailTemplate({
         }
         @media (max-width: 600px) {
             .container {
-                margin: 0;
-                box-shadow: none;
+                margin: 0 !important;
+                box-shadow: none !important;
+                width: 100% !important;
             }
             .header, .content, .footer {
-                padding: 20px;
+                padding: 15px !important;
+            }
+            .header {
+                padding: 20px 15px !important;
+            }
+            .header h1 {
+                font-size: 24px !important;
+            }
+            .header .subtitle {
+                font-size: 16px !important;
+            }
+            .loyallink-brand {
+                font-size: 16px !important;
+                padding: 10px 20px !important;
+                margin-bottom: 15px !important;
             }
             .points-earned {
-                font-size: 36px;
+                font-size: 36px !important;
+            }
+            .points-card {
+                padding: 20px !important;
+                margin: 20px 0 !important;
+            }
+            .message {
+                padding: 15px !important;
+                font-size: 14px !important;
+            }
+            .cta-button {
+                padding: 12px 25px !important;
+                font-size: 14px !important;
+            }
+            .greeting {
+                font-size: 16px !important;
             }
         }
     </style>
@@ -257,6 +289,8 @@ export function getVisitReminderTemplate({
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="x-apple-disable-message-reformatting">
     <title>Visit Progress Update</title>
     <style>
         body {
@@ -300,6 +334,10 @@ export function getVisitReminderTemplate({
             height: 20px;
             margin: 20px 0;
             overflow: hidden;
+            position: relative;
+            width: 100%;
+            min-width: 200px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
         }
         .progress-fill {
             background: linear-gradient(90deg, #4CAF50 0%, #45a049 100%);
@@ -307,6 +345,20 @@ export function getVisitReminderTemplate({
             width: ${progressPercentage}%;
             border-radius: 25px;
             transition: width 0.3s ease;
+            position: relative;
+            min-width: ${progressPercentage > 0 ? '20px' : '0'};
+            display: block;
+        }
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: #333;
+            text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+            z-index: 2;
         }
         .visit-stats {
             display: flex;
@@ -349,9 +401,53 @@ export function getVisitReminderTemplate({
             border-top: 1px solid #e9ecef;
         }
         @media (max-width: 600px) {
+            .container {
+                margin: 0 !important;
+                box-shadow: none !important;
+                width: 100% !important;
+            }
+            .header, .content, .footer {
+                padding: 15px !important;
+            }
+            .header {
+                padding: 20px 15px !important;
+            }
+            .header h1 {
+                font-size: 24px !important;
+            }
+            .loyallink-brand {
+                font-size: 16px !important;
+                padding: 10px 20px !important;
+                margin-bottom: 15px !important;
+            }
+            .progress-card {
+                padding: 20px !important;
+                margin: 20px 0 !important;
+            }
+            .progress-bar {
+                height: 16px !important;
+                margin: 15px 0 !important;
+            }
             .visit-stats {
-                flex-direction: column;
-                gap: 15px;
+                flex-direction: column !important;
+                gap: 10px !important;
+            }
+            .stat {
+                margin: 5px 0 !important;
+            }
+            .stat-number {
+                font-size: 24px !important;
+            }
+            .stat-label {
+                font-size: 12px !important;
+            }
+            .message {
+                padding: 15px !important;
+                font-size: 14px !important;
+            }
+            .reward-preview {
+                padding: 15px !important;
+                margin: 15px 0 !important;
             }
         }
     </style>
@@ -375,6 +471,7 @@ export function getVisitReminderTemplate({
                 <h3 style="margin: 0 0 15px 0; color: #2196F3;">Your Progress</h3>
                 <div class="progress-bar">
                     <div class="progress-fill"></div>
+                    <div class="progress-text">${Math.round(progressPercentage)}%</div>
                 </div>
                 <div class="visit-stats">
                     <div class="stat">
@@ -443,6 +540,8 @@ export function getRewardCompletionTemplate({
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="x-apple-disable-message-reformatting">
     <title>🎉 Reward Earned!</title>
     <style>
         body {
@@ -610,17 +709,60 @@ export function getRewardCompletionTemplate({
         }
         @media (max-width: 600px) {
             .container {
-                margin: 0;
-                box-shadow: none;
+                margin: 0 !important;
+                box-shadow: none !important;
+                width: 100% !important;
             }
             .header, .content, .footer {
-                padding: 20px;
+                padding: 15px !important;
+            }
+            .header {
+                padding: 20px 15px !important;
+            }
+            .header h1 {
+                font-size: 24px !important;
+            }
+            .header .subtitle {
+                font-size: 16px !important;
+            }
+            .loyallink-brand {
+                font-size: 16px !important;
+                padding: 10px 20px !important;
+                margin-bottom: 15px !important;
             }
             .reward-title {
-                font-size: 24px;
+                font-size: 20px !important;
+            }
+            .reward-description {
+                font-size: 16px !important;
             }
             .visit-number {
-                font-size: 36px;
+                font-size: 32px !important;
+            }
+            .visit-label {
+                font-size: 14px !important;
+            }
+            .celebration-banner {
+                padding: 20px !important;
+                margin: 20px 0 !important;
+            }
+            .visit-achievement {
+                padding: 20px !important;
+                margin: 20px 0 !important;
+            }
+            .claim-section {
+                padding: 20px !important;
+                margin: 20px 0 !important;
+            }
+            .claim-title {
+                font-size: 20px !important;
+            }
+            .claim-instructions {
+                font-size: 14px !important;
+            }
+            .claim-button {
+                padding: 12px 25px !important;
+                font-size: 14px !important;
             }
         }
     </style>
@@ -696,6 +838,8 @@ export function getSimpleEmailTemplate(message: string): string {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="x-apple-disable-message-reformatting">
     <title>Message from LoyalLink</title>
     <style>
         body {
@@ -730,6 +874,22 @@ export function getSimpleEmailTemplate(message: string): string {
             text-align: center;
             font-size: 14px;
             color: #6c757d;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 0 !important;
+                border-radius: 0 !important;
+                width: 100% !important;
+            }
+            .header, .content, .footer {
+                padding: 15px !important;
+            }
+            .header h1 {
+                font-size: 24px !important;
+            }
+            .content {
+                font-size: 14px !important;
+            }
         }
     </style>
 </head>
