@@ -117,7 +117,7 @@ export default function SignupPage() {
                 .single()
 
             if (existingUser && !checkError) {
-                setError('An account with this email already exists.')
+                setError('🔒 Already Registered! An account with this email already exists. Please sign in instead.')
                 setLoading(false)
                 return
             }
@@ -131,7 +131,7 @@ export default function SignupPage() {
                     .single()
 
                 if (existingBusiness && !businessCheckError) {
-                    setError('A business with this email already exists.')
+                    setError('🔒 Already Registered! A business with this email already exists. Please sign in instead.')
                     setLoading(false)
                     return
                 }
@@ -150,8 +150,11 @@ export default function SignupPage() {
 
             if (error) {
                 // Provide more user-friendly error messages
-                if (error.message.includes('already registered') || error.message.includes('User already registered')) {
-                    setError('An account with this email already exists. Please sign in instead.')
+                if (error.message.includes('already registered') ||
+                    error.message.includes('User already registered') ||
+                    error.message.includes('already been registered') ||
+                    error.message.includes('email address is already registered')) {
+                    setError('🔒 Already Registered! An account with this email already exists. Please sign in instead.')
                 } else if (error.message.includes('Password should be at least')) {
                     setError('Password must be at least 6 characters long.')
                 } else if (error.message.includes('Invalid email')) {
@@ -353,13 +356,16 @@ export default function SignupPage() {
                                                 💡 This might be a temporary server issue. Please try again in a moment.
                                             </p>
                                         )}
-                                        {error.includes('already exists') && (
-                                            <div className="mt-3">
+                                        {(error.includes('already exists') || error.includes('Already Registered')) && (
+                                            <div className="mt-3 space-y-2">
+                                                <p className="text-sm font-medium text-red-800">
+                                                    💡 You already have an account with us!
+                                                </p>
                                                 <Link
                                                     href="/login"
-                                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                                                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
                                                 >
-                                                    Sign In Instead
+                                                    Go to Sign In →
                                                 </Link>
                                             </div>
                                         )}
