@@ -69,10 +69,10 @@ export default function PhoneInput({
                 <select
                     value={countryCode}
                     onChange={(e) => handleCountryCodeChange(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-black text-white text-sm min-w-[100px]"
+                    className="px-3 py-2 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-black text-sm min-w-[100px]"
                 >
                     {countryCodes.map((cc) => (
-                        <option key={cc.code} value={cc.code} className="bg-black text-white">
+                        <option key={cc.code} value={cc.code} className="bg-white text-black">
                             {cc.flag} {cc.code}
                         </option>
                     ))}
@@ -84,7 +84,7 @@ export default function PhoneInput({
                     value={number}
                     onChange={(e) => handleNumberChange(e.target.value)}
                     placeholder={placeholder}
-                    className={`flex-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-black text-white placeholder-gray-400 ${className}`}
+                    className={`flex-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-black placeholder-gray-500 ${className}`}
                     maxLength={10}
                     required={required}
                 />
