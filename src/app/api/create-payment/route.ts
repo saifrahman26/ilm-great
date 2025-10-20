@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
         const order = await razorpay.orders.create({
             amount,
             currency,
-            receipt: `receipt_${businessId}_${Date.now()}`,
+            receipt: `rcpt_${Date.now().toString().slice(-8)}`, // Keep it under 40 chars
             notes: {
                 business_id: businessId,
                 business_name: business.name,
