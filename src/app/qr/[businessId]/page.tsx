@@ -34,6 +34,8 @@ export default function QRLandingPage() {
         register,
         handleSubmit,
         formState: { errors },
+        watch,
+        setValue
     } = useForm<CustomerForm>({
         resolver: zodResolver(customerSchema),
     })
@@ -310,10 +312,7 @@ export default function QRLandingPage() {
                                     <PhoneInput
                                         value={watch('phone') || '+1'}
                                         onChange={(value) => {
-                                            reset({
-                                                ...watch(),
-                                                phone: value
-                                            })
+                                            setValue('phone', value)
                                         }}
                                         placeholder="1234567890"
                                         className="text-gray-900"

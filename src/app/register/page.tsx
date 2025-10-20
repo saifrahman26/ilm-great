@@ -40,7 +40,8 @@ export default function RegisterPage() {
         handleSubmit,
         formState: { errors },
         reset,
-        watch
+        watch,
+        setValue
     } = useForm<CustomerForm>({
         resolver: zodResolver(customerSchema),
     })
@@ -335,10 +336,7 @@ export default function RegisterPage() {
                             <PhoneInput
                                 value={watch('phone') || '+1'}
                                 onChange={(value) => {
-                                    reset({
-                                        ...watch(),
-                                        phone: value
-                                    })
+                                    setValue('phone', value)
                                 }}
                                 placeholder="1234567890"
                                 className="text-gray-900"

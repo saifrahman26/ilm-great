@@ -47,7 +47,8 @@ export default function SignupPage() {
         handleSubmit,
         formState: { errors },
         watch,
-        reset
+        reset,
+        setValue
     } = useForm<SignupForm>({
         resolver: zodResolver(signupSchema),
     })
@@ -457,11 +458,7 @@ export default function SignupPage() {
                                     <PhoneInput
                                         value={watch('phone') || '+1'}
                                         onChange={(value) => {
-                                            // Update the form value
-                                            reset({
-                                                ...watch(),
-                                                phone: value
-                                            })
+                                            setValue('phone', value)
                                         }}
                                         placeholder="1234567890"
                                         className="text-gray-900"
