@@ -22,36 +22,19 @@ export async function POST(request: NextRequest) {
 
         let { customerId, businessId } = requestBody
 
-        console.log('🔍 Extracted values:', {
-            customerId,
-            businessId,
-            customerIdType: typeof customerId,
-            businessIdType: typeof businessId,
-            customerIdTruthy: !!customerId,
-            businessIdTruthy: !!businessId
-        })
+        console.log('🔍 Processing visit for customer:', customerId, 'business:', businessId)
 
-        // More lenient validation with detailed logging
+        // Validate required fields
         if (!customerId || customerId === 'null' || customerId === 'undefined') {
-            console.log('❌ Invalid customer ID:', { customerId, type: typeof customerId })
             return NextResponse.json(
-                {
-                    error: 'Valid Customer ID is required',
-                    received: { customerId, businessId },
-                    debug: 'Customer ID is missing, null, or undefined'
-                },
+                { error: 'Valid Customer ID is required' },
                 { status: 400 }
             )
         }
 
         if (!businessId || businessId === 'null' || businessId === 'undefined') {
-            console.log('❌ Invalid business ID:', { businessId, type: typeof businessId })
             return NextResponse.json(
-                {
-                    error: 'Valid Business ID is required',
-                    received: { customerId, businessId },
-                    debug: 'Business ID is missing, null, or undefined'
-                },
+                { error: 'Valid Business ID is required' },
                 { status: 400 }
             )
         }
@@ -148,18 +131,8 @@ export async function POST(request: NextRequest) {
         }
 
         // Check if customer reached reward goal (only at exact multiples)
-        console.log('🔍 Reward calculation debug:', {
-            newVisitCount,
-            visitGoal: business.visit_goal,
-            modulo: newVisitCount % business.visit_goal,
-            isExactMultiple: newVisitCount % business.visit_goal === 0,
-            isGreaterThanZero: newVisitCount > 0
-        })
-
         const reachedGoal = newVisitCount > 0 && newVisitCount % business.visit_goal === 0
         const rewardNumber = reachedGoal ? newVisitCount / business.visit_goal : 0
-
-        console.log('🎯 Final reward decision:', { reachedGoal, rewardNumber })
 
         // Send visit confirmation email if customer has email (but not if they reached reward goal)
         if (customer.email?.trim() && !reachedGoal) {
@@ -179,12 +152,7 @@ export async function POST(request: NextRequest) {
         }
 
         if (reachedGoal) {
-            console.log('🎉 Customer reached reward milestone!', {
-                newVisitCount,
-                visitGoal: business.visit_goal,
-                rewardNumber: rewardNumber,
-                customerEmail: customer.email
-            })
+            console.log('🎉 Customer reached reward milestone!')
 
             // Generate reward token directly here instead of separate API call
             try {
@@ -192,46 +160,14 @@ export async function POST(request: NextRequest) {
                 const generateRewardToken = () => Math.floor(100000 + Math.random() * 900000).toString()
                 let token = generateRewardToken()
 
-                console.log('🎫 Generated reward token:', token)
-
-                // Try to create reward record (if table exists)
-                try {
-                    const { data: reward, error: rewardError } = await supabaseAdmin
-                        .from('rewards')
-                        .insert({
-                            customer_id: customerId,
-                            business_id: businessId,
-                            reward_title: business.reward_title,
-                            points_used: business.visit_goal,
-                            claim_token: token,
-                            status: 'pending',
-                            created_at: new Date().toISOString()
-                        })
-                        .select()
-                        .single()
-
-                    if (rewardError) {
-                        console.log('⚠️ Could not save reward to database (table might not exist):', rewardError.message)
-                        // Continue anyway - we'll still send the email
-                    } else {
-                        console.log('✅ Reward record created:', reward)
-                    }
-                } catch (dbError) {
-                    console.log('⚠️ Rewards table not available, continuing with email only')
-                }
-
                 // Send reward token email directly
                 if (customer.email?.trim()) {
-                    console.log('📧 Sending reward token email for reward #' + rewardNumber)
                     try {
                         const { sendRewardTokenEmail } = await import('@/lib/messaging')
                         await sendRewardTokenEmail(updatedCustomer, business, token, rewardNumber)
-                        console.log('✅ Reward token email sent successfully')
                     } catch (emailError) {
                         console.error('❌ Failed to send reward token email:', emailError)
                     }
-                } else {
-                    console.log('⚠️ No email address for customer, cannot send reward token')
                 }
 
             } catch (tokenError) {
