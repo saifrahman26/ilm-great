@@ -142,72 +142,72 @@ export default function DashboardPage() {
             title="Dashboard"
             subtitle="Welcome back! Here's what's happening with your loyalty program."
         >
-            {/* Clean Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-500">Total Customers</p>
+            {/* Mobile-Friendly Stats Cards - 2x2 on mobile, 2x2 on tablet, 4x1 on desktop */}
+            <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6 hover:shadow-md transition-shadow">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
+                            <p className="text-xs sm:text-sm font-medium text-gray-500">Total Customers</p>
                             {loadingStats && customers.length === 0 ? (
-                                <div className="h-8 bg-gray-200 rounded animate-pulse mt-2 w-16"></div>
+                                <div className="h-6 sm:h-8 bg-gray-200 rounded animate-pulse mt-1 sm:mt-2 w-12 sm:w-16"></div>
                             ) : (
-                                <p className="text-2xl font-bold text-gray-900 mt-2">{stats.totalCustomers}</p>
+                                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">{stats.totalCustomers}</p>
                             )}
-                            <p className="text-sm text-gray-500 mt-1">All unique customers</p>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">All unique customers</p>
                         </div>
-                        <div className="w-12 h-12 bg-blue-50 rounded-lg flex items-center justify-center">
-                            <Users className="w-6 h-6 text-blue-600" />
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-blue-50 rounded-lg flex items-center justify-center mt-2 sm:mt-0 self-end sm:self-auto">
+                            <Users className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-500">Returning Customers</p>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6 hover:shadow-md transition-shadow">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
+                            <p className="text-xs sm:text-sm font-medium text-gray-500">Returning Customers</p>
                             {loadingStats && customers.length === 0 ? (
-                                <div className="h-8 bg-gray-200 rounded animate-pulse mt-2 w-16"></div>
+                                <div className="h-6 sm:h-8 bg-gray-200 rounded animate-pulse mt-1 sm:mt-2 w-12 sm:w-16"></div>
                             ) : (
-                                <p className="text-2xl font-bold text-gray-900 mt-2">{customers.filter(c => c.visits > 1).length}</p>
+                                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">{customers.filter(c => c.visits > 1).length}</p>
                             )}
-                            <p className="text-sm text-gray-500 mt-1">Customers with more than one visit</p>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Customers with more than one visit</p>
                         </div>
-                        <div className="w-12 h-12 bg-green-50 rounded-lg flex items-center justify-center">
-                            <TrendingUp className="w-6 h-6 text-green-600" />
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-green-50 rounded-lg flex items-center justify-center mt-2 sm:mt-0 self-end sm:self-auto">
+                            <TrendingUp className="w-4 h-4 sm:w-6 sm:h-6 text-green-600" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-500">Total Visits</p>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6 hover:shadow-md transition-shadow">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
+                            <p className="text-xs sm:text-sm font-medium text-gray-500">Total Visits</p>
                             {loadingStats && customers.length === 0 ? (
-                                <div className="h-8 bg-gray-200 rounded animate-pulse mt-2 w-16"></div>
+                                <div className="h-6 sm:h-8 bg-gray-200 rounded animate-pulse mt-1 sm:mt-2 w-12 sm:w-16"></div>
                             ) : (
-                                <p className="text-2xl font-bold text-gray-900 mt-2">{stats.totalVisits}</p>
+                                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">{stats.totalVisits}</p>
                             )}
-                            <p className="text-sm text-gray-500 mt-1">Across all customers</p>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Across all customers</p>
                         </div>
-                        <div className="w-12 h-12 bg-purple-50 rounded-lg flex items-center justify-center">
-                            <Eye className="w-6 h-6 text-purple-600" />
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-purple-50 rounded-lg flex items-center justify-center mt-2 sm:mt-0 self-end sm:self-auto">
+                            <Eye className="w-4 h-4 sm:w-6 sm:h-6 text-purple-600" />
                         </div>
                     </div>
                 </div>
 
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow">
-                    <div className="flex items-center justify-between">
-                        <div>
-                            <p className="text-sm font-medium text-gray-500">Rewards Redeemed</p>
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-3 sm:p-6 hover:shadow-md transition-shadow">
+                    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div className="flex-1">
+                            <p className="text-xs sm:text-sm font-medium text-gray-500">Rewards Redeemed</p>
                             {loadingStats && customers.length === 0 ? (
-                                <div className="h-8 bg-gray-200 rounded animate-pulse mt-2 w-16"></div>
+                                <div className="h-6 sm:h-8 bg-gray-200 rounded animate-pulse mt-1 sm:mt-2 w-12 sm:w-16"></div>
                             ) : (
-                                <p className="text-2xl font-bold text-gray-900 mt-2">{stats.rewardsGiven}</p>
+                                <p className="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">{stats.rewardsGiven}</p>
                             )}
-                            <p className="text-sm text-gray-500 mt-1">Based on {business?.visit_goal || 5} visits per reward</p>
+                            <p className="text-xs sm:text-sm text-gray-500 mt-1 hidden sm:block">Based on {business?.visit_goal || 5} visits per reward</p>
                         </div>
-                        <div className="w-12 h-12 bg-orange-50 rounded-lg flex items-center justify-center">
-                            <Gift className="w-6 h-6 text-orange-600" />
+                        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-orange-50 rounded-lg flex items-center justify-center mt-2 sm:mt-0 self-end sm:self-auto">
+                            <Gift className="w-4 h-4 sm:w-6 sm:h-6 text-orange-600" />
                         </div>
                     </div>
                 </div>
