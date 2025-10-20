@@ -72,7 +72,7 @@ export default function PhoneInput({
                     className="px-3 py-2 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-black text-white text-sm min-w-[100px]"
                 >
                     {countryCodes.map((cc) => (
-                        <option key={cc.code} value={cc.code}>
+                        <option key={cc.code} value={cc.code} className="bg-black text-white">
                             {cc.flag} {cc.code}
                         </option>
                     ))}
