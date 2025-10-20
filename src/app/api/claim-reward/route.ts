@@ -42,8 +42,22 @@ export async function POST(request: NextRequest) {
             .single()
 
         if (rewardError || !reward) {
+            console.log('🔍 Reward lookup failed:', {
+                token,
+                businessId,
+                error: rewardError?.message,
+                rewardFound: !!reward
+            })
+
+            if (rewardError?.message?.includes('relation') || rewardError?.message?.includes('does not exist')) {
+                return NextResponse.json(
+                    { error: 'Rewards system not properly configured. Please contact support.' },
+                    { status: 500 }
+                )
+            }
+
             return NextResponse.json(
-                { error: 'Invalid token or reward already claimed' },
+                { error: 'Invalid token or reward already claimed. Please check the 6-digit code and try again.' },
                 { status: 404 }
             )
         }

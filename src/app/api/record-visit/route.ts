@@ -160,6 +160,32 @@ export async function POST(request: NextRequest) {
                 const generateRewardToken = () => Math.floor(100000 + Math.random() * 900000).toString()
                 let token = generateRewardToken()
 
+                // Save reward token to database for claim validation
+                try {
+                    const { data: reward, error: rewardError } = await supabaseAdmin
+                        .from('rewards')
+                        .insert({
+                            customer_id: customerId,
+                            business_id: businessId,
+                            reward_title: business.reward_title,
+                            points_used: business.visit_goal,
+                            claim_token: token,
+                            status: 'pending',
+                            created_at: new Date().toISOString()
+                        })
+                        .select()
+                        .single()
+
+                    if (rewardError) {
+                        console.log('⚠️ Could not save reward to database (table might not exist):', rewardError.message)
+                        // Continue anyway - we'll still send the email
+                    } else {
+                        console.log('✅ Reward record created:', reward.id)
+                    }
+                } catch (dbError) {
+                    console.log('⚠️ Rewards table not available, continuing with email only')
+                }
+
                 // Send reward token email directly
                 if (customer.email?.trim()) {
                     try {
