@@ -17,6 +17,7 @@ export default function MarkVisitPage() {
     const [marking, setMarking] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
+    const [loadingTimeout, setLoadingTimeout] = useState(false)
 
     useEffect(() => {
         console.log('🔍 Auth state:', {
@@ -27,9 +28,25 @@ export default function MarkVisitPage() {
             customerId
         })
 
-        if (!authLoading && user && business) {
-            loadCustomer()
+        // Add timeout to prevent infinite loading
+        const timeout = setTimeout(() => {
+            if (authLoading || loading) {
+                console.log('⚠️ Loading timeout reached')
+                setLoadingTimeout(true)
+                setLoading(false)
+            }
+        }, 10000) // 10 second timeout
+
+        if (!authLoading) {
+            if (user && business) {
+                loadCustomer()
+            } else {
+                // If no user or business after auth loads, stop loading
+                setLoading(false)
+            }
         }
+
+        return () => clearTimeout(timeout)
     }, [customerId, authLoading, user, business])
 
     const loadCustomer = async () => {
@@ -154,12 +171,44 @@ export default function MarkVisitPage() {
         }
     }
 
-    if (authLoading || loading) {
+    if ((authLoading || loading) && !loadingTimeout) {
         return (
             <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
                 <div className="text-center">
                     <Loader2 className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
                     <p className="text-gray-600 text-lg">Loading customer information...</p>
+                    <p className="text-gray-500 text-sm mt-2">This should only take a moment</p>
+                </div>
+            </div>
+        )
+    }
+
+    // Handle loading timeout
+    if (loadingTimeout) {
+        return (
+            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
+                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
+                    <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-3xl">⏰</span>
+                    </div>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Issue</h2>
+                    <p className="text-gray-600 mb-6">
+                        The page is taking longer than expected to load. This might be a connection issue.
+                    </p>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => window.location.reload()}
+                            className="w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+                        >
+                            Refresh Page
+                        </button>
+                        <button
+                            onClick={() => router.push('/login')}
+                            className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
+                        >
+                            Go to Login
+                        </button>
+                    </div>
                 </div>
             </div>
         )
@@ -217,22 +266,33 @@ export default function MarkVisitPage() {
         return (
             <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
                 <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
-                    <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <User className="w-8 h-8 text-purple-600" />
+                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <span className="text-3xl">👋</span>
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Business Owner Access Only</h2>
-                    <p className="text-gray-600 mb-6">
-                        Only business owners can mark customer visits. Please ask the business owner to scan your QR code.
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Hello Customer!</h2>
+                    <p className="text-gray-600 mb-4">
+                        This is your personal QR code for earning loyalty points.
                     </p>
-                    <button
-                        onClick={() => router.push('/login')}
-                        className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors w-full mb-3"
-                    >
-                        Business Owner Login
-                    </button>
-                    <p className="text-sm text-gray-500">
-                        Are you a customer? Show this QR code to the business staff.
-                    </p>
+                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
+                        <h3 className="font-semibold text-blue-900 mb-2">📱 How to use this QR code:</h3>
+                        <ol className="text-sm text-blue-800 text-left space-y-1">
+                            <li>1. Show this screen to the business staff</li>
+                            <li>2. They will scan your QR code</li>
+                            <li>3. Your visit will be recorded automatically</li>
+                            <li>4. Earn rewards after multiple visits!</li>
+                        </ol>
+                    </div>
+                    <div className="space-y-3">
+                        <button
+                            onClick={() => router.push('/login')}
+                            className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors w-full"
+                        >
+                            Business Owner? Login Here
+                        </button>
+                        <p className="text-xs text-gray-500">
+                            Only business owners can record visits
+                        </p>
+                    </div>
                 </div>
             </div>
         )
