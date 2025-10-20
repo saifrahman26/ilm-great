@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 
-// Force dynamic rendering
+// Force dynamic rendering for signup page
 export const dynamic = 'force-dynamic'
 
 import { useAuth } from '@/contexts/AuthContext'
