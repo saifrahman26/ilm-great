@@ -66,6 +66,10 @@ export interface Business {
     business_logo_url?: string
     reward_setup_completed: boolean
     setup_completed_at?: string
+    inactive_customer_message?: string
+    inactive_days_threshold?: number
+    reward_expires?: boolean
+    reward_expiry_months?: number
     created_at: string
 }
 
