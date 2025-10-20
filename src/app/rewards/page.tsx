@@ -21,13 +21,36 @@ const rewardSchema = z.object({
     reward_title: z.string().min(3, 'Reward title must be at least 3 characters'),
     reward_description: z.string().min(10, 'Reward description must be at least 10 characters'),
     visit_goal: z.number().min(1, 'Visit goal must be at least 1').max(20, 'Visit goal cannot exceed 20'),
-    inactive_customer_message: z.string().min(10, 'Inactive customer message must be at least 10 characters').optional(),
+    inactive_customer_message: z.string().optional(),
     inactive_days_threshold: z.number().min(7, 'Threshold must be at least 7 days').max(365, 'Threshold cannot exceed 365 days').optional(),
+    reward_expires: z.boolean().optional(),
+    reward_expiry_months: z.number().min(1, 'Expiry must be at least 1 month').max(24, 'Expiry cannot exceed 24 months').optional(),
 })
 
 type RewardForm = z.infer<typeof rewardSchema>
 
 export default function RewardsPage() {
+    // Add custom CSS for slider
+    const sliderStyle = `
+        .slider::-webkit-slider-thumb {
+            appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        .slider::-moz-range-thumb {
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #8b5cf6;
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+    `
     const { user, business, loading } = useAuth()
     const [saving, setSaving] = useState(false)
     const [error, setError] = useState('')
@@ -46,7 +69,9 @@ export default function RewardsPage() {
             reward_description: '',
             visit_goal: 5,
             inactive_customer_message: '',
-            inactive_days_threshold: 30
+            inactive_days_threshold: 30,
+            reward_expires: false,
+            reward_expiry_months: 1
         }
     })
 
@@ -58,7 +83,9 @@ export default function RewardsPage() {
                 reward_description: business.reward_description || '',
                 visit_goal: business.visit_goal || 5,
                 inactive_customer_message: business.inactive_customer_message || '',
-                inactive_days_threshold: business.inactive_days_threshold || 30
+                inactive_days_threshold: business.inactive_days_threshold || 30,
+                reward_expires: business.reward_expires || false,
+                reward_expiry_months: business.reward_expiry_months || 1
             })
         }
     }, [business, reset])
@@ -87,6 +114,8 @@ export default function RewardsPage() {
                     visit_goal: data.visit_goal,
                     inactive_customer_message: data.inactive_customer_message,
                     inactive_days_threshold: data.inactive_days_threshold,
+                    reward_expires: data.reward_expires,
+                    reward_expiry_months: data.reward_expiry_months,
                     reward_setup_completed: true
                 })
                 .eq('id', business.id)
@@ -109,7 +138,9 @@ export default function RewardsPage() {
                         reward_description: data.reward_description,
                         visit_goal: data.visit_goal,
                         inactive_customer_message: data.inactive_customer_message,
-                        inactive_days_threshold: data.inactive_days_threshold
+                        inactive_days_threshold: data.inactive_days_threshold,
+                        reward_expires: data.reward_expires,
+                        reward_expiry_months: data.reward_expiry_months
                     })
                 })
 
@@ -164,6 +195,7 @@ export default function RewardsPage() {
 
     return (
         <DashboardLayout title="Reward Settings" subtitle="Configure your loyalty program rewards">
+            <style jsx>{sliderStyle}</style>
             <div className="max-w-2xl mx-auto">
                 <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
                     <div className="text-center mb-8">
@@ -281,6 +313,105 @@ export default function RewardsPage() {
                             />
                             {errors.reward_description && (
                                 <p className="mt-1 text-sm text-red-600">{errors.reward_description.message}</p>
+                            )}
+                        </div>
+
+                        {/* Reward Expiration Settings */}
+                        <div className="bg-gray-50 rounded-lg p-6 border border-gray-200">
+                            <h4 className="font-medium text-gray-900 mb-4 flex items-center">
+                                ⏰ Reward Expiration Settings
+                            </h4>
+
+                            {/* Enable/Disable Expiration */}
+                            <div className="mb-4">
+                                <label className="flex items-center space-x-3 cursor-pointer">
+                                    <input
+                                        {...register('reward_expires')}
+                                        type="checkbox"
+                                        className="w-4 h-4 text-purple-600 border-gray-300 rounded focus:ring-purple-500"
+                                    />
+                                    <span className="text-sm font-medium text-gray-700">
+                                        Set reward expiration (rewards expire after a certain time)
+                                    </span>
+                                </label>
+                                <p className="text-xs text-gray-500 mt-1 ml-7">
+                                    If unchecked, rewards will never expire (recommended for most businesses)
+                                </p>
+                            </div>
+
+                            {/* Expiration Months Slider */}
+                            {watch('reward_expires') && (
+                                <div className="mt-4 p-4 bg-white rounded-lg border border-gray-200">
+                                    <label className="block text-sm font-medium text-gray-700 mb-3">
+                                        Reward expires after: <span className="text-purple-600 font-semibold">{watch('reward_expiry_months')} month{watch('reward_expiry_months') !== 1 ? 's' : ''}</span>
+                                    </label>
+
+                                    {/* Slider */}
+                                    <div className="relative">
+                                        <input
+                                            {...register('reward_expiry_months', { valueAsNumber: true })}
+                                            type="range"
+                                            min="1"
+                                            max="24"
+                                            step="1"
+                                            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer slider"
+                                            style={{
+                                                background: `linear-gradient(to right, #8b5cf6 0%, #8b5cf6 ${((watch('reward_expiry_months') || 1) - 1) / 23 * 100}%, #e5e7eb ${((watch('reward_expiry_months') || 1) - 1) / 23 * 100}%, #e5e7eb 100%)`
+                                            }}
+                                        />
+
+                                        {/* Slider Labels */}
+                                        <div className="flex justify-between text-xs text-gray-500 mt-2">
+                                            <span>1 month</span>
+                                            <span>6 months</span>
+                                            <span>12 months</span>
+                                            <span>24 months</span>
+                                        </div>
+                                    </div>
+
+                                    {/* Quick Select Buttons */}
+                                    <div className="flex flex-wrap gap-2 mt-4">
+                                        {[1, 3, 6, 12, 18, 24].map((months) => (
+                                            <button
+                                                key={months}
+                                                type="button"
+                                                onClick={() => {
+                                                    const currentValues = watch()
+                                                    reset({
+                                                        ...currentValues,
+                                                        reward_expiry_months: months
+                                                    })
+                                                }}
+                                                className={`px-3 py-1 text-xs rounded-full border transition-colors ${watch('reward_expiry_months') === months
+                                                    ? 'bg-purple-100 border-purple-300 text-purple-700'
+                                                    : 'bg-white border-gray-300 text-gray-600 hover:border-purple-300'
+                                                    }`}
+                                            >
+                                                {months} month{months !== 1 ? 's' : ''}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <div className="mt-3 p-3 bg-blue-50 border border-blue-200 rounded-lg">
+                                        <p className="text-xs text-blue-800">
+                                            <strong>Example:</strong> If a customer earns a reward today and you set {watch('reward_expiry_months')} month{watch('reward_expiry_months') !== 1 ? 's' : ''} expiration,
+                                            they must use it before <strong>{new Date(Date.now() + (watch('reward_expiry_months') || 1) * 30 * 24 * 60 * 60 * 1000).toLocaleDateString()}</strong>.
+                                        </p>
+                                    </div>
+
+                                    {errors.reward_expiry_months && (
+                                        <p className="mt-2 text-sm text-red-600">{errors.reward_expiry_months.message}</p>
+                                    )}
+                                </div>
+                            )}
+
+                            {/* No Expiration Message */}
+                            {!watch('reward_expires') && (
+                                <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
+                                    <p className="text-sm text-green-800">
+                                        ✅ <strong>No Expiration:</strong> Customer rewards will never expire. This is the most customer-friendly option and is recommended for most businesses.
+                                    </p>
+                                </div>
                             )}
                         </div>
 
@@ -535,9 +666,20 @@ export default function RewardsPage() {
                                 <p className="text-sm text-gray-600 mb-2">
                                     {watch('reward_description') || 'Your reward description will appear here...'}
                                 </p>
-                                <p className="text-xs text-purple-600">
-                                    Earned after {watch('visit_goal') || 5} visits
-                                </p>
+                                <div className="flex flex-col space-y-1">
+                                    <p className="text-xs text-purple-600">
+                                        Earned after {watch('visit_goal') || 5} visits
+                                    </p>
+                                    {watch('reward_expires') ? (
+                                        <p className="text-xs text-orange-600">
+                                            ⏰ Expires {watch('reward_expiry_months')} month{watch('reward_expiry_months') !== 1 ? 's' : ''} after earning
+                                        </p>
+                                    ) : (
+                                        <p className="text-xs text-green-600">
+                                            ♾️ Never expires
+                                        </p>
+                                    )}
+                                </div>
                             </div>
                         </div>
 
