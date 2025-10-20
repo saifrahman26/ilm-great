@@ -108,34 +108,44 @@ export default function SignupPage() {
         setSuccess('')
 
         try {
-            // Step 0: Check if user already exists
+            // Step 0: Check if user already exists (comprehensive check)
             console.log('🔍 Checking if user already exists...')
-            const { data: existingUser, error: checkError } = await supabase
-                .from('businesses')
-                .select('email')
-                .eq('email', data.email)
-                .single()
 
-            if (existingUser && !checkError) {
-                setError('🔒 Already Registered! An account with this email already exists. Please sign in instead.')
-                setLoading(false)
-                return
-            }
+            // Check login email
+            const checkResponse = await fetch('/api/check-user-exists', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: data.email })
+            })
 
-            // Also check by business email if different
-            if (data.businessEmail !== data.email) {
-                const { data: existingBusiness, error: businessCheckError } = await supabase
-                    .from('businesses')
-                    .select('email')
-                    .eq('email', data.businessEmail)
-                    .single()
-
-                if (existingBusiness && !businessCheckError) {
-                    setError('🔒 Already Registered! A business with this email already exists. Please sign in instead.')
+            if (checkResponse.ok) {
+                const checkResult = await checkResponse.json()
+                if (checkResult.exists) {
+                    setError('🔒 Already Registered! An account with this email already exists. Please sign in instead.')
                     setLoading(false)
                     return
                 }
             }
+
+            // Also check business email if different
+            if (data.businessEmail !== data.email) {
+                const businessCheckResponse = await fetch('/api/check-user-exists', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email: data.businessEmail })
+                })
+
+                if (businessCheckResponse.ok) {
+                    const businessCheckResult = await businessCheckResponse.json()
+                    if (businessCheckResult.exists) {
+                        setError('🔒 Already Registered! A business with this email already exists. Please sign in instead.')
+                        setLoading(false)
+                        return
+                    }
+                }
+            }
+
+
 
             // Step 1: Create the user account
             const { error } = await signUp(data.email, data.password, {
