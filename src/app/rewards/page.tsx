@@ -12,7 +12,8 @@ import {
     Award,
     Save,
     CheckCircle,
-    AlertCircle
+    AlertCircle,
+    Mail
 } from 'lucide-react'
 import Link from 'next/link'
 
@@ -20,6 +21,8 @@ const rewardSchema = z.object({
     reward_title: z.string().min(3, 'Reward title must be at least 3 characters'),
     reward_description: z.string().min(10, 'Reward description must be at least 10 characters'),
     visit_goal: z.number().min(1, 'Visit goal must be at least 1').max(20, 'Visit goal cannot exceed 20'),
+    inactive_customer_message: z.string().min(10, 'Inactive customer message must be at least 10 characters').optional(),
+    inactive_days_threshold: z.number().min(7, 'Threshold must be at least 7 days').max(365, 'Threshold cannot exceed 365 days').optional(),
 })
 
 type RewardForm = z.infer<typeof rewardSchema>
@@ -41,7 +44,9 @@ export default function RewardsPage() {
         defaultValues: {
             reward_title: '',
             reward_description: '',
-            visit_goal: 5
+            visit_goal: 5,
+            inactive_customer_message: '',
+            inactive_days_threshold: 30
         }
     })
 
@@ -51,7 +56,9 @@ export default function RewardsPage() {
             reset({
                 reward_title: business.reward_title || '',
                 reward_description: business.reward_description || '',
-                visit_goal: business.visit_goal || 5
+                visit_goal: business.visit_goal || 5,
+                inactive_customer_message: business.inactive_customer_message || '',
+                inactive_days_threshold: business.inactive_days_threshold || 30
             })
         }
     }, [business, reset])
@@ -78,6 +85,8 @@ export default function RewardsPage() {
                     reward_title: data.reward_title,
                     reward_description: data.reward_description,
                     visit_goal: data.visit_goal,
+                    inactive_customer_message: data.inactive_customer_message,
+                    inactive_days_threshold: data.inactive_days_threshold,
                     reward_setup_completed: true
                 })
                 .eq('id', business.id)
@@ -98,7 +107,9 @@ export default function RewardsPage() {
                         businessId: business.id,
                         reward_title: data.reward_title,
                         reward_description: data.reward_description,
-                        visit_goal: data.visit_goal
+                        visit_goal: data.visit_goal,
+                        inactive_customer_message: data.inactive_customer_message,
+                        inactive_days_threshold: data.inactive_days_threshold
                     })
                 })
 
@@ -375,7 +386,140 @@ export default function RewardsPage() {
                             </p>
                         </div>
 
-                        {/* Preview */}
+                        {/* Inactive Customer Messages Section */}
+                        <div className="border-t border-gray-200 pt-8">
+                            <div className="mb-6">
+                                <h3 className="text-lg font-semibold text-gray-900 mb-2 flex items-center">
+                                    📧 Inactive Customer Messages
+                                </h3>
+                                <p className="text-sm text-gray-600">
+                                    Automatically send messages to customers who haven't visited in a while to encourage them to return.
+                                </p>
+                            </div>
+
+                            {/* Inactive Days Threshold */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Days Since Last Visit (Threshold)
+                                </label>
+                                <select
+                                    {...register('inactive_days_threshold', { valueAsNumber: true })}
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-gray-900"
+                                >
+                                    <option value={7}>7 days</option>
+                                    <option value={14}>14 days</option>
+                                    <option value={21}>21 days</option>
+                                    <option value={30}>30 days</option>
+                                    <option value={45}>45 days</option>
+                                    <option value={60}>60 days</option>
+                                    <option value={90}>90 days</option>
+                                </select>
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Send message to customers who haven't visited for this many days
+                                </p>
+                                {errors.inactive_days_threshold && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.inactive_days_threshold.message}</p>
+                                )}
+                            </div>
+
+                            {/* Inactive Customer Message */}
+                            <div className="mb-6">
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    Message for Inactive Customers
+                                </label>
+                                <textarea
+                                    {...register('inactive_customer_message')}
+                                    rows={4}
+                                    placeholder="Hi {customer_name}! We miss you at {business_name}. Come back for a special 20% off offer! Valid for the next 7 days. Show this message to claim your discount!"
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent resize-none text-gray-900 placeholder-gray-500"
+                                />
+                                <p className="text-xs text-gray-500 mt-1">
+                                    Use {`{customer_name}`} and {`{business_name}`} as placeholders that will be replaced automatically
+                                </p>
+                                {errors.inactive_customer_message && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.inactive_customer_message.message}</p>
+                                )}
+                            </div>
+
+                            {/* Message Templates */}
+                            <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 mb-6">
+                                <h4 className="font-medium text-gray-900 mb-3 flex items-center">
+                                    📝 Message Templates:
+                                </h4>
+                                <div className="grid grid-cols-1 gap-3">
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const currentValues = watch()
+                                            reset({
+                                                ...currentValues,
+                                                inactive_customer_message: "Hi {customer_name}! 😊 We miss you at {business_name}! It's been a while since your last visit. Come back for a special 20% off offer! Valid for the next 7 days. Show this message to claim your discount! 🎁",
+                                                inactive_days_threshold: 30
+                                            })
+                                        }}
+                                        className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                                    >
+                                        <div className="font-medium text-gray-900 text-sm">💰 Discount Offer</div>
+                                        <div className="text-xs text-gray-600 mt-1">20% off comeback offer</div>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const currentValues = watch()
+                                            reset({
+                                                ...currentValues,
+                                                inactive_customer_message: "Hello {customer_name}! We haven't seen you at {business_name} lately and we miss you! 💙 Come back and enjoy a complimentary coffee on us. Just mention this message when you visit!",
+                                                inactive_days_threshold: 21
+                                            })
+                                        }}
+                                        className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                                    >
+                                        <div className="font-medium text-gray-900 text-sm">☕ Free Item</div>
+                                        <div className="text-xs text-gray-600 mt-1">Complimentary item offer</div>
+                                    </button>
+
+                                    <button
+                                        type="button"
+                                        onClick={() => {
+                                            const currentValues = watch()
+                                            reset({
+                                                ...currentValues,
+                                                inactive_customer_message: "Hi {customer_name}! 👋 We hope you're doing well! We'd love to see you back at {business_name}. We have some exciting new items you might enjoy. Come visit us soon!",
+                                                inactive_days_threshold: 45
+                                            })
+                                        }}
+                                        className="text-left p-3 bg-white border border-gray-200 rounded-lg hover:border-purple-300 hover:bg-purple-50 transition-colors"
+                                    >
+                                        <div className="font-medium text-gray-900 text-sm">🤝 Friendly Reminder</div>
+                                        <div className="text-xs text-gray-600 mt-1">Simple welcome back message</div>
+                                    </button>
+                                </div>
+                                <p className="text-xs text-gray-500 mt-3">
+                                    Click any template to auto-fill the message, then customize as needed
+                                </p>
+                            </div>
+
+                            {/* Message Preview */}
+                            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 border border-blue-200 mb-6">
+                                <h4 className="font-medium text-blue-900 mb-3 flex items-center">
+                                    👀 Message Preview:
+                                </h4>
+                                <div className="bg-white rounded-lg p-4 border">
+                                    <p className="text-sm text-gray-800">
+                                        {watch('inactive_customer_message')
+                                            ?.replace('{customer_name}', 'John Doe')
+                                            ?.replace('{business_name}', business?.name || 'Your Business')
+                                            || 'Your inactive customer message will appear here...'}
+                                    </p>
+                                    <p className="text-xs text-blue-600 mt-2">
+                                        Sent to customers inactive for {watch('inactive_days_threshold') || 30} days
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Reward Preview */}
                         <div className="bg-gradient-to-r from-purple-50 to-pink-50 rounded-lg p-4 border border-purple-200">
                             <h4 className="font-medium text-purple-900 mb-3 flex items-center">
                                 <CheckCircle className="w-4 h-4 mr-2" />

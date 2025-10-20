@@ -15,7 +15,7 @@ const supabaseAdmin = createClient(
 
 export async function POST(request: NextRequest) {
     try {
-        const { businessId, reward_title, reward_description, visit_goal } = await request.json()
+        const { businessId, reward_title, reward_description, visit_goal, inactive_customer_message, inactive_days_threshold } = await request.json()
 
         if (!businessId) {
             return NextResponse.json(
@@ -31,6 +31,8 @@ export async function POST(request: NextRequest) {
                 reward_title,
                 reward_description,
                 visit_goal,
+                inactive_customer_message,
+                inactive_days_threshold,
                 reward_setup_completed: true
             })
             .eq('id', businessId)
