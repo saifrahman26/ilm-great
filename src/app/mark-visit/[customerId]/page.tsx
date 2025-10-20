@@ -18,6 +18,7 @@ export default function MarkVisitPage() {
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
     const [loadingTimeout, setLoadingTimeout] = useState(false)
+    const [rewardEarned, setRewardEarned] = useState(false)
 
     useEffect(() => {
         console.log('🔍 Auth state:', {
@@ -157,6 +158,7 @@ export default function MarkVisitPage() {
 
             setSuccess(true)
             setCustomer(result.customer)
+            setRewardEarned(result.reachedGoal || false)
 
             // Show success message and redirect after 2 seconds
             setTimeout(() => {
@@ -245,13 +247,13 @@ export default function MarkVisitPage() {
                     <p className="text-gray-600 mb-4">
                         <strong>{customer?.name}</strong> now has <strong>{customer?.visits}</strong> visit{customer?.visits !== 1 ? 's' : ''}
                     </p>
-                    {customer?.visits >= (business?.visit_goal || 5) && (
+                    {rewardEarned && (
                         <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-4">
                             <p className="text-yellow-800 font-semibold">
                                 🎁 Reward Earned!
                             </p>
                             <p className="text-yellow-700 text-sm">
-                                Customer has reached the goal!
+                                Customer has reached the reward goal!
                             </p>
                         </div>
                     )}
