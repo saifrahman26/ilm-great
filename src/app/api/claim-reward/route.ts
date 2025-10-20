@@ -23,6 +23,20 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        console.log('🔍 Looking for reward with token:', token, 'businessId:', businessId)
+
+        // First, let's check if the rewards table exists and what rewards are available
+        const { data: allRewards, error: allRewardsError } = await supabaseAdmin
+            .from('rewards')
+            .select('*')
+            .eq('business_id', businessId)
+
+        console.log('📊 All rewards for business:', allRewards?.length || 0, 'Error:', allRewardsError?.message)
+
+        if (allRewards) {
+            console.log('🎫 Available tokens:', allRewards.map(r => ({ token: r.claim_token, status: r.status, customer_id: r.customer_id })))
+        }
+
         // Find the reward by token
         const { data: reward, error: rewardError } = await supabaseAdmin
             .from('rewards')
@@ -41,13 +55,32 @@ export async function POST(request: NextRequest) {
             .eq('status', 'pending')
             .single()
 
+        console.log('🎯 Specific reward lookup:', {
+            token,
+            businessId,
+            error: rewardError?.message,
+            rewardFound: !!reward,
+            rewardData: reward ? { id: reward.id, status: reward.status, customer_id: reward.customer_id } : null
+        })
+
         if (rewardError || !reward) {
-            console.log('🔍 Reward lookup failed:', {
-                token,
-                businessId,
-                error: rewardError?.message,
-                rewardFound: !!reward
-            })
+            // Check if token exists but with different status
+            const { data: anyTokenReward } = await supabaseAdmin
+                .from('rewards')
+                .select('*')
+                .eq('claim_token', token)
+                .eq('business_id', businessId)
+                .single()
+
+            if (anyTokenReward) {
+                console.log('🔄 Token found but status is:', anyTokenReward.status)
+                if (anyTokenReward.status === 'completed') {
+                    return NextResponse.json(
+                        { error: 'This reward has already been claimed.' },
+                        { status: 400 }
+                    )
+                }
+            }
 
             if (rewardError?.message?.includes('relation') || rewardError?.message?.includes('does not exist')) {
                 return NextResponse.json(
@@ -57,7 +90,7 @@ export async function POST(request: NextRequest) {
             }
 
             return NextResponse.json(
-                { error: 'Invalid token or reward already claimed. Please check the 6-digit code and try again.' },
+                { error: 'Invalid token. Please check the 6-digit code and try again.' },
                 { status: 404 }
             )
         }
