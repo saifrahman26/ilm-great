@@ -22,6 +22,7 @@ import {
     AlertCircle
 } from 'lucide-react'
 import Link from 'next/link'
+import PhoneInput from '@/components/PhoneInput'
 import { CardSkeleton } from '@/components/LoadingSkeleton'
 
 const businessSettingsSchema = z.object({
@@ -304,14 +305,19 @@ export default function SettingsPage() {
                                     <Phone className="w-4 h-4 inline mr-1" />
                                     Phone Number *
                                 </label>
-                                <input
-                                    {...register('phone')}
-                                    type="tel"
-                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 placeholder-gray-500 transition-all duration-200 hover:border-gray-400 focus:scale-105"
+                                <PhoneInput
+                                    value={watch('phone') || '+1'}
+                                    onChange={(value) => {
+                                        reset({
+                                            ...watch(),
+                                            phone: value
+                                        })
+                                    }}
+                                    placeholder="1234567890"
+                                    className="text-gray-900"
+                                    error={errors.phone?.message}
+                                    required
                                 />
-                                {errors.phone && (
-                                    <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-                                )}
                             </div>
                         </div>
                     </div>

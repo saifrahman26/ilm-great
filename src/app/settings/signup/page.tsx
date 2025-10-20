@@ -14,6 +14,7 @@ import { z } from 'zod'
 import Link from 'next/link'
 import { Upload, Building, Mail, Phone, Lock, User } from 'lucide-react'
 import Logo from '@/components/Logo'
+import PhoneInput from '@/components/PhoneInput'
 
 
 const signupSchema = z.object({
@@ -22,7 +23,7 @@ const signupSchema = z.object({
     confirmPassword: z.string().min(6, 'Please confirm your password'),
     businessName: z.string().min(2, 'Business name must be at least 2 characters'),
     businessEmail: z.string().email({ message: 'Invalid business email address' }),
-    phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+    phone: z.string().min(12, 'Phone number with country code must be at least 12 characters').regex(/^\+\d{1,4}\d{10}$/, 'Please enter a valid phone number with country code'),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
@@ -45,6 +46,8 @@ export default function SignupPage() {
         register,
         handleSubmit,
         formState: { errors },
+        watch,
+        reset
     } = useForm<SignupForm>({
         resolver: zodResolver(signupSchema),
     })
@@ -451,15 +454,20 @@ export default function SignupPage() {
                                     Business Phone *
                                 </label>
                                 <div className="mt-1">
-                                    <input
-                                        {...register('phone')}
-                                        type="tel"
-                                        placeholder="+1234567890"
-                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
+                                    <PhoneInput
+                                        value={watch('phone') || '+1'}
+                                        onChange={(value) => {
+                                            // Update the form value
+                                            reset({
+                                                ...watch(),
+                                                phone: value
+                                            })
+                                        }}
+                                        placeholder="1234567890"
+                                        className="text-gray-900"
+                                        error={errors.phone?.message}
+                                        required
                                     />
-                                    {errors.phone && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-                                    )}
                                 </div>
                             </div>
 

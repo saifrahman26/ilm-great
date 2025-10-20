@@ -7,6 +7,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import { Gift, Star, Phone, Mail, User, CheckCircle } from 'lucide-react'
+import PhoneInput from '@/components/PhoneInput'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
@@ -306,15 +307,19 @@ export default function QRLandingPage() {
                                         <Phone className="w-4 h-4 inline mr-1" />
                                         Phone Number *
                                     </label>
-                                    <input
-                                        {...register('phone')}
-                                        type="tel"
-                                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                                        placeholder="Enter your phone number"
+                                    <PhoneInput
+                                        value={watch('phone') || '+1'}
+                                        onChange={(value) => {
+                                            reset({
+                                                ...watch(),
+                                                phone: value
+                                            })
+                                        }}
+                                        placeholder="1234567890"
+                                        className="text-gray-900"
+                                        error={errors.phone?.message}
+                                        required
                                     />
-                                    {errors.phone && (
-                                        <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-                                    )}
                                 </div>
 
                                 <div>

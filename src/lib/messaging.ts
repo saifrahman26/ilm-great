@@ -1,5 +1,50 @@
 import { Customer } from './supabase'
 
+// Helper function to generate branded email header
+function generateEmailHeader(businessName: string, businessLogo?: string) {
+    return `
+        <!-- Enhanced Header with Business Branding -->
+        <div class="header" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%); padding: 40px; border-radius: 24px 24px 0 0; text-align: center; position: relative; overflow: hidden;">
+            <!-- Background Pattern -->
+            <div style="position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.5;"></div>
+            <div style="position: absolute; bottom: -30px; left: -30px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
+            
+            <!-- Business Logo or LoyalLink Logo -->
+            <div class="business-logo" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 20px 30px; border-radius: 60px; margin-bottom: 25px; border: 2px solid rgba(255,255,255,0.2);">
+                ${businessLogo ?
+            `<img src="${businessLogo}" alt="${businessName} Logo" style="height: 40px; max-width: 200px; object-fit: contain;" />` :
+            `<h1 style="color: white; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">🔗 ${businessName}</h1>`
+        }
+            </div>
+        </div>
+    `
+}
+
+// Helper function to generate branded email footer
+function generateEmailFooter(businessName: string, businessPhone?: string) {
+    return `
+        <!-- Enhanced Footer with Business Contact -->
+        <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
+            <div style="background: rgba(79, 70, 229, 0.1); backdrop-filter: blur(10px); display: inline-block; padding: 20px 30px; border-radius: 16px; margin-bottom: 20px; border: 1px solid rgba(79, 70, 229, 0.2);">
+                <p style="margin: 0 0 10px 0; color: #4f46e5; font-size: 18px; font-weight: 700;">
+                    ${businessName}
+                </p>
+                ${businessPhone ?
+            `<p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
+                        📞 ${businessPhone}
+                    </p>` : ''
+        }
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                    Thank you for your loyalty!
+                </p>
+            </div>
+            <p style="font-size: 14px; color: #666; margin-top: 15px; font-weight: 600;">
+                Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
+            </p>
+        </div>
+    `
+}
+
 // Generate QR code using QR Server API
 export async function generateQRCode(data: string): Promise<string> {
     try {
@@ -712,8 +757,19 @@ export async function sendRewardTokenEmail(
         
         <!-- Footer -->}
         <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
-            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;"><strong>${business.name}</strong></p>
-            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;">We appreciate your loyalty!</p>
+            <div style="background: rgba(79, 70, 229, 0.1); backdrop-filter: blur(10px); display: inline-block; padding: 20px 30px; border-radius: 16px; margin-bottom: 20px; border: 1px solid rgba(79, 70, 229, 0.2);">
+                <p style="margin: 0 0 10px 0; color: #4f46e5; font-size: 18px; font-weight: 700;">
+                    ${business.name}
+                </p>
+                ${business.phone ?
+                `<p style="margin: 0 0 10px 0; color: #6b7280; font-size: 14px;">
+                        📞 ${business.phone}
+                    </p>` : ''
+            }
+                <p style="margin: 0; color: #6b7280; font-size: 14px;">
+                    We appreciate your loyalty!
+                </p>
+            </div>
             <p style="font-size: 14px; color: #666; margin-top: 15px; font-weight: 600;">
                 Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
             </p>

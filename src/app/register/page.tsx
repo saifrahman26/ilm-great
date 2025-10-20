@@ -18,10 +18,11 @@ import {
     Target
 } from 'lucide-react'
 import Link from 'next/link'
+import PhoneInput from '@/components/PhoneInput'
 
 const customerSchema = z.object({
     name: z.string().min(2, 'Name must be at least 2 characters'),
-    phone: z.string().min(10, 'Phone number must be at least 10 digits'),
+    phone: z.string().min(12, 'Phone number with country code must be at least 12 characters').regex(/^\+\d{1,4}\d{10}$/, 'Please enter a valid phone number with country code'),
     email: z.string().min(1, 'Email is required').email('Invalid email address'),
 })
 
@@ -38,7 +39,8 @@ export default function RegisterPage() {
         register,
         handleSubmit,
         formState: { errors },
-        reset
+        reset,
+        watch
     } = useForm<CustomerForm>({
         resolver: zodResolver(customerSchema),
     })
@@ -330,20 +332,19 @@ export default function RegisterPage() {
                             <label className="block text-sm font-medium text-gray-700 mb-2">
                                 Phone Number *
                             </label>
-                            <div className="relative">
-                                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                                    <Phone className="h-5 w-5 text-gray-400" />
-                                </div>
-                                <input
-                                    {...register('phone')}
-                                    type="tel"
-                                    placeholder="Enter phone number"
-                                    className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 placeholder-gray-500"
-                                />
-                            </div>
-                            {errors.phone && (
-                                <p className="mt-1 text-sm text-red-600">{errors.phone.message}</p>
-                            )}
+                            <PhoneInput
+                                value={watch('phone') || '+1'}
+                                onChange={(value) => {
+                                    reset({
+                                        ...watch(),
+                                        phone: value
+                                    })
+                                }}
+                                placeholder="1234567890"
+                                className="text-gray-900"
+                                error={errors.phone?.message}
+                                required
+                            />
                         </div>
 
                         <div>

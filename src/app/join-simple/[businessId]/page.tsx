@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { CheckCircle, AlertCircle, QrCode, Loader } from 'lucide-react'
+import PhoneInput from '@/components/PhoneInput'
 
 export default function JoinSimplePage() {
     const params = useParams()
@@ -142,12 +143,11 @@ export default function JoinSimplePage() {
                         <label className="block text-sm font-medium text-gray-700 mb-1">
                             Phone Number *
                         </label>
-                        <input
-                            type="tel"
-                            value={formData.phone}
-                            onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                            placeholder="Your phone number"
-                            className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        <PhoneInput
+                            value={formData.phone || '+1'}
+                            onChange={(value) => setFormData({ ...formData, phone: value })}
+                            placeholder="1234567890"
+                            className="text-gray-900"
                             required
                         />
                     </div>

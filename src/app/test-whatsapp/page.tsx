@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import PhoneInput from '@/components/PhoneInput'
 
 export default function TestWhatsApp() {
     const [phone, setPhone] = useState('')
@@ -72,12 +73,11 @@ export default function TestWhatsApp() {
                             <label className="block text-sm font-medium text-gray-700 mb-1">
                                 Phone Number (with country code)
                             </label>
-                            <input
-                                type="tel"
-                                value={phone}
-                                onChange={(e) => setPhone(e.target.value)}
-                                placeholder="+1234567890"
-                                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            <PhoneInput
+                                value={phone || '+1'}
+                                onChange={setPhone}
+                                placeholder="1234567890"
+                                className="text-gray-900"
                             />
                         </div>
 

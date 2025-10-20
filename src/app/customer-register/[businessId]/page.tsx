@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { useParams } from 'next/navigation'
 import { CheckCircle, AlertCircle, QrCode, Loader, User, Phone, Mail, Gift } from 'lucide-react'
+import PhoneInput from '@/components/PhoneInput'
 
 export default function CustomerRegisterPage() {
     const params = useParams()
@@ -230,12 +231,12 @@ export default function CustomerRegisterPage() {
                                 <Phone className="w-4 h-4 inline mr-2" />
                                 Phone Number *
                             </label>
-                            <input
-                                type="tel"
-                                value={formData.phone}
-                                onChange={(e) => handleInputChange('phone', e.target.value)}
-                                placeholder="Enter your phone number"
-                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-colors text-gray-900 placeholder-gray-500"
+                            <PhoneInput
+                                value={formData.phone || '+1'}
+                                onChange={(value) => handleInputChange('phone', value)}
+                                placeholder="1234567890"
+                                className="text-gray-900"
+                                error={errors.phone}
                                 required
                             />
                         </div>
