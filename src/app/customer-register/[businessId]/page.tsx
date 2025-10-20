@@ -236,7 +236,6 @@ export default function CustomerRegisterPage() {
                                 onChange={(value) => handleInputChange('phone', value)}
                                 placeholder="1234567890"
                                 className="text-gray-900"
-                                error={errors.phone}
                                 required
                             />
                         </div>
