@@ -415,24 +415,7 @@ export default function MarkVisitPage() {
                         </div>
                     )}
 
-                    {/* Debug Info (always show for now) */}
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                        <p className="text-blue-800 text-sm">
-                            <strong>Debug Info:</strong><br />
-                            Business ID: {business?.id || 'null'}<br />
-                            Customer ID: {customer?.id || 'null'}<br />
-                            URL Customer ID: {customerId}<br />
-                            User ID (fallback): {user?.id || 'null'}<br />
-                            Final Customer ID: {customer?.id || customerId}<br />
-                            Final Business ID: {business?.id || user?.id}<br />
-                            Business Name: {business?.name || 'null'}<br />
-                            Customer Name: {customer?.name || 'null'}<br />
-                            Auth Loading: {authLoading ? 'true' : 'false'}<br />
-                            Has User: {user ? 'true' : 'false'}<br />
-                            Has Business: {business ? 'true' : 'false'}<br />
-                            Has Customer: {customer ? 'true' : 'false'}
-                        </p>
-                    </div>
+
 
                     {/* Error Message */}
                     {error && (
