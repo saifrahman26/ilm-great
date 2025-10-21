@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { whatsappService } from '@/lib/whatsapp'
+import { whatsappService } from '@/whatsapp'
 
 export async function POST(request: NextRequest) {
     try {
