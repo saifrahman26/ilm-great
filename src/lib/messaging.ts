@@ -386,7 +386,9 @@ export async function sendInactiveCustomerOffer(customer: Customer): Promise<voi
 export async function sendVisitConfirmationEmail(
     customer: any,
     business: any,
-    visitCount: number
+    visitCount: number,
+    rewardExpires: boolean = false,
+    rewardExpiryMonths: number = 1
 ): Promise<void> {
     if (!customer.email) {
         console.log('No email provided for customer:', customer.name)
@@ -408,6 +410,33 @@ export async function sendVisitConfirmationEmail(
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visit Recorded - ${business.name}</title>
+    <style>
+        @media only screen and (max-width: 600px) {
+            .visit-stats { 
+                flex-direction: column !important; 
+                gap: 15px !important; 
+                margin: 20px 0 !important;
+                padding: 0 !important;
+            }
+            .stat { 
+                margin: 0 !important; 
+                flex: none !important;
+            }
+            .stat-number { 
+                font-size: 24px !important; 
+            }
+            .stat-label { 
+                font-size: 12px !important; 
+            }
+            .progress-card { 
+                padding: 20px !important; 
+                margin: 20px 0 !important; 
+            }
+            .business-name { 
+                font-size: 32px !important; 
+            }
+        }
+    </style>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
     <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
@@ -417,7 +446,7 @@ export async function sendVisitConfirmationEmail(
             <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); font-size: 20px; font-weight: 800; letter-spacing: 1px;">
                 🔗 LinkLoyal
             </div>
-            <h1 style="margin: 0; font-size: 48px; font-weight: 900; letter-spacing: 1.5px;">${business.name}</h1>
+            <h1 class="business-name" style="margin: 0; font-size: 48px; font-weight: 900; letter-spacing: 1.5px;">${business.name}</h1>
             <p style="margin: 15px 0 0 0; font-size: 20px; opacity: 0.95; font-weight: 500;">✅ Visit Recorded!</p>
         </div>
         
@@ -440,7 +469,7 @@ export async function sendVisitConfirmationEmail(
             </div>
             ` : `
             <!-- Progress Card -->
-            <div style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); padding: 30px; border-radius: 12px; margin: 30px 0; border: 2px solid #0ea5e9;">
+            <div class="progress-card" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); padding: 30px; border-radius: 12px; margin: 30px 0; border: 2px solid #0ea5e9;">
                 <h3 style="margin: 0 0 15px 0; color: #0c4a6e; text-align: center;">Your Progress</h3>
                 
                 <!-- Progress Bar -->
@@ -449,18 +478,18 @@ export async function sendVisitConfirmationEmail(
                 </div>
                 
                 <!-- Visit Stats -->
-                <div style="display: flex; justify-content: space-around; margin: 20px 0; text-align: center;">
-                    <div>
-                        <div style="font-size: 32px; font-weight: bold; color: #0ea5e9;">${visitCount}</div>
-                        <div style="font-size: 14px; color: #64748b;">Visits</div>
+                <div class="visit-stats" style="display: flex; justify-content: space-between; margin: 25px 0; padding: 0 10px; text-align: center;">
+                    <div class="stat" style="flex: 1; margin: 0 5px;">
+                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: #0ea5e9; margin-bottom: 5px; display: block;">${visitCount}</div>
+                        <div class="stat-label" style="font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">VISITS</div>
                     </div>
-                    <div>
-                        <div style="font-size: 32px; font-weight: bold; color: #0ea5e9;">${business.visit_goal}</div>
-                        <div style="font-size: 14px; color: #64748b;">Goal</div>
+                    <div class="stat" style="flex: 1; margin: 0 5px;">
+                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: #0ea5e9; margin-bottom: 5px; display: block;">${business.visit_goal}</div>
+                        <div class="stat-label" style="font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">GOAL</div>
                     </div>
-                    <div>
-                        <div style="font-size: 32px; font-weight: bold; color: #0ea5e9;">${visitsLeft}</div>
-                        <div style="font-size: 14px; color: #64748b;">To Go</div>
+                    <div class="stat" style="flex: 1; margin: 0 5px;">
+                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: #0ea5e9; margin-bottom: 5px; display: block;">${visitsLeft}</div>
+                        <div class="stat-label" style="font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">TO GO</div>
                     </div>
                 </div>
             </div>
@@ -470,6 +499,12 @@ export async function sendVisitConfirmationEmail(
                 <h3 style="margin: 0; color: #92400e;">🎁 Your Reward</h3>
                 <p style="margin: 10px 0; color: #b45309; font-size: 18px; font-weight: bold;">${business.reward_title}</p>
                 <p style="margin: 10px 0; color: #d97706;">Just ${visitsLeft} more visit${visitsLeft === 1 ? '' : 's'} to go!</p>
+                ${rewardExpires ? `
+                <div style="background: rgba(255,255,255,0.3); padding: 12px; border-radius: 6px; margin-top: 15px;">
+                    <p style="margin: 0; font-size: 14px; font-weight: bold; color: #92400e;">⏰ Note: Rewards expire after ${rewardExpiryMonths} month${rewardExpiryMonths === 1 ? '' : 's'}</p>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #b45309;">Complete your visits to claim before expiry!</p>
+                </div>
+                ` : ''}
             </div>
             `}
             
@@ -533,7 +568,9 @@ export async function sendVisitConfirmationEmail(
 // Send reward completion email
 export async function sendRewardCompletionEmail(
     customer: any,
-    business: any
+    business: any,
+    rewardExpires: boolean = false,
+    rewardExpiryMonths: number = 1
 ): Promise<void> {
     if (!customer.email) {
         console.log('No email provided for customer:', customer.name)
@@ -596,7 +633,12 @@ export async function sendRewardCompletionEmail(
                 <div style="font-size: 16px; margin: 15px 0; line-height: 1.5;">
                     Show this email to any staff member at <strong>${business.name}</strong> to claim your reward!
                     <br><br>
-                    <strong>Valid for your next visit</strong>
+                    ${rewardExpires ? `
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p style="margin: 0; font-size: 16px; font-weight: bold;">⏰ IMPORTANT: This reward expires in ${rewardExpiryMonths} month${rewardExpiryMonths === 1 ? '' : 's'}</p>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">Please claim it before the expiry date to avoid losing your reward!</p>
+                    </div>
+                    ` : '<strong>Valid for your next visit</strong>'}
                 </div>
                 <div style="display: inline-block; background: white; color: #fd79a8; padding: 15px 30px; border-radius: 25px; font-weight: bold; margin: 20px 0; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);">
                     📱 Save This Email
