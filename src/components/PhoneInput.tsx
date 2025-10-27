@@ -12,9 +12,9 @@ interface PhoneInputProps {
 }
 
 const countryCodes = [
+    { code: '+91', country: 'India', flag: '🇮🇳' },
     { code: '+1', country: 'US/CA', flag: '🇺🇸' },
     { code: '+44', country: 'UK', flag: '🇬🇧' },
-    { code: '+91', country: 'India', flag: '🇮🇳' },
     { code: '+86', country: 'China', flag: '🇨🇳' },
     { code: '+49', country: 'Germany', flag: '🇩🇪' },
     { code: '+33', country: 'France', flag: '🇫🇷' },
@@ -32,7 +32,7 @@ export default function PhoneInput({
     error,
     required = false
 }: PhoneInputProps) {
-    const [selectedCountryCode, setSelectedCountryCode] = useState('+1')
+    const [selectedCountryCode, setSelectedCountryCode] = useState('+91')
 
     // Extract country code and number from value
     const getCountryCodeAndNumber = (fullNumber: string) => {
@@ -64,16 +64,16 @@ export default function PhoneInput({
 
     return (
         <div className="space-y-1">
-            <div className="flex">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
                 {/* Country Code Selector */}
                 <select
                     value={countryCode}
                     onChange={(e) => handleCountryCodeChange(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-l-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-black text-sm min-w-[100px]"
+                    className="px-4 py-3 sm:py-2 border border-gray-300 rounded-md sm:rounded-l-md sm:rounded-r-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-black text-base sm:text-sm w-full sm:w-auto sm:min-w-[140px]"
                 >
                     {countryCodes.map((cc) => (
                         <option key={cc.code} value={cc.code} className="bg-white text-black">
-                            {cc.flag} {cc.code}
+                            {cc.flag} {cc.code} {cc.country}
                         </option>
                     ))}
                 </select>
@@ -84,7 +84,7 @@ export default function PhoneInput({
                     value={number}
                     onChange={(e) => handleNumberChange(e.target.value)}
                     placeholder={placeholder}
-                    className={`flex-1 px-3 py-2 border border-l-0 border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-black placeholder-gray-500 ${className}`}
+                    className={`flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-md sm:rounded-r-md sm:rounded-l-none sm:border-l-0 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-black placeholder-gray-500 text-base sm:text-sm ${className}`}
                     maxLength={10}
                     required={required}
                 />

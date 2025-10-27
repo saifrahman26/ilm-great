@@ -125,6 +125,12 @@ export default function RewardsPage() {
             if (error) {
                 console.error('❌ Direct Supabase error:', error)
 
+                // Check if it's a missing column error
+                if (error.message.includes('inactive_customer_message') || error.message.includes('column') || error.message.includes('schema cache')) {
+                    setError(`Database setup required: Missing columns detected. Please run the database migration first.`)
+                    return
+                }
+
                 // Fallback: Try API call
                 console.log('🔄 Trying API fallback...')
                 const response = await fetch('/api/update-business', {
@@ -209,6 +215,27 @@ export default function RewardsPage() {
                             Set up what customers earn when they complete their loyalty journey
                         </p>
                     </div>
+
+                    {/* Database Setup Notice */}
+                    {error && error.includes('Database setup required') && (
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 mb-8">
+                            <div className="flex items-center mb-3">
+                                <AlertCircle className="w-5 h-5 text-blue-600 mr-2" />
+                                <h3 className="text-lg font-semibold text-blue-900">Database Setup Required</h3>
+                            </div>
+                            <p className="text-blue-800 mb-4">
+                                Your database is missing some columns needed for the new reward features.
+                                Please run the database migration to add them.
+                            </p>
+                            <Link
+                                href="/setup-database"
+                                className="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors"
+                            >
+                                <AlertCircle className="w-4 h-4 mr-2" />
+                                Setup Database
+                            </Link>
+                        </div>
+                    )}
 
                     {/* Current Active Reward Display */}
                     {business && (business.reward_title || business.reward_description) && (
