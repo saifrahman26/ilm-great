@@ -157,8 +157,8 @@ export function getLoyaltyEmailTemplate({
             font-size: 14px;
         }
         .business-contact {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 20px;
+            font-weight: 800;
             color: #333;
             margin-bottom: 10px;
         }
@@ -190,15 +190,17 @@ export function getLoyaltyEmailTemplate({
                 padding: 20px 15px !important;
             }
             .business-name {
-                font-size: 24px !important;
+                font-size: 32px !important;
+                margin-bottom: 10px !important;
             }
             .header .subtitle {
                 font-size: 16px !important;
+                margin: 10px 0 15px 0 !important;
             }
             .linkloyal-brand {
-                font-size: 12px !important;
-                padding: 6px 12px !important;
-                margin-top: 8px !important;
+                font-size: 9px !important;
+                padding: 3px 8px !important;
+                margin-top: 10px !important;
             }
             .points-earned {
                 font-size: 36px !important;
@@ -218,13 +220,16 @@ export function getLoyaltyEmailTemplate({
             .greeting {
                 font-size: 16px !important;
             }
+            .business-contact {
+                font-size: 18px !important;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="business-name">🎉 ${businessName}</h1>
+            <h1 class="business-name">${businessName}</h1>
             <p class="subtitle">Loyalty Program Update</p>
             <div class="linkloyal-brand">
                 🔗 LinkLoyal
@@ -337,23 +342,25 @@ export function getVisitReminderTemplate({
             text-align: center;
         }
         .business-name {
-            font-size: 32px;
+            font-size: 48px;
             font-weight: 900;
-            margin: 0 0 10px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin: 0 0 15px 0;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            letter-spacing: 1.2px;
+            line-height: 1.1;
         }
         .linkloyal-brand {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
             display: inline-block;
-            padding: 8px 16px;
-            border-radius: 25px;
-            margin-top: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255,255,255,0.15);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            opacity: 0.7;
         }
         .content {
             padding: 40px 30px;
@@ -447,8 +454,8 @@ export function getVisitReminderTemplate({
             border-top: 1px solid #e9ecef;
         }
         .business-contact {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 20px;
+            font-weight: 800;
             color: #333;
             margin-bottom: 10px;
         }
@@ -471,12 +478,13 @@ export function getVisitReminderTemplate({
                 padding: 20px 15px !important;
             }
             .business-name {
-                font-size: 24px !important;
+                font-size: 32px !important;
+                margin-bottom: 10px !important;
             }
             .linkloyal-brand {
-                font-size: 12px !important;
-                padding: 6px 12px !important;
-                margin-top: 8px !important;
+                font-size: 9px !important;
+                padding: 3px 8px !important;
+                margin-top: 10px !important;
             }
             .progress-card {
                 padding: 20px !important;
@@ -488,10 +496,10 @@ export function getVisitReminderTemplate({
             }
             .visit-stats {
                 flex-direction: column !important;
-                gap: 10px !important;
+                gap: 15px !important;
             }
             .stat {
-                margin: 5px 0 !important;
+                margin: 0 !important;
             }
             .stat-number {
                 font-size: 24px !important;
@@ -507,13 +515,16 @@ export function getVisitReminderTemplate({
                 padding: 15px !important;
                 margin: 15px 0 !important;
             }
+            .business-contact {
+                font-size: 18px !important;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="business-name">🎯 ${businessName}</h1>
+            <h1 class="business-name">${businessName}</h1>
             <p>Visit Progress Update</p>
             <div class="linkloyal-brand">
                 🔗 LinkLoyal
@@ -651,28 +662,31 @@ export function getRewardCompletionTemplate({
             right: -20px;
         }
         .business-name {
-            font-size: 32px;
+            font-size: 48px;
             font-weight: 900;
-            margin: 0 0 10px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin: 0 0 15px 0;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            letter-spacing: 1.2px;
+            line-height: 1.1;
         }
         .header .subtitle {
-            margin: 10px 0 0 0;
-            font-size: 18px;
-            opacity: 0.9;
+            margin: 15px 0 20px 0;
+            font-size: 20px;
+            opacity: 0.95;
+            font-weight: 500;
         }
         .linkloyal-brand {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
             display: inline-block;
-            padding: 8px 16px;
-            border-radius: 25px;
-            margin-top: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255,255,255,0.15);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            opacity: 0.7;
         }
         .content {
             padding: 40px 30px;
@@ -775,8 +789,8 @@ export function getRewardCompletionTemplate({
             font-size: 14px;
         }
         .business-contact {
-            font-size: 18px;
-            font-weight: 700;
+            font-size: 20px;
+            font-weight: 800;
             color: #333;
             margin-bottom: 10px;
         }
@@ -799,15 +813,17 @@ export function getRewardCompletionTemplate({
                 padding: 20px 15px !important;
             }
             .business-name {
-                font-size: 24px !important;
+                font-size: 32px !important;
+                margin-bottom: 10px !important;
             }
             .header .subtitle {
                 font-size: 16px !important;
+                margin: 10px 0 15px 0 !important;
             }
             .linkloyal-brand {
-                font-size: 12px !important;
-                padding: 6px 12px !important;
-                margin-top: 8px !important;
+                font-size: 9px !important;
+                padding: 3px 8px !important;
+                margin-top: 10px !important;
             }
             .reward-title {
                 font-size: 20px !important;
@@ -843,13 +859,16 @@ export function getRewardCompletionTemplate({
                 padding: 12px 25px !important;
                 font-size: 14px !important;
             }
+            .business-contact {
+                font-size: 18px !important;
+            }
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="business-name">🎉 ${businessName}</h1>
+            <h1 class="business-name">${businessName}</h1>
             <p class="subtitle">CONGRATULATIONS! You've Earned Your Reward!</p>
             <div class="linkloyal-brand">
                 🔗 LinkLoyal
@@ -949,23 +968,25 @@ export function getSimpleEmailTemplate(message: string, businessName: string = '
             text-align: center;
         }
         .business-name {
-            font-size: 28px;
+            font-size: 36px;
             font-weight: 900;
-            margin: 0 0 10px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            margin: 0 0 15px 0;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            letter-spacing: 1px;
+            line-height: 1.1;
         }
         .linkloyal-brand {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
             display: inline-block;
-            padding: 6px 12px;
-            border-radius: 20px;
-            margin-top: 8px;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-size: 12px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255,255,255,0.15);
+            font-size: 10px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            opacity: 0.7;
         }
         .content {
             padding: 30px;
@@ -980,8 +1001,8 @@ export function getSimpleEmailTemplate(message: string, businessName: string = '
             color: #6c757d;
         }
         .business-contact {
-            font-size: 16px;
-            font-weight: 700;
+            font-size: 18px;
+            font-weight: 800;
             color: #333;
             margin-bottom: 8px;
         }
@@ -1001,14 +1022,19 @@ export function getSimpleEmailTemplate(message: string, businessName: string = '
                 padding: 15px !important;
             }
             .business-name {
-                font-size: 20px !important;
+                font-size: 24px !important;
+                margin-bottom: 10px !important;
             }
             .linkloyal-brand {
-                font-size: 10px !important;
-                padding: 4px 8px !important;
+                font-size: 8px !important;
+                padding: 3px 8px !important;
+                margin-top: 10px !important;
             }
             .content {
                 font-size: 14px !important;
+            }
+            .business-contact {
+                font-size: 16px !important;
             }
         }
     </style>
@@ -1016,7 +1042,7 @@ export function getSimpleEmailTemplate(message: string, businessName: string = '
 <body>
     <div class="container">
         <div class="header">
-            <h1 class="business-name">📧 ${businessName}</h1>
+            <h1 class="business-name">${businessName}</h1>
             <div class="linkloyal-brand">
                 🔗 LinkLoyal
             </div>
