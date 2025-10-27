@@ -122,18 +122,18 @@ export async function sendQRCodeToCustomer(customer: Customer, businessInfo?: { 
     }
 
     try {
-        const businessName = businessInfo?.name || 'LoyalLink Business'
+        const businessName = businessInfo?.name || 'LinkLoyal Business'
         const rewardTitle = businessInfo?.rewardTitle || 'Loyalty Reward'
         const visitGoal = businessInfo?.visitGoal || 5
 
-        // Create a beautiful LoyalLink-branded email with QR code
+        // Create a beautiful LinkLoyal-branded email with QR code
         const emailHtml = `
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Welcome to ${businessName} - Your LoyalLink QR Code</title>
+    <title>Welcome to ${businessName} - Your LinkLoyal QR Code</title>
     <style>
         @media only screen and (max-width: 600px) {
             .container { padding: 8px !important; }
@@ -158,31 +158,31 @@ export async function sendQRCodeToCustomer(customer: Customer, businessInfo?: { 
             .main-title { font-size: 20px !important; }
             .greeting-title { font-size: 20px !important; }
             .qr-image { width: 160px !important; height: 160px !important; }
-            .loyallink-logo { font-size: 22px !important; padding: 12px 20px !important; }
+            .linkloyal-logo { font-size: 22px !important; padding: 12px 20px !important; }
         }
     </style>
 </head>
 <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh;">
     <div class="container" style="max-width: 600px; margin: 0 auto; padding: 20px;">
         
-        <!-- Enhanced Header with LoyalLink Branding -->
+        <!-- Enhanced Header with LinkLoyal Branding -->
         <div class="header" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%); padding: 40px; border-radius: 24px 24px 0 0; text-align: center; position: relative; overflow: hidden;">
             <!-- Background Pattern -->
             <div style="position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.5;"></div>
             <div style="position: absolute; bottom: -30px; left: -30px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
             
-            <!-- LoyalLink Logo -->
-            <div class="loyallink-logo" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 20px 30px; border-radius: 60px; margin-bottom: 25px; border: 2px solid rgba(255,255,255,0.2);">
+            <!-- LinkLoyal Logo -->
+            <div class="linkloyal-logo" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 20px 30px; border-radius: 60px; margin-bottom: 25px; border: 2px solid rgba(255,255,255,0.2);">
                 <h1 style="color: white; margin: 0; font-size: 28px; font-weight: 800; letter-spacing: 2px; text-shadow: 0 2px 4px rgba(0,0,0,0.3);">
-                    🔗 LoyalLink
+                    🔗 LinkLoyal
                 </h1>
             </div>
             
-            <h2 class="main-title" style="color: white; margin: 0; font-size: 32px; font-weight: 700; text-shadow: 0 2px 4px rgba(0,0,0,0.3); line-height: 1.1;">
-                Welcome to ${businessName}!
+            <h2 class="main-title" style="color: white; margin: 0; font-size: 48px; font-weight: 900; text-shadow: 0 3px 6px rgba(0,0,0,0.4); line-height: 1.1; letter-spacing: 1.5px;">
+                ${businessName}
             </h2>
-            <p style="color: rgba(255,255,255,0.95); margin: 15px 0 0 0; font-size: 18px; font-weight: 500; line-height: 1.3;">
-                🎉 Your loyalty journey starts here
+            <p style="color: rgba(255,255,255,0.95); margin: 15px 0 0 0; font-size: 20px; font-weight: 500; line-height: 1.3;">
+                🎉 Welcome to your loyalty program!
             </p>
             
             <!-- Animated dots -->
@@ -289,7 +289,7 @@ export async function sendQRCodeToCustomer(customer: Customer, businessInfo?: { 
         <div style="text-align: center; padding: 30px; color: rgba(255,255,255,0.9);">
             <div style="background: rgba(255,255,255,0.1); backdrop-filter: blur(10px); display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 15px; border: 1px solid rgba(255,255,255,0.2);">
                 <p style="margin: 0; font-size: 16px; font-weight: 600;">
-                    Powered by <strong>🔗 LoyalLink</strong>
+                    Powered by <strong>🔗 LinkLoyal</strong>
                 </p>
             </div>
             <p style="margin: 0; font-size: 14px; opacity: 0.8;">
@@ -317,7 +317,7 @@ export async function sendQRCodeToCustomer(customer: Customer, businessInfo?: { 
             body: JSON.stringify({
                 email: customer.email,
                 message: emailHtml,
-                subject: `🔗 Welcome to ${businessName} - Your LoyalLink QR Code Inside!`,
+                subject: `🔗 Welcome to ${businessName} - Your LinkLoyal QR Code Inside!`,
                 template: 'raw-html'
             })
         })
@@ -415,10 +415,10 @@ export async function sendVisitConfirmationEmail(
         <!-- Header -->
         <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 40px 30px; text-align: center;">
             <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); font-size: 20px; font-weight: 800; letter-spacing: 1px;">
-                🔗 LoyalLink
+                🔗 LinkLoyal
             </div>
-            <h1 style="margin: 0; font-size: 28px; font-weight: 700;">✅ Visit Recorded!</h1>
-            <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.95;">${business.name}</p>
+            <h1 style="margin: 0; font-size: 48px; font-weight: 900; letter-spacing: 1.5px;">${business.name}</h1>
+            <p style="margin: 15px 0 0 0; font-size: 20px; opacity: 0.95; font-weight: 500;">✅ Visit Recorded!</p>
         </div>
         
         <!-- Content -->
@@ -556,10 +556,10 @@ export async function sendRewardCompletionEmail(
         <div style="background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%); color: white; padding: 40px 30px; text-align: center; position: relative; overflow: hidden;">
             <div style="position: absolute; font-size: 100px; opacity: 0.1; top: -20px; right: -20px;">🎉</div>
             <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); font-size: 20px; font-weight: 800; letter-spacing: 1px;">
-                🔗 LoyalLink
+                🔗 LinkLoyal
             </div>
-            <h1 style="margin: 0; font-size: 32px; font-weight: bold;">🎉 CONGRATULATIONS!</h1>
-            <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.9;">You've Earned Your Reward!</p>
+            <h1 style="margin: 0; font-size: 48px; font-weight: 900; letter-spacing: 1.5px;">${business.name}</h1>
+            <p style="margin: 15px 0 0 0; font-size: 20px; opacity: 0.95; font-weight: 500;">🎉 CONGRATULATIONS! You've Earned Your Reward!</p>
         </div>
         
         <!-- Content -->
@@ -618,7 +618,7 @@ export async function sendRewardCompletionEmail(
             <p style="margin: 5px 0; color: #6c757d; font-size: 14px;"><strong>${business.name}</strong></p>
             <p style="margin: 5px 0; color: #6c757d; font-size: 14px;">🏪 We appreciate your loyalty and look forward to seeing you again!</p>
             <p style="font-size: 14px; color: #666; margin-top: 15px; font-weight: 600;">
-                Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
+                Powered by <strong>🔗 LinkLoyal</strong> - Making loyalty simple and rewarding
             </p>
             <p style="font-size: 12px; color: #999; margin-top: 10px;">
                 This reward email was generated automatically when you completed ${business.visit_goal} visits.
@@ -682,10 +682,10 @@ export async function sendRewardTokenEmail(
         <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; padding: 40px 30px; text-align: center; position: relative; overflow: hidden;">
             <div style="position: absolute; font-size: 120px; opacity: 0.1; top: -30px; right: -30px;">🎁</div>
             <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); font-size: 20px; font-weight: 800; letter-spacing: 1px;">
-                🔗 LoyalLink
+                🔗 LinkLoyal
             </div>
-            <h1 style="margin: 0; font-size: 32px; font-weight: bold;">🎉 REWARD READY!</h1>
-            <p style="margin: 10px 0 0 0; font-size: 18px; opacity: 0.95;">Your ${business.reward_title} is waiting!</p>
+            <h1 style="margin: 0; font-size: 48px; font-weight: 900; letter-spacing: 1.5px;">${business.name}</h1>
+            <p style="margin: 15px 0 0 0; font-size: 20px; opacity: 0.95; font-weight: 500;">🎉 Your ${business.reward_title} is ready!</p>
             ${rewardNumber ? `<p style="margin: 5px 0 0 0; font-size: 16px; opacity: 0.8;">Reward #${rewardNumber}</p>` : ''}
         </div>
         
