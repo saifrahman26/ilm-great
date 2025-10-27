@@ -9,7 +9,7 @@ function generateEmailHeader(businessName: string, businessLogo?: string) {
             <div style="position: absolute; top: -50px; right: -50px; width: 100px; height: 100px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.5;"></div>
             <div style="position: absolute; bottom: -30px; left: -30px; width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; opacity: 0.3;"></div>
             
-            <!-- Business Logo or LoyalLink Logo -->
+            <!-- Business Logo or LinkLoyal Logo -->
             <div class="business-logo" style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 20px 30px; border-radius: 60px; margin-bottom: 25px; border: 2px solid rgba(255,255,255,0.2);">
                 ${businessLogo ?
             `<img src="${businessLogo}" alt="${businessName} Logo" style="height: 40px; max-width: 200px; object-fit: contain;" />` :
@@ -91,7 +91,7 @@ export async function sendEmail(customer: Customer, subject: string, htmlContent
             },
             body: JSON.stringify({
                 sender: {
-                    name: 'LoyalLink',
+                    name: 'LinkLoyal',
                     email: process.env.BREVO_SENDER_EMAIL || 'noreply@loyallink.com'
                 },
                 to: [
@@ -100,7 +100,7 @@ export async function sendEmail(customer: Customer, subject: string, htmlContent
                         name: customer.name
                     }
                 ],
-                subject: `[LoyalLink] ${subject}`,
+                subject: `[LinkLoyal] ${subject}`,
                 htmlContent: htmlContent,
                 textContent: htmlContent.replace(/<[^>]*>/g, ''), // Strip HTML for text version
                 tags: ['loyalty-program', 'automated']

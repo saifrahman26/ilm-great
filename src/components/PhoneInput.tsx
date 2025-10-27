@@ -1,7 +1,5 @@
 'use client'
 
-import { useState } from 'react'
-
 interface PhoneInputProps {
     value: string
     onChange: (value: string) => void
@@ -11,72 +9,37 @@ interface PhoneInputProps {
     required?: boolean
 }
 
-const countryCodes = [
-    { code: '+91', country: 'India', flag: '🇮🇳' },
-    { code: '+1', country: 'US/CA', flag: '🇺🇸' },
-    { code: '+44', country: 'UK', flag: '🇬🇧' },
-    { code: '+86', country: 'China', flag: '🇨🇳' },
-    { code: '+49', country: 'Germany', flag: '🇩🇪' },
-    { code: '+33', country: 'France', flag: '🇫🇷' },
-    { code: '+81', country: 'Japan', flag: '🇯🇵' },
-    { code: '+61', country: 'Australia', flag: '🇦🇺' },
-    { code: '+55', country: 'Brazil', flag: '🇧🇷' },
-    { code: '+7', country: 'Russia', flag: '🇷🇺' },
-]
-
 export default function PhoneInput({
     value,
     onChange,
-    placeholder = "Enter phone number",
+    placeholder = "9876543210",
     className = "",
     error,
     required = false
 }: PhoneInputProps) {
-    const [selectedCountryCode, setSelectedCountryCode] = useState('+91')
-
-    // Extract country code and number from value
-    const getCountryCodeAndNumber = (fullNumber: string) => {
-        const matchedCode = countryCodes.find(cc => fullNumber.startsWith(cc.code))
-        if (matchedCode) {
-            return {
-                countryCode: matchedCode.code,
-                number: fullNumber.slice(matchedCode.code.length)
-            }
+    // Extract number from value (remove +91 if present)
+    const getNumber = (fullNumber: string) => {
+        if (fullNumber.startsWith('+91')) {
+            return fullNumber.slice(3)
         }
-        return {
-            countryCode: selectedCountryCode,
-            number: fullNumber
-        }
+        return fullNumber
     }
 
-    const { countryCode, number } = getCountryCodeAndNumber(value)
-
-    const handleCountryCodeChange = (newCode: string) => {
-        setSelectedCountryCode(newCode)
-        onChange(newCode + number)
-    }
+    const number = getNumber(value)
 
     const handleNumberChange = (newNumber: string) => {
         // Only allow digits and limit to 10 digits
         const cleanNumber = newNumber.replace(/\D/g, '').slice(0, 10)
-        onChange(countryCode + cleanNumber)
+        onChange('+91' + cleanNumber)
     }
 
     return (
         <div className="space-y-1">
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-0">
-                {/* Country Code Selector */}
-                <select
-                    value={countryCode}
-                    onChange={(e) => handleCountryCodeChange(e.target.value)}
-                    className="px-4 py-3 sm:py-2 border border-gray-300 rounded-md sm:rounded-l-md sm:rounded-r-none focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-gray-50 text-black text-base sm:text-sm w-full sm:w-auto sm:min-w-[140px]"
-                >
-                    {countryCodes.map((cc) => (
-                        <option key={cc.code} value={cc.code} className="bg-white text-black">
-                            {cc.flag} {cc.code} {cc.country}
-                        </option>
-                    ))}
-                </select>
+            <div className="flex">
+                {/* Fixed +91 Country Code */}
+                <div className="px-4 py-3 sm:py-2 border border-gray-300 rounded-l-md bg-gray-50 text-black text-base sm:text-sm flex items-center">
+                    🇮🇳 +91
+                </div>
 
                 {/* Phone Number Input */}
                 <input
@@ -84,7 +47,7 @@ export default function PhoneInput({
                     value={number}
                     onChange={(e) => handleNumberChange(e.target.value)}
                     placeholder={placeholder}
-                    className={`flex-1 px-4 py-3 sm:py-2 border border-gray-300 rounded-md sm:rounded-r-md sm:rounded-l-none sm:border-l-0 focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-black placeholder-gray-500 text-base sm:text-sm ${className}`}
+                    className={`flex-1 px-4 py-3 sm:py-2 border border-l-0 border-gray-300 rounded-r-md focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white text-black placeholder-gray-500 text-base sm:text-sm ${className}`}
                     maxLength={10}
                     required={required}
                 />
@@ -92,7 +55,7 @@ export default function PhoneInput({
 
             {/* Helper Text */}
             <p className="text-xs text-gray-500">
-                Enter 10-digit phone number (without country code)
+                Enter 10-digit Indian mobile number
             </p>
 
             {/* Error Message */}

@@ -11,7 +11,7 @@ const inter = Inter({
 });
 
 export const metadata: Metadata = {
-  title: "LoyalLink - Customer Loyalty Made Simple",
+  title: "LinkLoyal - Customer Loyalty Made Simple",
   description: "Track customer visits and reward loyalty with automated messaging. Perfect for cafes, restaurants, and local businesses.",
   manifest: '/manifest.json',
   viewport: {
@@ -24,7 +24,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
-    title: 'LoyalLink',
+    title: 'LinkLoyal',
   },
   icons: {
     icon: [
@@ -48,7 +48,7 @@ export default function RootLayout({
         <meta name="mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-capable" content="yes" />
         <meta name="apple-mobile-web-app-status-bar-style" content="default" />
-        <meta name="apple-mobile-web-app-title" content="LoyalLink" />
+        <meta name="apple-mobile-web-app-title" content="LinkLoyal" />
         <meta name="format-detection" content="telephone=no" />
         <meta name="msapplication-TileColor" content="#2563eb" />
         <meta name="msapplication-tap-highlight" content="no" />

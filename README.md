@@ -1,4 +1,4 @@
-# LoyalLink - Loyalty Program Management System
+# LinkLoyal - Loyalty Program Management System
 
 A modern, full-stack loyalty program management system built with Next.js, Supabase, and Resend.
 
@@ -26,8 +26,8 @@ A modern, full-stack loyalty program management system built with Next.js, Supab
 
 1. Clone the repository:
 \`\`\`bash
-git clone https://github.com/yourusername/loyallink.git
-cd loyallink
+git clone https://github.com/yourusername/linkloyal.git
+cd linkloyal
 \`\`\`
 
 2. Install dependencies:
@@ -131,4 +131,4 @@ This project is licensed under the MIT License.
 
 ## 🆘 Support
 
-For support, email support@loyallink.com or create an issue on GitHub.
+For support, email support@linkloyal.com or create an issue on GitHub.

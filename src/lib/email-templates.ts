@@ -4,6 +4,7 @@ interface EmailTemplateProps {
     totalPoints?: number
     message: string
     businessName?: string
+    businessPhone?: string
     logoUrl?: string
 }
 
@@ -12,7 +13,8 @@ export function getLoyaltyEmailTemplate({
     points,
     totalPoints,
     message,
-    businessName = 'LoyalLink Business',
+    businessName = 'LinkLoyal Business',
+    businessPhone = '',
     logoUrl
 }: EmailTemplateProps): string {
     return `
@@ -57,11 +59,12 @@ export function getLoyaltyEmailTemplate({
             border-radius: 50%;
             opacity: 0.5;
         }
-        .header h1 {
-            margin: 0;
-            font-size: 32px;
-            font-weight: 700;
+        .business-name {
+            font-size: 36px;
+            font-weight: 900;
+            margin: 0 0 10px 0;
             text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+            letter-spacing: 1px;
         }
         .header .subtitle {
             margin: 10px 0 0 0;
@@ -69,17 +72,18 @@ export function getLoyaltyEmailTemplate({
             opacity: 0.95;
             font-weight: 500;
         }
-        .loyallink-brand {
+        .linkloyal-brand {
             background: rgba(255,255,255,0.15);
             backdrop-filter: blur(10px);
             display: inline-block;
-            padding: 15px 25px;
-            border-radius: 50px;
-            margin-bottom: 20px;
-            border: 2px solid rgba(255,255,255,0.2);
-            font-size: 20px;
-            font-weight: 800;
-            letter-spacing: 1px;
+            padding: 8px 16px;
+            border-radius: 25px;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
         }
         .content {
             padding: 40px 30px;
@@ -151,6 +155,18 @@ export function getLoyaltyEmailTemplate({
             color: #6c757d;
             font-size: 14px;
         }
+        .business-contact {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .business-phone {
+            font-size: 16px;
+            color: #667eea;
+            font-weight: 600;
+            margin: 10px 0;
+        }
         .social-links {
             margin: 20px 0;
         }
@@ -172,16 +188,16 @@ export function getLoyaltyEmailTemplate({
             .header {
                 padding: 20px 15px !important;
             }
-            .header h1 {
+            .business-name {
                 font-size: 24px !important;
             }
             .header .subtitle {
                 font-size: 16px !important;
             }
-            .loyallink-brand {
-                font-size: 16px !important;
-                padding: 10px 20px !important;
-                margin-bottom: 15px !important;
+            .linkloyal-brand {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+                margin-top: 8px !important;
             }
             .points-earned {
                 font-size: 36px !important;
@@ -207,11 +223,11 @@ export function getLoyaltyEmailTemplate({
 <body>
     <div class="container">
         <div class="header">
-            <div class="loyallink-brand">
-                🔗 LoyalLink
-            </div>
-            <h1>🎉 ${businessName}</h1>
+            <h1 class="business-name">🎉 ${businessName}</h1>
             <p class="subtitle">Loyalty Program Update</p>
+            <div class="linkloyal-brand">
+                🔗 LinkLoyal
+            </div>
         </div>
         
         <div class="content">
@@ -247,15 +263,16 @@ export function getLoyaltyEmailTemplate({
         </div>
         
         <div class="footer">
-            <p><strong>${businessName}</strong></p>
+            <p class="business-contact">${businessName}</p>
+            ${businessPhone ? `<p class="business-phone">📞 ${businessPhone}</p>` : ''}
             <p>Thank you for being a loyal customer!</p>
             <div class="social-links">
                 <a href="#">📧 Contact Us</a>
                 <a href="#">🌐 Website</a>
                 <a href="#">📱 App</a>
             </div>
-            <p style="font-size: 14px; color: #666; margin-top: 20px; font-weight: 600;">
-                Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
+            <p style="font-size: 12px; color: #666; margin-top: 15px; font-weight: 600;">
+                Powered by <strong>🔗 LinkLoyal</strong> - Making loyalty simple and rewarding
             </p>
             <p style="font-size: 12px; color: #999; margin-top: 10px;">
                 You received this email because you're part of our loyalty program.
@@ -271,13 +288,15 @@ export function getVisitReminderTemplate({
     customerName = 'Valued Customer',
     currentVisits,
     visitGoal,
-    businessName = 'LoyalLink Business',
+    businessName = 'LinkLoyal Business',
+    businessPhone = '',
     message
 }: {
     customerName?: string
     currentVisits: number
     visitGoal: number
     businessName?: string
+    businessPhone?: string
     message: string
 }): string {
     const visitsLeft = visitGoal - currentVisits
@@ -312,10 +331,24 @@ export function getVisitReminderTemplate({
             padding: 40px 30px;
             text-align: center;
         }
-        .header h1 {
-            margin: 0;
-            font-size: 28px;
-            font-weight: 300;
+        .business-name {
+            font-size: 32px;
+            font-weight: 900;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .linkloyal-brand {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 25px;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
         }
         .content {
             padding: 40px 30px;
@@ -400,6 +433,18 @@ export function getVisitReminderTemplate({
             text-align: center;
             border-top: 1px solid #e9ecef;
         }
+        .business-contact {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .business-phone {
+            font-size: 16px;
+            color: #4CAF50;
+            font-weight: 600;
+            margin: 10px 0;
+        }
         @media (max-width: 600px) {
             .container {
                 margin: 0 !important;
@@ -412,13 +457,13 @@ export function getVisitReminderTemplate({
             .header {
                 padding: 20px 15px !important;
             }
-            .header h1 {
+            .business-name {
                 font-size: 24px !important;
             }
-            .loyallink-brand {
-                font-size: 16px !important;
-                padding: 10px 20px !important;
-                margin-bottom: 15px !important;
+            .linkloyal-brand {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+                margin-top: 8px !important;
             }
             .progress-card {
                 padding: 20px !important;
@@ -455,11 +500,11 @@ export function getVisitReminderTemplate({
 <body>
     <div class="container">
         <div class="header">
-            <div class="loyallink-brand">
-                🔗 LoyalLink
-            </div>
-            <h1>🎯 ${businessName}</h1>
+            <h1 class="business-name">🎯 ${businessName}</h1>
             <p>Visit Progress Update</p>
+            <div class="linkloyal-brand">
+                🔗 LinkLoyal
+            </div>
         </div>
         
         <div class="content">
@@ -507,10 +552,11 @@ export function getVisitReminderTemplate({
         </div>
         
         <div class="footer">
-            <p><strong>${businessName}</strong></p>
+            <p class="business-contact">${businessName}</p>
+            ${businessPhone ? `<p class="business-phone">📞 ${businessPhone}</p>` : ''}
             <p>Thank you for your loyalty!</p>
-            <p style="font-size: 14px; color: #666; margin-top: 15px; font-weight: 600;">
-                Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
+            <p style="font-size: 12px; color: #666; margin-top: 15px; font-weight: 600;">
+                Powered by <strong>🔗 LinkLoyal</strong> - Making loyalty simple and rewarding
             </p>
         </div>
     </div>
@@ -521,7 +567,8 @@ export function getVisitReminderTemplate({
 
 export function getRewardCompletionTemplate({
     customerName = 'Valued Customer',
-    businessName = 'LoyalLink Business',
+    businessName = 'LinkLoyal Business',
+    businessPhone = '',
     rewardTitle,
     rewardDescription,
     visitsCompleted,
@@ -529,6 +576,7 @@ export function getRewardCompletionTemplate({
 }: {
     customerName?: string
     businessName?: string
+    businessPhone?: string
     rewardTitle: string
     rewardDescription: string
     visitsCompleted: number
@@ -573,28 +621,29 @@ export function getRewardCompletionTemplate({
             top: -20px;
             right: -20px;
         }
-        .header h1 {
-            margin: 0;
+        .business-name {
             font-size: 32px;
-            font-weight: bold;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 900;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
         }
         .header .subtitle {
             margin: 10px 0 0 0;
             font-size: 18px;
             opacity: 0.9;
         }
-        .loyallink-brand {
+        .linkloyal-brand {
             background: rgba(255,255,255,0.15);
             backdrop-filter: blur(10px);
             display: inline-block;
-            padding: 15px 25px;
-            border-radius: 50px;
-            margin-bottom: 20px;
-            border: 2px solid rgba(255,255,255,0.2);
-            font-size: 20px;
-            font-weight: 800;
-            letter-spacing: 1px;
+            padding: 8px 16px;
+            border-radius: 25px;
+            margin-top: 10px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 14px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
         }
         .content {
             padding: 40px 30px;
@@ -696,16 +745,17 @@ export function getRewardCompletionTemplate({
             color: #6c757d;
             font-size: 14px;
         }
-        .confetti {
-            position: absolute;
-            width: 10px;
-            height: 10px;
-            background: #ff6b6b;
-            animation: confetti-fall 3s linear infinite;
+        .business-contact {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
         }
-        @keyframes confetti-fall {
-            0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+        .business-phone {
+            font-size: 16px;
+            color: #ff6b6b;
+            font-weight: 600;
+            margin: 10px 0;
         }
         @media (max-width: 600px) {
             .container {
@@ -719,16 +769,16 @@ export function getRewardCompletionTemplate({
             .header {
                 padding: 20px 15px !important;
             }
-            .header h1 {
+            .business-name {
                 font-size: 24px !important;
             }
             .header .subtitle {
                 font-size: 16px !important;
             }
-            .loyallink-brand {
-                font-size: 16px !important;
-                padding: 10px 20px !important;
-                margin-bottom: 15px !important;
+            .linkloyal-brand {
+                font-size: 12px !important;
+                padding: 6px 12px !important;
+                margin-top: 8px !important;
             }
             .reward-title {
                 font-size: 20px !important;
@@ -770,11 +820,11 @@ export function getRewardCompletionTemplate({
 <body>
     <div class="container">
         <div class="header">
-            <div class="loyallink-brand">
-                🔗 LoyalLink
+            <h1 class="business-name">🎉 ${businessName}</h1>
+            <p class="subtitle">CONGRATULATIONS! You've Earned Your Reward!</p>
+            <div class="linkloyal-brand">
+                🔗 LinkLoyal
             </div>
-            <h1>🎉 CONGRATULATIONS!</h1>
-            <p class="subtitle">You've Earned Your Reward!</p>
         </div>
         
         <div class="content">
@@ -816,10 +866,11 @@ export function getRewardCompletionTemplate({
         </div>
         
         <div class="footer">
-            <p><strong>${businessName}</strong></p>
+            <p class="business-contact">${businessName}</p>
+            ${businessPhone ? `<p class="business-phone">📞 ${businessPhone}</p>` : ''}
             <p>🏪 We appreciate your loyalty and look forward to seeing you again!</p>
-            <p style="font-size: 14px; color: #666; margin-top: 15px; font-weight: 600;">
-                Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
+            <p style="font-size: 12px; color: #666; margin-top: 15px; font-weight: 600;">
+                Powered by <strong>🔗 LinkLoyal</strong> - Making loyalty simple and rewarding
             </p>
             <p style="font-size: 12px; color: #999; margin-top: 10px;">
                 This reward email was generated automatically when you completed ${visitGoal} visits.
@@ -831,7 +882,7 @@ export function getRewardCompletionTemplate({
   `.trim()
 }
 
-export function getSimpleEmailTemplate(message: string): string {
+export function getSimpleEmailTemplate(message: string, businessName: string = 'LinkLoyal Business', businessPhone: string = ''): string {
     return `
 <!DOCTYPE html>
 <html lang="en">
@@ -840,7 +891,7 @@ export function getSimpleEmailTemplate(message: string): string {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="format-detection" content="telephone=no">
     <meta name="x-apple-disable-message-reformatting">
-    <title>Message from LoyalLink</title>
+    <title>Message from ${businessName}</title>
     <style>
         body {
             margin: 0;
@@ -863,6 +914,25 @@ export function getSimpleEmailTemplate(message: string): string {
             padding: 30px;
             text-align: center;
         }
+        .business-name {
+            font-size: 28px;
+            font-weight: 900;
+            margin: 0 0 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        .linkloyal-brand {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-top: 8px;
+            border: 1px solid rgba(255,255,255,0.2);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
         .content {
             padding: 30px;
             font-size: 16px;
@@ -875,6 +945,18 @@ export function getSimpleEmailTemplate(message: string): string {
             font-size: 14px;
             color: #6c757d;
         }
+        .business-contact {
+            font-size: 16px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 8px;
+        }
+        .business-phone {
+            font-size: 14px;
+            color: #667eea;
+            font-weight: 600;
+            margin: 8px 0;
+        }
         @media (max-width: 600px) {
             .container {
                 margin: 0 !important;
@@ -884,8 +966,12 @@ export function getSimpleEmailTemplate(message: string): string {
             .header, .content, .footer {
                 padding: 15px !important;
             }
-            .header h1 {
-                font-size: 24px !important;
+            .business-name {
+                font-size: 20px !important;
+            }
+            .linkloyal-brand {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
             }
             .content {
                 font-size: 14px !important;
@@ -896,13 +982,21 @@ export function getSimpleEmailTemplate(message: string): string {
 <body>
     <div class="container">
         <div class="header">
-            <h1 style="margin: 0;">📧 Message for You</h1>
+            <h1 class="business-name">📧 ${businessName}</h1>
+            <div class="linkloyal-brand">
+                🔗 LinkLoyal
+            </div>
         </div>
         <div class="content">
             ${message}
         </div>
         <div class="footer">
+            <p class="business-contact">${businessName}</p>
+            ${businessPhone ? `<p class="business-phone">📞 ${businessPhone}</p>` : ''}
             <p>Thank you for being a valued customer!</p>
+            <p style="font-size: 12px; color: #666; margin-top: 10px; font-weight: 600;">
+                Powered by <strong>🔗 LinkLoyal</strong> - Making loyalty simple and rewarding
+            </p>
         </div>
     </div>
 </body>
