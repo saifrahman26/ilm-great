@@ -60,30 +60,31 @@ export function getLoyaltyEmailTemplate({
             opacity: 0.5;
         }
         .business-name {
-            font-size: 36px;
+            font-size: 48px;
             font-weight: 900;
-            margin: 0 0 10px 0;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-            letter-spacing: 1px;
+            margin: 0 0 15px 0;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            letter-spacing: 1.5px;
+            line-height: 1.1;
         }
         .header .subtitle {
-            margin: 10px 0 0 0;
-            font-size: 18px;
+            margin: 15px 0 20px 0;
+            font-size: 20px;
             opacity: 0.95;
             font-weight: 500;
         }
         .linkloyal-brand {
-            background: rgba(255,255,255,0.15);
-            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
             display: inline-block;
-            padding: 8px 16px;
-            border-radius: 25px;
-            margin-top: 10px;
-            border: 1px solid rgba(255,255,255,0.2);
-            font-size: 14px;
-            font-weight: 600;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255,255,255,0.15);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            opacity: 0.7;
         }
         .content {
             padding: 40px 30px;
@@ -290,7 +291,9 @@ export function getVisitReminderTemplate({
     visitGoal,
     businessName = 'LinkLoyal Business',
     businessPhone = '',
-    message
+    message,
+    rewardExpires = false,
+    rewardExpiryMonths = 1
 }: {
     customerName?: string
     currentVisits: number
@@ -298,6 +301,8 @@ export function getVisitReminderTemplate({
     businessName?: string
     businessPhone?: string
     message: string
+    rewardExpires?: boolean
+    rewardExpiryMonths?: number
 }): string {
     const visitsLeft = visitGoal - currentVisits
     const progressPercentage = Math.min((currentVisits / visitGoal) * 100, 100)
@@ -395,20 +400,28 @@ export function getVisitReminderTemplate({
         }
         .visit-stats {
             display: flex;
-            justify-content: space-around;
-            margin: 20px 0;
+            justify-content: space-between;
+            margin: 25px 0;
+            padding: 0 10px;
         }
         .stat {
             text-align: center;
+            flex: 1;
+            margin: 0 5px;
         }
         .stat-number {
-            font-size: 32px;
+            font-size: 28px;
             font-weight: bold;
             color: #2196F3;
+            margin-bottom: 5px;
+            display: block;
         }
         .stat-label {
-            font-size: 14px;
+            font-size: 13px;
             color: #666;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
         .message {
             background-color: #f8f9fa;
@@ -538,11 +551,23 @@ export function getVisitReminderTemplate({
             <div class="reward-preview">
                 <h3 style="margin: 0;">🎉 Congratulations!</h3>
                 <p style="margin: 10px 0;">You've reached your goal! Your reward is ready!</p>
+                ${rewardExpires ? `
+                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="margin: 0; font-size: 14px; font-weight: bold;">⏰ Reward expires in ${rewardExpiryMonths} month${rewardExpiryMonths === 1 ? '' : 's'}</p>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">Claim it soon to avoid expiration!</p>
+                </div>
+                ` : ''}
             </div>
             ` : `
             <div class="reward-preview">
                 <h3 style="margin: 0;">🎁 Almost There!</h3>
                 <p style="margin: 10px 0;">Just ${visitsLeft} more visit${visitsLeft === 1 ? '' : 's'} to earn your reward!</p>
+                ${rewardExpires ? `
+                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; margin-top: 15px;">
+                    <p style="margin: 0; font-size: 14px; font-weight: bold;">⏰ Note: Rewards expire after ${rewardExpiryMonths} month${rewardExpiryMonths === 1 ? '' : 's'}</p>
+                    <p style="margin: 5px 0 0 0; font-size: 12px; opacity: 0.9;">Complete your visits to claim before expiry!</p>
+                </div>
+                ` : ''}
             </div>
             `}
             
@@ -572,7 +597,9 @@ export function getRewardCompletionTemplate({
     rewardTitle,
     rewardDescription,
     visitsCompleted,
-    visitGoal
+    visitGoal,
+    rewardExpires = false,
+    rewardExpiryMonths = 1
 }: {
     customerName?: string
     businessName?: string
@@ -581,6 +608,8 @@ export function getRewardCompletionTemplate({
     rewardDescription: string
     visitsCompleted: number
     visitGoal: number
+    rewardExpires?: boolean
+    rewardExpiryMonths?: number
 }): string {
     return `
 <!DOCTYPE html>
@@ -850,7 +879,12 @@ export function getRewardCompletionTemplate({
                 <div class="claim-instructions">
                     Show this email to any staff member at ${businessName} to claim your reward!
                     <br><br>
-                    <strong>Valid for your next visit</strong>
+                    ${rewardExpires ? `
+                    <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; margin: 15px 0;">
+                        <p style="margin: 0; font-size: 16px; font-weight: bold;">⏰ IMPORTANT: This reward expires in ${rewardExpiryMonths} month${rewardExpiryMonths === 1 ? '' : 's'}</p>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">Please claim it before the expiry date to avoid losing your reward!</p>
+                    </div>
+                    ` : '<strong>Valid for your next visit</strong>'}
                 </div>
                 <a href="#" class="claim-button">📱 Save This Email</a>
             </div>
