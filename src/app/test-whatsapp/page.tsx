@@ -74,9 +74,9 @@ export default function TestWhatsApp() {
                                 Phone Number (with country code)
                             </label>
                             <PhoneInput
-                                value={phone || '+1'}
+                                value={phone || '+91'}
                                 onChange={setPhone}
-                                placeholder="1234567890"
+                                placeholder="9876543210"
                                 className="text-gray-900"
                             />
                         </div>

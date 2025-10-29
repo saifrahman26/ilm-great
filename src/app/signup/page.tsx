@@ -51,6 +51,9 @@ export default function SignupPage() {
         setValue
     } = useForm<SignupForm>({
         resolver: zodResolver(signupSchema),
+        defaultValues: {
+            phone: '+91'
+        }
     })
 
     const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {

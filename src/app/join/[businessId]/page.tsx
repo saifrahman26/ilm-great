@@ -400,11 +400,11 @@ function JoinBusinessContent() {
                                     Phone Number *
                                 </label>
                                 <PhoneInput
-                                    value={watch('phone') || '+1'}
+                                    value={watch('phone') || '+91'}
                                     onChange={(value) => {
                                         setValue('phone', value)
                                     }}
-                                    placeholder="1234567890"
+                                    placeholder="9876543210"
                                     className="text-gray-900"
                                     error={errors.phone?.message}
                                     required

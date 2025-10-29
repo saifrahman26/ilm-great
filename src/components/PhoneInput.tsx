@@ -38,7 +38,7 @@ export default function PhoneInput({
             <div className="flex">
                 {/* Fixed +91 Country Code */}
                 <div className="px-4 py-3 sm:py-2 border border-gray-300 rounded-l-md bg-gray-50 text-black text-base sm:text-sm flex items-center">
-                    🇮🇳 +91
+                    +91
                 </div>
 
                 {/* Phone Number Input */}

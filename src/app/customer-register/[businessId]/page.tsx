@@ -11,7 +11,7 @@ export default function CustomerRegisterPage() {
 
     const [formData, setFormData] = useState({
         name: '',
-        phone: '',
+        phone: '+91',
         email: ''
     })
     const [submitting, setSubmitting] = useState(false)
@@ -251,9 +251,9 @@ export default function CustomerRegisterPage() {
                                 Phone Number *
                             </label>
                             <PhoneInput
-                                value={formData.phone || '+1'}
+                                value={formData.phone}
                                 onChange={(value) => handleInputChange('phone', value)}
-                                placeholder="1234567890"
+                                placeholder="9876543210"
                                 className="text-gray-900"
                                 required
                             />
