@@ -1,16 +1,32 @@
-# LinkLoyal - Loyalty Program Management System
+# 🔗 LinkLoyal - AI-Powered Loyalty Program Platform
 
-A modern, full-stack loyalty program management system built with Next.js, Supabase, and Resend.
+A modern, comprehensive loyalty program management system that helps businesses build lasting customer relationships through QR code technology, AI-enhanced communications, and seamless reward management.
 
-## 🚀 Features
+## 🌟 **Key Features**
 
-- **Customer Management**: Register customers and track their visits
-- **QR Code System**: Generate QR codes for businesses and customers
-- **Visit Tracking**: Scan QR codes to record visits and award points
-- **Reward System**: Automatic reward calculation and notifications
-- **Email Notifications**: Welcome emails, visit confirmations, and reward alerts
-- **Dashboard**: Real-time analytics and customer insights
-- **Mobile-Friendly**: Responsive design for all devices
+### 🎯 **For Businesses**
+- **🚀 Quick Setup**: Complete loyalty program setup in under 10 minutes
+- **📱 QR Code Generation**: Professional, branded QR codes for customer registration
+- **📊 AI Dashboard**: Real-time insights and customer analytics with AI-powered business intelligence
+- **🎁 Flexible Rewards**: Customizable visit goals and reward types with quick templates
+- **⭐ Google Review Integration**: Automatic review prompts after customer registration
+- **📧 Automated Communications**: AI-enhanced email campaigns with personalized content
+- **👥 Customer Management**: Complete customer database with visit history and progress tracking
+
+### 👥 **For Customers**
+- **📱 Mobile-First Experience**: Optimized for smartphones and tablets
+- **⚡ Quick Registration**: 1-minute signup process via QR code scan
+- **📊 Progress Tracking**: Visual progress bars showing current cycle (3/5 visits, not total visits)
+- **💾 QR Code Management**: Download, share, and save personal QR codes
+- **🎁 Reward Notifications**: Premium emails with unique 6-digit claim tokens
+- **⭐ Review Integration**: Easy Google Review prompts after registration
+- **📧 Smart Emails**: AI-generated personalized communications
+
+### 🤖 **AI-Enhanced Features**
+- **📧 Personalized Emails**: AI-generated content tailored to each customer and business type
+- **🎯 Smart Insights**: Business intelligence powered by customer data analysis
+- **📝 Dynamic Content**: Adaptive messaging based on customer behavior and visit patterns
+- **🔄 Automated Workflows**: Intelligent email sequences and timing optimization
 
 ## 🛠️ Tech Stack
 
@@ -47,15 +63,43 @@ cp .env.example .env.local
 npm run dev
 \`\`\`
 
-## 🔧 Environment Variables
+## 🎯 **Recent Major Improvements**
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| \`NEXT_PUBLIC_SUPABASE_URL\` | Your Supabase project URL | Yes |
-| \`NEXT_PUBLIC_SUPABASE_ANON_KEY\` | Supabase anonymous key | Yes |
-| \`SUPABASE_SERVICE_ROLE_KEY\` | Supabase service role key | Yes |
-| \`RESEND_API_KEY\` | Resend API key for emails | Yes |
-| \`NEXT_PUBLIC_APP_URL\` | Your app's URL | Yes |
+### ✅ **Visit Count Logic Fixed**
+- **Problem**: Customers with 18 total visits showed "18/5 visits" instead of current cycle
+- **Solution**: Implemented modulo logic showing "3/5 visits (3 rewards earned)"
+- **Impact**: Clear, consistent progress tracking across all interfaces
+
+### 📱 **Mobile Optimization Enhanced**
+- **Email Templates**: Fully responsive with mobile-first design
+- **QR Code Display**: Larger, touch-friendly QR codes with better contrast
+- **Button Interactions**: Improved download and share functionality
+- **Progress Bars**: Enhanced visual feedback with proper scaling
+
+### 🎫 **Reward System Perfected**
+- **Unique Claim Tokens**: 6-digit codes for reward redemption
+- **Premium Email Templates**: Professional reward notification emails
+- **Proper Email Flow**: Visit confirmations vs reward notifications clearly separated
+- **Token Validation**: Secure reward claim process
+
+### ⭐ **Google Review Integration**
+- **Automatic Prompts**: Customers see review requests after registration
+- **Settings Integration**: Easy Google Review link management
+- **Mobile Optimized**: Touch-friendly review buttons
+- **Business Growth**: Helps collect more positive reviews
+
+---
+
+## 🔧 **Environment Variables**
+
+| Variable | Description | Required | Example |
+|----------|-------------|----------|---------|
+| \`NEXT_PUBLIC_SUPABASE_URL\` | Your Supabase project URL | Yes | \`https://xxx.supabase.co\` |
+| \`NEXT_PUBLIC_SUPABASE_ANON_KEY\` | Supabase anonymous key | Yes | \`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\` |
+| \`SUPABASE_SERVICE_ROLE_KEY\` | Supabase service role key | Yes | \`eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...\` |
+| \`RESEND_API_KEY\` | Resend API key for emails | Yes | \`re_xxxxxxxxxx\` |
+| \`OPENAI_API_KEY\` | OpenAI API key for AI features | Optional | \`sk-xxxxxxxxxx\` |
+| \`NEXT_PUBLIC_APP_URL\` | Your app's URL | Yes | \`https://your-domain.com\` |
 
 ## 🗄️ Database Setup
 
@@ -83,19 +127,39 @@ npm run dev
 
 Make sure to add all environment variables from \`.env.example\` to your Vercel project settings.
 
-## 📱 Usage
+## 📚 **Complete Documentation**
 
-### For Businesses:
-1. Sign up and create your business profile
-2. Set up your reward program (title, description, visit goal)
-3. Generate your business QR code
-4. Display QR code for customers to scan and join
+### 📖 **User Guides**
+- **[🛍️ Customer Journey Guide](CUSTOMER_JOURNEY.md)**: Complete walkthrough of customer experience from QR scan to reward redemption
+- **[🏢 Business Setup Guide](BUSINESS_SETUP_GUIDE.md)**: Comprehensive business onboarding and management guide
+- **[🌟 Google Review Integration](GOOGLE_REVIEW_INTEGRATION.md)**: Setup guide for automatic review collection
+- **[📧 Email Setup Guide](EMAIL_SETUP.md)**: Email system configuration and troubleshooting
 
-### For Customers:
-1. Scan business QR code to join loyalty program
-2. Receive personal QR code via email
-3. Show QR code on each visit to earn points
-4. Get rewards automatically after reaching visit goal
+### 🔧 **Technical Documentation**
+- **[⚙️ Setup Guide](SETUP-GUIDE.md)**: Technical installation and configuration
+- **[🗄️ Database Migration](MIGRATION_SCRIPT.sql)**: Database schema and setup scripts
+- **[🔗 Supabase Configuration](SUPABASE_URL_FIX.md)**: Database connection troubleshooting
+
+---
+
+## 🚀 **Quick Start**
+
+### 🏢 **For Businesses (10-Minute Setup)**
+1. **Create Account**: Sign up at your deployment URL
+2. **Business Info**: Enter name, email, phone, Google Review link
+3. **Configure Rewards**: Set reward title, description, and visit goal (or use templates)
+4. **Generate QR Code**: Download your branded QR code from dashboard
+5. **Display QR Code**: Place at checkout, tables, entrance, or receipts
+6. **Train Staff**: Show them how to scan customer QR codes for visit recording
+7. **Launch**: Start collecting loyal customers immediately!
+
+### 👥 **For Customers (1-Minute Registration)**
+1. **Scan QR Code**: Use phone camera at participating business
+2. **Quick Registration**: Fill out name, phone, and email (takes 1 minute)
+3. **Get Personal QR Code**: Receive via email immediately
+4. **Leave Review**: Optional Google Review prompt (helps business grow)
+5. **Track Progress**: Watch progress toward reward (3/5 visits)
+6. **Earn Rewards**: Show QR code on each visit, get unique claim codes when earned
 
 ## 🔐 Security Features
 
