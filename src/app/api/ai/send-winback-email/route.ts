@@ -128,7 +128,7 @@ export async function POST(request: NextRequest) {
 
         // Send email
         const emailSent = await sendEmail(
-            customer.email,
+            customer,
             `💙 We miss you at ${business.name}! ${specialOffer ? '+ Special offer inside' : ''}`,
             emailHtml
         )
