@@ -10,7 +10,10 @@ async function generateAIMessage(context: {
     visitGoal: number
     rewardTitle: string
     isRewardReached: boolean
-    emailType: 'visit_confirmation' | 'reward_earned' | 'inactive_reminder'
+    emailType: 'visit_confirmation' | 'reward_earned' | 'inactive_reminder' | 'pending_reward_reminder'
+    pendingRewards?: number
+    daysSinceLastVisit?: number
+    specialOffer?: string
 }): Promise<string> {
     try {
         const aiResponse = await aiService.generatePersonalizedEmail(context)
@@ -32,6 +35,8 @@ async function generateAIMessage(context: {
             }
         case 'reward_earned':
             return `🎉 Congratulations! You've earned your <strong>${context.rewardTitle}</strong>! Show this email to claim your reward.`
+        case 'pending_reward_reminder':
+            return `🎁 Hi ${context.customerName}! You have ${context.pendingRewards || 1} unclaimed reward${(context.pendingRewards || 1) > 1 ? 's' : ''} waiting for you at ${context.businessName}! Come by soon to claim your ${context.rewardTitle}. ✨`
         case 'inactive_reminder':
             return `We miss you! Come back to ${context.businessName} and continue your journey to earn your <strong>${context.rewardTitle}</strong>!`
         default:
@@ -43,10 +48,11 @@ async function generateAIMessage(context: {
 export async function generateQRCode(data: string): Promise<string> {
     try {
         // Using QR Server API (free service)
-        return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(data)}`
+        const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(data)}`
+        return qrUrl
     } catch (error) {
         console.error('Error generating QR code:', error)
-        return ''
+        throw new Error('Failed to generate QR code')
     }
 }
 
@@ -56,18 +62,17 @@ export async function sendWhatsAppMessage(customer: Customer, message: string): 
         const response = await fetch(`https://api.ultramsg.com/${process.env.ULTRAMSG_INSTANCE_ID}/messages/chat`, {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/x-www-form-urlencoded',
+                'Content-Type': 'application/json',
             },
-            body: new URLSearchParams({
-                token: process.env.ULTRAMSG_TOKEN!,
-                to: customer.phone || '',
-                body: message,
-                priority: '1',
-                referenceId: `loyalty_${Date.now()}`
+            body: JSON.stringify({
+                token: process.env.ULTRAMSG_TOKEN,
+                to: customer.phone,
+                body: message
             })
         })
 
-        return response.ok
+        const result = await response.json()
+        return response.ok && result.sent
     } catch (error) {
         console.error('Error sending WhatsApp message:', error)
         return false
@@ -218,5 +223,144 @@ export async function sendInactiveCustomerOffer(customer: Customer, business?: a
         }
     } catch (error) {
         console.error('❌ Error sending inactive customer offer:', error)
+    }
+}
+
+// Send reward token email
+export async function sendRewardTokenEmail(customer: any, business: any, token: string, rewardNumber?: number): Promise<void> {
+    if (!customer.email) {
+        console.log('No email provided for customer:', customer.name)
+        return
+    }
+
+    try {
+        // Use AI-enhanced email service
+        const { sendAIEnhancedEmail } = await import('./email')
+
+        const emailSent = await sendAIEnhancedEmail(
+            customer.email,
+            customer.name,
+            business.name,
+            business.business_type || 'Business',
+            'reward_earned',
+            {
+                rewardTitle: business.reward_title,
+                isRewardReached: true
+            }
+        )
+
+        if (emailSent) {
+            console.log('✅ AI-enhanced reward token email sent to:', customer.email)
+        } else {
+            console.error('❌ Failed to send reward token email to:', customer.email)
+        }
+    } catch (error) {
+        console.error('❌ Error sending reward token email:', error)
+        throw error
+    }
+}
+
+// Send QR code to customer via email API
+export async function sendQRCodeToCustomer(customer: Customer, businessInfo?: { name: string; rewardTitle: string; visitGoal: number }): Promise<void> {
+    if (!customer.email) {
+        console.log('No email provided for customer:', customer.name)
+        return
+    }
+
+    try {
+        const qrCodeUrl = await generateQRCode(`https://loyallinkk.vercel.app/mark-visit/${customer.id}`)
+
+        const emailHtml = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Your QR Code - ${businessInfo?.name || 'LinkLoyal'}</title>
+        </head>
+        <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
+            <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+                <h1 style="margin: 0; font-size: 28px;">📱 Your QR Code</h1>
+                <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">${businessInfo?.name || 'LinkLoyal'}</p>
+            </div>
+            
+            <div style="background: white; padding: 30px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 10px 10px;">
+                <h2 style="color: #4f46e5; margin-top: 0;">Hello ${customer.name}! 👋</h2>
+                
+                <p>Here's your personal QR code for ${businessInfo?.name || 'our loyalty program'}:</p>
+                
+                <div style="text-align: center; margin: 30px 0;">
+                    <img src="${qrCodeUrl}" alt="Your QR Code" style="max-width: 200px; border: 3px solid #4f46e5; border-radius: 10px;" />
+                </div>
+                
+                <p><strong>How to use:</strong></p>
+                <ul>
+                    <li>Show this QR code at your next visit</li>
+                    <li>Staff will scan it to record your visit</li>
+                    <li>Earn rewards after ${businessInfo?.visitGoal || 5} visits!</li>
+                </ul>
+                
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; margin-top: 20px;">
+                    <p style="margin: 0; color: #495057; font-size: 14px;">
+                        <strong>Reward:</strong> ${businessInfo?.rewardTitle || 'Loyalty Reward'}
+                    </p>
+                </div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
+                <p>Powered by 🔗 LinkLoyal - Making loyalty simple and rewarding</p>
+            </div>
+        </body>
+        </html>`
+
+        const emailSent = await sendEmail(customer, '📱 Your QR Code is Ready!', emailHtml)
+
+        if (emailSent) {
+            console.log('✅ QR code email sent to:', customer.email)
+        } else {
+            console.error('❌ Failed to send QR code email to:', customer.email)
+        }
+    } catch (error) {
+        console.error('❌ Error sending QR code email:', error)
+        throw error
+    }
+}
+
+// Send reward completion email
+export async function sendRewardCompletionEmail(
+    customer: any,
+    business: any,
+    rewardExpires: boolean = false,
+    rewardExpiryMonths: number = 1
+): Promise<void> {
+    if (!customer.email) {
+        console.log('No email provided for customer:', customer.name)
+        return
+    }
+
+    try {
+        // Use AI-enhanced email service
+        const { sendAIEnhancedEmail } = await import('./email')
+
+        const emailSent = await sendAIEnhancedEmail(
+            customer.email,
+            customer.name,
+            business.name,
+            business.business_type || 'Business',
+            'reward_earned',
+            {
+                rewardTitle: business.reward_title,
+                isRewardReached: true
+            }
+        )
+
+        if (emailSent) {
+            console.log('✅ AI-enhanced reward completion email sent to:', customer.email)
+        } else {
+            console.error('❌ Failed to send reward completion email to:', customer.email)
+        }
+    } catch (error) {
+        console.error('❌ Error sending reward completion email:', error)
+        throw error
     }
 }
