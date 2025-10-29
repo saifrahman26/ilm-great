@@ -383,7 +383,7 @@ function createEmailTemplate(
                     <p style="color: white; margin: 0 0 20px 0; font-size: 14px; opacity: 0.9; line-height: 1.5;">
                         Show this code to staff to record your visit instantly
                     </p>
-                    <a href="https://loyallinkk.vercel.app/qr-download/${context.customerId}" 
+                    <a href="/api/qr-download/${context.customerId}" 
                        class="qr-download-btn"
                        style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 14px 24px; border-radius: 25px; text-decoration: none; font-size: 14px; font-weight: bold; border: 2px solid rgba(255,255,255,0.3); margin-top: 5px; transition: all 0.3s ease; backdrop-filter: blur(5px);">
                         📱 Download High-Quality QR Code

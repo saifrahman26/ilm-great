@@ -59,15 +59,30 @@ function CustomerQRContent() {
         fetchCustomerData()
     }, [customerId])
 
-    const downloadQR = () => {
+    const downloadQR = async () => {
         if (!customer?.qr_code_url) return
 
-        const link = document.createElement('a')
-        link.href = customer.qr_code_url
-        link.download = `${customer.name}-loyalty-qr.png`
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
+        try {
+            // Fetch the image as a blob
+            const response = await fetch(customer.qr_code_url)
+            const blob = await response.blob()
+
+            // Create a download link
+            const url = window.URL.createObjectURL(blob)
+            const link = document.createElement('a')
+            link.href = url
+            link.download = `${customer.name.replace(/\s+/g, '-')}-loyalty-qr.png`
+            document.body.appendChild(link)
+            link.click()
+            document.body.removeChild(link)
+
+            // Clean up the object URL
+            window.URL.revokeObjectURL(url)
+        } catch (error) {
+            console.error('Download failed:', error)
+            // Fallback: open in new tab
+            window.open(customer.qr_code_url, '_blank')
+        }
     }
 
     const shareQR = async () => {
@@ -119,7 +134,12 @@ function CustomerQRContent() {
         )
     }
 
-    const progressPercentage = (customer.visits / business.visit_goal) * 100
+    // Fix visit count logic - use modulo to show current cycle progress
+    const visitGoal = business.visit_goal
+    const currentCycleVisits = customer.visits % visitGoal
+    const displayVisits = currentCycleVisits === 0 && customer.visits > 0 ? visitGoal : currentCycleVisits
+    const progressPercentage = (displayVisits / visitGoal) * 100
+    const totalRewards = Math.floor(customer.visits / visitGoal)
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-4 px-4">
@@ -143,11 +163,50 @@ function CustomerQRContent() {
                     {/* QR Code */}
                     <div className="px-6 py-6 text-center">
                         <div className="bg-white border-2 border-gray-200 rounded-xl p-4 mb-4 inline-block">
-                            <img
-                                src={customer.qr_code_url}
-                                alt="Your Loyalty QR Code"
-                                className="w-40 h-40 mx-auto"
-                            />
+                            {customer.qr_code_url ? (
+                                <img
+                                    src={customer.qr_code_url}
+                                    alt="Your Loyalty QR Code"
+                                    className="w-40 h-40 mx-auto"
+                                    onError={(e) => {
+                                        console.error('QR code image failed to load:', customer.qr_code_url)
+                                        // Fallback: regenerate QR code URL
+                                        const target = e.target as HTMLImageElement
+                                        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://loyallinkk.vercel.app'
+                                        const qrData = `${baseUrl}/mark-visit/${customer.id}`
+                                        const fallbackUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
+                                        target.src = fallbackUrl
+                                        console.log('🔄 Using fallback QR code:', fallbackUrl)
+                                    }}
+                                />
+                            ) : (
+                                // Generate QR code immediately if missing
+                                (() => {
+                                    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://loyallinkk.vercel.app'
+                                    const qrData = `${baseUrl}/mark-visit/${customer.id}`
+                                    const generatedUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrData)}`
+                                    console.log('🔄 Generating missing QR code:', generatedUrl)
+
+                                    return (
+                                        <img
+                                            src={generatedUrl}
+                                            alt="Your Loyalty QR Code"
+                                            className="w-40 h-40 mx-auto"
+                                            onLoad={() => {
+                                                // Update customer record with generated QR code
+                                                fetch(`/api/customer/${customer.id}`, {
+                                                    method: 'PATCH',
+                                                    headers: { 'Content-Type': 'application/json' },
+                                                    body: JSON.stringify({
+                                                        qr_code_url: generatedUrl,
+                                                        qr_data: qrData
+                                                    })
+                                                }).catch(console.error)
+                                            }}
+                                        />
+                                    )
+                                })()
+                            )}
                         </div>
 
                         <p className="text-sm text-gray-600 mb-6">
@@ -181,21 +240,24 @@ function CustomerQRContent() {
                                 <span className="font-medium text-gray-900">Progress</span>
                             </div>
                             <span className="text-sm font-medium text-gray-600">
-                                {customer.visits} / {business.visit_goal} visits
+                                {displayVisits} / {business.visit_goal} visits
+                                {totalRewards > 0 && (
+                                    <span className="text-green-600 ml-2">({totalRewards} reward{totalRewards === 1 ? '' : 's'})</span>
+                                )}
                             </span>
                         </div>
 
                         <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
                             <div
                                 className="bg-gradient-to-r from-blue-600 to-purple-600 h-3 rounded-full transition-all duration-500"
-                                style={{ width: `${Math.min(progressPercentage, 100)}%` }}
+                                style={{ width: `${progressPercentage}%` }}
                             ></div>
                         </div>
 
                         <p className="text-sm text-gray-600 text-center">
-                            {customer.visits >= business.visit_goal
+                            {displayVisits >= business.visit_goal
                                 ? `🎉 Congratulations! You've earned your ${business.reward_title}!`
-                                : `${business.visit_goal - customer.visits} more visits to earn your ${business.reward_title}`
+                                : `${business.visit_goal - displayVisits} more visit${business.visit_goal - displayVisits === 1 ? '' : 's'} to earn your ${business.reward_title}`
                             }
                         </p>
                     </div>
