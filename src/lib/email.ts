@@ -135,13 +135,21 @@ function generateFallbackContent(
     emailType: string,
     context: any
 ): string {
+    // Fix visit count logic to be consistent - use modulo for current cycle
+    const totalVisits = context.visitCount || 0
+    const visitGoal = context.visitGoal || 5
+
+    // Calculate current cycle visits (resets after each reward)
+    const currentCycleVisits = totalVisits % visitGoal
+    const currentVisits = currentCycleVisits === 0 && totalVisits > 0 ? visitGoal : currentCycleVisits
+    const visitsRemaining = Math.max(0, visitGoal - currentVisits)
+
     switch (emailType) {
         case 'visit_confirmation':
             if (context.isRewardReached) {
-                return `🎉 Amazing, ${customerName}! You've completed ${context.visitCount} visits and earned your ${context.rewardTitle}! Thank you for being such a loyal customer at ${businessName}. 🎁`
+                return `🎉 Amazing, ${customerName}! You've completed ${currentVisits} visits and earned your ${context.rewardTitle}! Thank you for being such a loyal customer at ${businessName}. 🎁`
             } else {
-                const remaining = (context.visitGoal || 5) - (context.visitCount || 0)
-                return `Thank you for visiting ${businessName}, ${customerName}! 🙏 You now have ${context.visitCount} of ${context.visitGoal} visits. Just ${remaining} more visit${remaining === 1 ? '' : 's'} to earn your ${context.rewardTitle}! 🎯`
+                return `Thank you for visiting ${businessName}, ${customerName}! 🙏 You now have ${currentVisits} of ${visitGoal} visits. Just ${visitsRemaining} more visit${visitsRemaining === 1 ? '' : 's'} to earn your ${context.rewardTitle}! 🎯`
             }
         case 'reward_earned':
             return `🎉 Congratulations ${customerName}! You've earned your ${context.rewardTitle} at ${businessName}! Show this email to our staff to claim your well-deserved reward. Thank you for your loyalty! 🎁`
@@ -218,9 +226,18 @@ function createEmailTemplate(
     emailType: string,
     context: any
 ): string {
-    // Calculate progress percentage (cap at 100% for display, handle cases where visits exceed goal)
-    const progressPercentage = context.visitCount && context.visitGoal
-        ? Math.min((Math.min(context.visitCount, context.visitGoal) / context.visitGoal) * 100, 100)
+    // Fix visit count logic - use modulo to show current cycle progress
+    const totalVisits = context.visitCount || 0
+    const visitGoal = context.visitGoal || 5
+
+    // Calculate current cycle visits (resets after each reward)
+    const currentCycleVisits = totalVisits % visitGoal
+    const currentVisits = currentCycleVisits === 0 && totalVisits > 0 ? visitGoal : currentCycleVisits
+    const visitsRemaining = Math.max(0, visitGoal - currentVisits)
+
+    // Calculate progress percentage based on current cycle
+    const progressPercentage = visitGoal > 0
+        ? (currentVisits / visitGoal) * 100
         : 0
 
     return `
@@ -230,102 +247,155 @@ function createEmailTemplate(
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${businessName} - Loyalty Program</title>
+    <style>
+        /* Mobile-first responsive styles */
+        @media only screen and (max-width: 600px) {
+            .container {
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+            .header {
+                padding: 20px 15px !important;
+                border-radius: 0 !important;
+            }
+            .header h1 {
+                font-size: 24px !important;
+                line-height: 1.2 !important;
+            }
+            .content {
+                padding: 20px 15px !important;
+                border-radius: 0 !important;
+            }
+            .progress-section {
+                padding: 15px !important;
+                margin: 20px 0 !important;
+            }
+            .progress-numbers {
+                font-size: 20px !important;
+            }
+            .qr-container {
+                max-width: 100% !important;
+                padding: 20px 15px !important;
+            }
+            .qr-code-img {
+                width: 180px !important;
+                height: 180px !important;
+            }
+            .qr-download-btn {
+                display: block !important;
+                width: 90% !important;
+                max-width: 280px !important;
+                margin: 15px auto !important;
+                padding: 15px 20px !important;
+                font-size: 14px !important;
+                text-align: center !important;
+            }
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px;">
-    <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
-        <h1 style="margin: 0; font-size: 28px;">🔗 ${businessName}</h1>
-        <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Loyalty Program</p>
-    </div>
-    
-    <div style="background: white; padding: 30px; border: 1px solid #ddd; border-top: none; border-radius: 0 0 10px 10px;">
-        <h2 style="color: #4f46e5; margin-top: 0;">Hello ${customerName}! 👋</h2>
-        
-        <div style="font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
-            ${content}
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Arial, sans-serif; line-height: 1.6; color: #333; margin: 0; padding: 0; background-color: #f5f5f5;">
+    <div class="container" style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div class="header" style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 30px; text-align: center; border-radius: 10px 10px 0 0;">
+            <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🔗 ${businessName}</h1>
+            <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">Loyalty Program</p>
         </div>
         
-        ${context.isRewardReached ? `
-        <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin: 20px 0; text-align: center;">
-            <h3 style="color: #155724; margin: 0 0 10px 0;">🎉 Reward Ready to Claim!</h3>
-            <p style="margin: 0; color: #155724; font-weight: bold;">Show this email to our staff to claim your ${context.rewardTitle}!</p>
-        </div>
-        ` : ''}
-        
-        ${context.visitCount !== undefined && context.visitGoal ? `
-        <!-- Progress Bar Section -->
-        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 25px 0; border: 1px solid #e9ecef;">
-            <h3 style="margin: 0 0 15px 0; color: #495057; text-align: center; font-size: 18px;">
-                🎯 Your Loyalty Progress
-            </h3>
+        <div class="content" style="background: white; padding: 30px; border-radius: 0 0 10px 10px;">
+            <h2 style="color: #4f46e5; margin-top: 0; font-size: 22px;">Hello ${customerName}! 👋</h2>
             
-            <div style="text-align: center; margin-bottom: 15px;">
-                <span style="font-size: 24px; font-weight: bold; color: #4f46e5;">
-                    ${Math.min(context.visitCount, context.visitGoal)} / ${context.visitGoal}
-                </span>
-                <span style="font-size: 16px; color: #6c757d; margin-left: 5px;">visits</span>
+            <div style="font-size: 16px; line-height: 1.6; margin-bottom: 25px;">
+                ${content}
             </div>
             
-            <!-- Progress Bar -->
-            <div style="background: #e9ecef; border-radius: 20px; height: 20px; margin: 15px 0; overflow: hidden; position: relative;">
-                <div style="background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%); height: 100%; width: ${Math.min(progressPercentage, 100)}%; border-radius: 20px; transition: width 0.3s ease;"></div>
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: ${progressPercentage > 50 ? 'white' : '#495057'}; font-size: 12px; font-weight: bold;">
-                    ${Math.round(Math.min(progressPercentage, 100))}%
-                </div>
+            ${context.isRewardReached ? `
+            <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 20px; margin: 20px 0; text-align: center;">
+                <h3 style="color: #155724; margin: 0 0 10px 0; font-size: 18px;">🎉 Reward Ready to Claim!</h3>
+                <p style="margin: 0; color: #155724; font-weight: bold; font-size: 16px;">Show this email to our staff to claim your ${context.rewardTitle}!</p>
             </div>
+            ` : ''}
             
-            ${!context.isRewardReached ? `
-            <p style="margin: 10px 0 0 0; color: #6c757d; text-align: center; font-size: 14px;">
-                ${Math.max(0, context.visitGoal - context.visitCount)} more visit${Math.max(0, context.visitGoal - context.visitCount) === 1 ? '' : 's'} to earn your <strong>${context.rewardTitle}</strong>!
-            </p>
-            ` : `
-            <p style="margin: 10px 0 0 0; color: #28a745; text-align: center; font-size: 14px; font-weight: bold;">
-                🎉 Congratulations! You've earned your <strong>${context.rewardTitle}</strong>!
-            </p>
-            `}
-        </div>
-        ` : ''}
-        
-        ${context.qrCodeUrl && emailType === 'visit_confirmation' ? `
-        <!-- Mobile-Optimized QR Code Section -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 15px; border-radius: 10px; text-align: center; margin: 25px 0;">
-            <h3 style="color: white; margin: 0 0 20px 0; font-size: 18px;">
-                📱 Your Personal QR Code
-            </h3>
-            <!-- Mobile-optimized QR container -->
-            <div style="background: white; padding: 25px 20px; border-radius: 15px; margin: 15px auto; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+            ${currentVisits > 0 && visitGoal > 0 ? `
+            <!-- Progress Bar Section -->
+            <div class="progress-section" style="background: #f8f9fa; padding: 20px; border-radius: 12px; margin: 25px 0; border: 1px solid #e9ecef;">
+                <h3 style="margin: 0 0 20px 0; color: #495057; text-align: center; font-size: 18px;">
+                    🎯 Your Loyalty Progress
+                </h3>
+                
                 <div style="text-align: center; margin-bottom: 20px;">
-                    <h2 style="margin: 0; color: #333; font-size: 22px; font-weight: bold;">
-                        ${businessName}
-                    </h2>
-                    <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">Loyalty Program</p>
+                    <span class="progress-numbers" style="font-size: 28px; font-weight: bold; color: #4f46e5;">
+                        ${currentVisits} / ${visitGoal}
+                    </span>
+                    <span style="font-size: 16px; color: #6c757d; margin-left: 8px;">visits</span>
                 </div>
-                <!-- Larger, mobile-friendly QR code -->
-                <div style="text-align: center; margin: 20px 0;">
-                    <img src="${context.qrCodeUrl}" alt="Your QR Code" style="width: 200px; height: 200px; max-width: 100%; border: 3px solid #4f46e5; border-radius: 12px; display: block; margin: 0 auto;" />
+                
+                <!-- Progress Bar -->
+                <div style="background: #e9ecef; border-radius: 25px; height: 24px; margin: 20px 0; overflow: hidden; position: relative; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+                    <div style="background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%); height: 100%; width: ${progressPercentage}%; border-radius: 25px; transition: width 0.3s ease; min-width: ${progressPercentage > 0 ? '24px' : '0'};"></div>
+                    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: ${progressPercentage > 50 ? 'white' : '#495057'}; font-size: 13px; font-weight: bold; text-shadow: ${progressPercentage > 50 ? '0 1px 2px rgba(0,0,0,0.3)' : 'none'};">
+                        ${Math.round(progressPercentage)}%
+                    </div>
                 </div>
-                <p style="margin: 15px 0 0 0; color: #666; font-size: 14px; font-weight: 500;">
-                    Customer: ${customerName}
+                
+                ${!context.isRewardReached ? `
+                <p style="margin: 15px 0 0 0; color: #6c757d; text-align: center; font-size: 15px; line-height: 1.4;">
+                    ${visitsRemaining} more visit${visitsRemaining === 1 ? '' : 's'} to earn your <strong style="color: #4f46e5;">${context.rewardTitle}</strong>!
                 </p>
+                ` : `
+                <p style="margin: 15px 0 0 0; color: #28a745; text-align: center; font-size: 15px; font-weight: bold;">
+                    🎉 Congratulations! You've earned your <strong>${context.rewardTitle}</strong>!
+                </p>
+                `}
             </div>
-            <!-- Mobile-friendly instructions -->
-            <div style="margin-top: 20px; padding: 0 10px;">
-                <p style="color: white; margin: 0 0 10px 0; font-size: 16px; font-weight: 500;">
-                    📥 Save this QR code to your phone!
-                </p>
-                <p style="color: white; margin: 0 0 15px 0; font-size: 14px; opacity: 0.9; line-height: 1.4;">
-                    Show this code to staff to record your visit instantly
-                </p>
-                <a href="https://loyallinkk.vercel.app/qr-download/${context.customerId}" 
-                   style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 20px; border-radius: 25px; text-decoration: none; font-size: 14px; font-weight: bold; border: 2px solid rgba(255,255,255,0.3); margin-top: 5px;">
-                    📱 Download High-Quality QR Code
-                </a>
+            ` : ''}
+            
+            ${context.qrCodeUrl && emailType === 'visit_confirmation' ? `
+            <!-- Mobile-Optimized QR Code Section -->
+            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px 20px; border-radius: 12px; text-align: center; margin: 25px 0;">
+                <h3 style="color: white; margin: 0 0 20px 0; font-size: 18px; font-weight: bold;">
+                    📱 Your Personal QR Code
+                </h3>
+                
+                <!-- Mobile-optimized QR container -->
+                <div class="qr-container" style="background: white; padding: 25px 20px; border-radius: 15px; margin: 15px auto; max-width: 320px; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                    <div style="text-align: center; margin-bottom: 20px;">
+                        <h2 style="margin: 0; color: #333; font-size: 20px; font-weight: bold; line-height: 1.2;">
+                            ${businessName}
+                        </h2>
+                        <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">Loyalty Program</p>
+                    </div>
+                    
+                    <!-- Larger, mobile-friendly QR code -->
+                    <div style="text-align: center; margin: 20px 0; padding: 10px; background: #f8f9fa; border-radius: 12px;">
+                        <img class="qr-code-img" src="${context.qrCodeUrl}" alt="Your QR Code" style="width: 200px; height: 200px; max-width: 100%; border: 4px solid #4f46e5; border-radius: 12px; display: block; margin: 0 auto; background: white; padding: 8px;" />
+                    </div>
+                    
+                    <p style="margin: 15px 0 0 0; color: #666; font-size: 14px; font-weight: 600;">
+                        Customer: ${customerName}
+                    </p>
+                </div>
+                
+                <!-- Mobile-friendly instructions -->
+                <div style="margin-top: 20px; padding: 0 10px;">
+                    <p style="color: white; margin: 0 0 10px 0; font-size: 16px; font-weight: 600;">
+                        📥 Save this QR code to your phone!
+                    </p>
+                    <p style="color: white; margin: 0 0 20px 0; font-size: 14px; opacity: 0.9; line-height: 1.5;">
+                        Show this code to staff to record your visit instantly
+                    </p>
+                    <a href="https://loyallinkk.vercel.app/qr-download/${context.customerId}" 
+                       class="qr-download-btn"
+                       style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 14px 24px; border-radius: 25px; text-decoration: none; font-size: 14px; font-weight: bold; border: 2px solid rgba(255,255,255,0.3); margin-top: 5px; transition: all 0.3s ease; backdrop-filter: blur(5px);">
+                        📱 Download High-Quality QR Code
+                    </a>
+                </div>
             </div>
+            ` : ''}
         </div>
-        ` : ''}
-    </div>
-    
-    <div style="text-align: center; margin-top: 20px; color: #666; font-size: 12px;">
-        <p>Powered by 🔗 LinkLoyal - Making loyalty simple and rewarding</p>
+        
+        <div style="text-align: center; margin-top: 20px; padding: 20px; color: #666; font-size: 12px; background: #f8f9fa;">
+            <p style="margin: 0;">Powered by 🔗 LinkLoyal - Making loyalty simple and rewarding</p>
+        </div>
     </div>
 </body>
 </html>`

@@ -273,13 +273,28 @@ function JoinBusinessContent() {
                                 <Gift className="w-5 h-5 text-teal-600 mr-2" />
                                 <span className="font-medium text-teal-900">Current Progress</span>
                             </div>
-                            <p className="text-teal-800">{registeredCustomer.visits} of {business?.visit_goal} visits completed</p>
-                            <div className="w-full bg-teal-200 rounded-full h-2 mt-2">
-                                <div
-                                    className="bg-teal-600 h-2 rounded-full transition-all duration-500"
-                                    style={{ width: `${(registeredCustomer.visits / (business?.visit_goal || 5)) * 100}%` }}
-                                ></div>
-                            </div>
+                            {(() => {
+                                const visitGoal = business?.visit_goal || 5
+                                const currentCycleVisits = registeredCustomer.visits % visitGoal
+                                const displayVisits = currentCycleVisits === 0 && registeredCustomer.visits > 0 ? visitGoal : currentCycleVisits
+                                const totalRewards = Math.floor(registeredCustomer.visits / visitGoal)
+                                const progressPercentage = (displayVisits / visitGoal) * 100
+
+                                return (
+                                    <>
+                                        <p className="text-teal-800">
+                                            {displayVisits} of {visitGoal} visits completed
+                                            {totalRewards > 0 && ` (${totalRewards} reward${totalRewards === 1 ? '' : 's'} earned)`}
+                                        </p>
+                                        <div className="w-full bg-teal-200 rounded-full h-2 mt-2">
+                                            <div
+                                                className="bg-teal-600 h-2 rounded-full transition-all duration-500"
+                                                style={{ width: `${progressPercentage}%` }}
+                                            ></div>
+                                        </div>
+                                    </>
+                                )
+                            })()}
                         </div>
 
                         <div className="mt-6">

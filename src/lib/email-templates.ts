@@ -177,51 +177,113 @@ export function getLoyaltyEmailTemplate({
             color: #667eea;
             text-decoration: none;
         }
+        /* Mobile-First Responsive Design */
         @media (max-width: 600px) {
             .container {
                 margin: 0 !important;
                 box-shadow: none !important;
                 width: 100% !important;
+                border-radius: 0 !important;
             }
             .header, .content, .footer {
-                padding: 15px !important;
+                padding: 20px 16px !important;
             }
             .header {
-                padding: 20px 15px !important;
+                padding: 30px 16px !important;
             }
             .business-name {
-                font-size: 32px !important;
-                margin-bottom: 10px !important;
+                font-size: 28px !important;
+                margin-bottom: 12px !important;
+                line-height: 1.2 !important;
             }
             .header .subtitle {
                 font-size: 16px !important;
-                margin: 10px 0 15px 0 !important;
+                margin: 12px 0 16px 0 !important;
+                line-height: 1.3 !important;
             }
             .linkloyal-brand {
-                font-size: 9px !important;
-                padding: 3px 8px !important;
-                margin-top: 10px !important;
+                font-size: 10px !important;
+                padding: 4px 10px !important;
+                margin-top: 12px !important;
             }
             .points-earned {
-                font-size: 36px !important;
+                font-size: 40px !important;
+                line-height: 1.1 !important;
             }
             .points-card {
-                padding: 20px !important;
-                margin: 20px 0 !important;
+                padding: 24px 16px !important;
+                margin: 24px 0 !important;
+                border-radius: 12px !important;
             }
             .message {
-                padding: 15px !important;
-                font-size: 14px !important;
+                padding: 20px !important;
+                font-size: 15px !important;
+                line-height: 1.5 !important;
             }
             .cta-button {
-                padding: 12px 25px !important;
-                font-size: 14px !important;
+                padding: 16px 32px !important;
+                font-size: 16px !important;
+                min-height: 48px !important;
+                display: block !important;
+                width: 100% !important;
+                max-width: 280px !important;
+                margin: 24px auto !important;
+                text-align: center !important;
+                box-sizing: border-box !important;
             }
             .greeting {
-                font-size: 16px !important;
+                font-size: 17px !important;
+                line-height: 1.4 !important;
             }
             .business-contact {
-                font-size: 18px !important;
+                font-size: 20px !important;
+                line-height: 1.3 !important;
+            }
+            .business-phone {
+                font-size: 16px !important;
+                margin: 12px 0 !important;
+            }
+            /* QR Code Mobile Optimization */
+            .qr-code-section {
+                padding: 20px 16px !important;
+                margin: 20px 0 !important;
+            }
+            .qr-code-section img {
+                width: 200px !important;
+                height: 200px !important;
+                max-width: 100% !important;
+                border: 4px solid #667eea !important;
+                border-radius: 16px !important;
+                padding: 12px !important;
+            }
+            .qr-instructions {
+                font-size: 15px !important;
+                line-height: 1.4 !important;
+                margin: 16px 0 !important;
+            }
+            .qr-link {
+                font-size: 14px !important;
+                word-break: break-all !important;
+                line-height: 1.3 !important;
+            }
+            /* Social Links Mobile */
+            .social-links {
+                margin: 20px 0 !important;
+                display: flex !important;
+                flex-direction: column !important;
+                gap: 12px !important;
+            }
+            .social-links a {
+                display: block !important;
+                margin: 0 !important;
+                padding: 8px !important;
+                font-size: 14px !important;
+            }
+            /* Footer Mobile */
+            .footer p {
+                font-size: 13px !important;
+                line-height: 1.4 !important;
+                margin: 8px 0 !important;
             }
         }
     </style>
@@ -253,18 +315,34 @@ export function getLoyaltyEmailTemplate({
                 ${message}
             </div>
             
-            <div style="text-align: center;">
+            <div style="text-align: center;" class="qr-code-section">
                 <div style="margin: 30px 0;">
-                    <h3 style="color: #333; margin-bottom: 15px;">📱 Quick Check-In</h3>
-                    <p style="color: #666; margin-bottom: 20px;">Show this QR code at your next visit:</p>
-                    <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://loyallinkk.vercel.app/customer-qr?name=${encodeURIComponent(customerName)}&business=${businessName}`)}" 
-                         alt="Customer QR Code" 
-                         style="border: 3px solid #667eea; border-radius: 12px; padding: 10px; background: white;" />
-                    <p style="color: #666; font-size: 14px; margin-top: 15px;">
-                        Or visit: <a href="https://loyallinkk.vercel.app/customer-qr" style="color: #667eea;">loyallinkk.vercel.app/customer-qr</a>
-                    </p>
+                    <h3 style="color: #333; margin-bottom: 15px; font-size: 20px; font-weight: bold;">📱 Your Personal QR Code</h3>
+                    <p style="color: #666; margin-bottom: 20px; font-size: 16px;" class="qr-instructions">Show this code to staff to record your visit instantly:</p>
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 16px; margin: 20px 0; display: inline-block;">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`https://loyallinkk.vercel.app/customer-qr?name=${encodeURIComponent(customerName)}&business=${businessName}`)}" 
+                             alt="Customer QR Code" 
+                             style="border: 4px solid white; border-radius: 12px; padding: 8px; background: white; display: block;" 
+                             class="qr-code" />
+                        <p style="color: white; font-size: 14px; margin: 12px 0 0 0; font-weight: 600;">Customer: ${customerName}</p>
+                    </div>
+                    <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin: 20px 0; border-left: 4px solid #667eea;">
+                        <p style="color: #666; font-size: 14px; margin: 0 0 12px 0; line-height: 1.4;" class="qr-link">
+                            💡 <strong>Can't scan?</strong> Visit: <a href="https://loyallinkk.vercel.app/customer-qr" style="color: #667eea; text-decoration: none; font-weight: 600;">loyallinkk.vercel.app/customer-qr</a>
+                        </p>
+                        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 12px;">
+                            <a href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=png&download=1&data=${encodeURIComponent(`https://loyallinkk.vercel.app/customer-qr?name=${encodeURIComponent(customerName)}&business=${businessName}`)}" 
+                               style="background: #667eea; color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 600; display: inline-block;">
+                                📱 Download QR Code
+                            </a>
+                            <a href="https://loyallinkk.vercel.app/customer-qr" 
+                               style="background: #28a745; color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 600; display: inline-block;">
+                                🌐 Open Web App
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <a href="https://loyallinkk.vercel.app/customer-qr" class="cta-button">View My Account</a>
+                <a href="https://loyallinkk.vercel.app/customer-qr" class="cta-button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; display: inline-block;">📱 View My Loyalty Account</a>
             </div>
         </div>
         
@@ -465,58 +543,100 @@ export function getVisitReminderTemplate({
             font-weight: 600;
             margin: 10px 0;
         }
+        /* Mobile-First Responsive Design */
         @media (max-width: 600px) {
             .container {
                 margin: 0 !important;
                 box-shadow: none !important;
                 width: 100% !important;
+                border-radius: 0 !important;
             }
             .header, .content, .footer {
-                padding: 15px !important;
+                padding: 20px 16px !important;
             }
             .header {
-                padding: 20px 15px !important;
+                padding: 30px 16px !important;
             }
             .business-name {
-                font-size: 32px !important;
-                margin-bottom: 10px !important;
+                font-size: 28px !important;
+                margin-bottom: 12px !important;
+                line-height: 1.2 !important;
             }
             .linkloyal-brand {
-                font-size: 9px !important;
-                padding: 3px 8px !important;
-                margin-top: 10px !important;
+                font-size: 10px !important;
+                padding: 4px 10px !important;
+                margin-top: 12px !important;
             }
             .progress-card {
-                padding: 20px !important;
-                margin: 20px 0 !important;
+                padding: 24px 16px !important;
+                margin: 24px 0 !important;
+                border-radius: 16px !important;
             }
             .progress-bar {
-                height: 16px !important;
-                margin: 15px 0 !important;
+                height: 24px !important;
+                margin: 20px 0 !important;
+                border-radius: 12px !important;
+            }
+            .progress-text {
+                font-size: 14px !important;
+                font-weight: bold !important;
             }
             .visit-stats {
-                flex-direction: column !important;
-                gap: 15px !important;
+                flex-direction: row !important;
+                gap: 8px !important;
+                justify-content: space-between !important;
+                margin: 20px 0 !important;
             }
             .stat {
                 margin: 0 !important;
+                flex: 1 !important;
+                padding: 12px 8px !important;
+                background: rgba(255,255,255,0.1) !important;
+                border-radius: 12px !important;
             }
             .stat-number {
-                font-size: 24px !important;
+                font-size: 28px !important;
+                line-height: 1.1 !important;
+                margin-bottom: 4px !important;
             }
             .stat-label {
-                font-size: 12px !important;
+                font-size: 11px !important;
+                font-weight: 700 !important;
+                text-transform: uppercase !important;
+                letter-spacing: 0.5px !important;
             }
             .message {
-                padding: 15px !important;
-                font-size: 14px !important;
+                padding: 20px !important;
+                font-size: 15px !important;
+                line-height: 1.5 !important;
+                border-radius: 12px !important;
             }
             .reward-preview {
-                padding: 15px !important;
-                margin: 15px 0 !important;
+                padding: 20px !important;
+                margin: 20px 0 !important;
+                border-radius: 16px !important;
+            }
+            .reward-preview h3 {
+                font-size: 20px !important;
+                margin: 0 0 12px 0 !important;
+            }
+            .reward-preview p {
+                font-size: 15px !important;
+                line-height: 1.4 !important;
+                margin: 8px 0 !important;
             }
             .business-contact {
-                font-size: 18px !important;
+                font-size: 20px !important;
+                line-height: 1.3 !important;
+            }
+            .business-phone {
+                font-size: 16px !important;
+                margin: 12px 0 !important;
+            }
+            .footer p {
+                font-size: 13px !important;
+                line-height: 1.4 !important;
+                margin: 8px 0 !important;
             }
         }
     </style>
@@ -800,67 +920,110 @@ export function getRewardCompletionTemplate({
             font-weight: 600;
             margin: 10px 0;
         }
+        /* Mobile-First Responsive Design */
         @media (max-width: 600px) {
             .container {
                 margin: 0 !important;
                 box-shadow: none !important;
                 width: 100% !important;
+                border-radius: 0 !important;
             }
             .header, .content, .footer {
-                padding: 15px !important;
+                padding: 20px 16px !important;
             }
             .header {
-                padding: 20px 15px !important;
+                padding: 30px 16px !important;
             }
             .business-name {
-                font-size: 32px !important;
-                margin-bottom: 10px !important;
+                font-size: 28px !important;
+                margin-bottom: 12px !important;
+                line-height: 1.2 !important;
             }
             .header .subtitle {
                 font-size: 16px !important;
-                margin: 10px 0 15px 0 !important;
+                margin: 12px 0 16px 0 !important;
+                line-height: 1.3 !important;
             }
             .linkloyal-brand {
-                font-size: 9px !important;
-                padding: 3px 8px !important;
-                margin-top: 10px !important;
+                font-size: 10px !important;
+                padding: 4px 10px !important;
+                margin-top: 12px !important;
             }
             .reward-title {
-                font-size: 20px !important;
+                font-size: 24px !important;
+                line-height: 1.2 !important;
+                margin: 16px 0 12px 0 !important;
             }
             .reward-description {
                 font-size: 16px !important;
+                line-height: 1.4 !important;
+                margin: 12px 0 !important;
             }
             .visit-number {
-                font-size: 32px !important;
+                font-size: 40px !important;
+                line-height: 1.1 !important;
             }
             .visit-label {
-                font-size: 14px !important;
+                font-size: 16px !important;
+                margin: 8px 0 !important;
             }
             .celebration-banner {
-                padding: 20px !important;
-                margin: 20px 0 !important;
+                padding: 24px 16px !important;
+                margin: 24px 0 !important;
+                border-radius: 16px !important;
+            }
+            .celebration-banner::before {
+                font-size: 24px !important;
+                padding: 8px !important;
+                top: -12px !important;
             }
             .visit-achievement {
-                padding: 20px !important;
-                margin: 20px 0 !important;
+                padding: 24px 16px !important;
+                margin: 24px 0 !important;
+                border-radius: 16px !important;
+            }
+            .visit-achievement p {
+                font-size: 15px !important;
+                line-height: 1.4 !important;
             }
             .claim-section {
-                padding: 20px !important;
-                margin: 20px 0 !important;
+                padding: 24px 16px !important;
+                margin: 24px 0 !important;
+                border-radius: 16px !important;
             }
             .claim-title {
-                font-size: 20px !important;
+                font-size: 22px !important;
+                line-height: 1.2 !important;
+                margin: 0 0 16px 0 !important;
             }
             .claim-instructions {
-                font-size: 14px !important;
+                font-size: 15px !important;
+                line-height: 1.5 !important;
+                margin: 16px 0 !important;
             }
             .claim-button {
-                padding: 12px 25px !important;
-                font-size: 14px !important;
+                padding: 16px 32px !important;
+                font-size: 16px !important;
+                min-height: 48px !important;
+                display: block !important;
+                width: 100% !important;
+                max-width: 280px !important;
+                margin: 24px auto !important;
+                text-align: center !important;
+                box-sizing: border-box !important;
             }
             .business-contact {
-                font-size: 18px !important;
+                font-size: 20px !important;
+                line-height: 1.3 !important;
+            }
+            .business-phone {
+                font-size: 16px !important;
+                margin: 12px 0 !important;
+            }
+            .footer p {
+                font-size: 13px !important;
+                line-height: 1.4 !important;
+                margin: 8px 0 !important;
             }
         }
     </style>
@@ -962,17 +1125,30 @@ export function getSimpleEmailTemplate(message: string, businessName: string = '
             overflow: hidden;
         }
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
             color: white;
             padding: 30px;
             text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 100px;
+            height: 100px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            opacity: 0.5;
         }
         .business-name {
             font-size: 36px;
             font-weight: 900;
             margin: 0 0 15px 0;
             text-shadow: 0 3px 6px rgba(0,0,0,0.4);
-            letter-spacing: 1px;
+            letter-spacing: 1.5px;
             line-height: 1.1;
         }
         .linkloyal-brand {
@@ -1012,29 +1188,47 @@ export function getSimpleEmailTemplate(message: string, businessName: string = '
             font-weight: 600;
             margin: 8px 0;
         }
+        /* Mobile-First Responsive Design */
         @media (max-width: 600px) {
             .container {
                 margin: 0 !important;
                 border-radius: 0 !important;
                 width: 100% !important;
+                box-shadow: none !important;
             }
             .header, .content, .footer {
-                padding: 15px !important;
+                padding: 20px 16px !important;
+            }
+            .header {
+                padding: 30px 16px !important;
             }
             .business-name {
-                font-size: 24px !important;
-                margin-bottom: 10px !important;
+                font-size: 28px !important;
+                margin-bottom: 12px !important;
+                line-height: 1.2 !important;
             }
             .linkloyal-brand {
-                font-size: 8px !important;
-                padding: 3px 8px !important;
-                margin-top: 10px !important;
+                font-size: 10px !important;
+                padding: 4px 10px !important;
+                margin-top: 12px !important;
             }
             .content {
-                font-size: 14px !important;
+                font-size: 15px !important;
+                line-height: 1.5 !important;
+                padding: 24px 16px !important;
             }
             .business-contact {
+                font-size: 18px !important;
+                line-height: 1.3 !important;
+            }
+            .business-phone {
                 font-size: 16px !important;
+                margin: 12px 0 !important;
+            }
+            .footer p {
+                font-size: 13px !important;
+                line-height: 1.4 !important;
+                margin: 8px 0 !important;
             }
         }
     </style>

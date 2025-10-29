@@ -11,21 +11,54 @@ export async function POST(request: NextRequest) {
             points,
             totalPoints,
             businessName,
+            businessType,
             currentVisits,
             visitGoal,
+            emailType,
+            context,
             template = 'simple'
         } = await request.json()
 
-        if (!email || !message) {
+        if (!email && template !== 'ai-enhanced') {
             return NextResponse.json(
-                { error: 'Email and message are required' },
+                { error: 'Email is required' },
                 { status: 400 }
             )
         }
 
         // Generate HTML email based on template type
         let htmlContent: string
-        if (template === 'loyalty' && (points || customerName)) {
+        let emailSubject = subject || 'Loyalty Program Update'
+
+        if (template === 'ai-enhanced' && customerName && businessName && emailType && context) {
+            // Use the new AI-enhanced email service
+            const { sendAIEnhancedEmail } = await import('@/lib/email')
+
+            try {
+                const emailSent = await sendAIEnhancedEmail(
+                    email,
+                    customerName,
+                    businessName,
+                    businessType || 'Business',
+                    emailType,
+                    context
+                )
+
+                return NextResponse.json({
+                    success: emailSent,
+                    message: emailSent ? 'AI-enhanced email sent successfully!' : 'Failed to send AI-enhanced email',
+                    service: 'ai-enhanced',
+                    template: 'ai-enhanced'
+                })
+            } catch (error) {
+                console.error('❌ AI-enhanced email error:', error)
+                return NextResponse.json({
+                    success: false,
+                    error: 'AI-enhanced email failed',
+                    details: error instanceof Error ? error.message : 'Unknown error'
+                }, { status: 500 })
+            }
+        } else if (template === 'loyalty' && (points || customerName)) {
             htmlContent = getLoyaltyEmailTemplate({
                 customerName,
                 points,
@@ -41,9 +74,15 @@ export async function POST(request: NextRequest) {
                 businessName,
                 message
             })
-        } else if (template === 'raw-html' || message.includes('<!DOCTYPE html>')) {
+        } else if (template === 'raw-html' || (message && message.includes('<!DOCTYPE html>'))) {
             htmlContent = message
         } else {
+            if (!message) {
+                return NextResponse.json(
+                    { error: 'Message is required for this template type' },
+                    { status: 400 }
+                )
+            }
             htmlContent = getSimpleEmailTemplate(message)
         }
 

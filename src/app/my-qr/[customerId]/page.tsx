@@ -77,8 +77,13 @@ export default function MyQRPage() {
         )
     }
 
-    const progressPercentage = Math.min((customer.visits / (business?.visit_goal || 5)) * 100, 100)
-    const visitsLeft = Math.max((business?.visit_goal || 5) - customer.visits, 0)
+    // Fix visit count logic - use modulo to show current cycle progress
+    const visitGoal = business?.visit_goal || 5
+    const currentCycleVisits = customer.visits % visitGoal
+    const displayVisits = currentCycleVisits === 0 && customer.visits > 0 ? visitGoal : currentCycleVisits
+    const progressPercentage = (displayVisits / visitGoal) * 100
+    const visitsLeft = Math.max(visitGoal - displayVisits, 0)
+    const totalRewards = Math.floor(customer.visits / visitGoal)
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 p-4">
@@ -119,8 +124,11 @@ export default function MyQRPage() {
                     <div className="grid grid-cols-2 gap-4 mb-6">
                         <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 text-center border-2 border-blue-200">
                             <Calendar className="w-6 h-6 text-blue-600 mx-auto mb-2" />
-                            <p className="text-3xl font-bold text-blue-900">{customer.visits}</p>
-                            <p className="text-sm text-blue-700">Visits</p>
+                            <p className="text-3xl font-bold text-blue-900">{displayVisits}</p>
+                            <p className="text-sm text-blue-700">Current Visits</p>
+                            {totalRewards > 0 && (
+                                <p className="text-xs text-blue-600 mt-1">{totalRewards} reward{totalRewards === 1 ? '' : 's'} earned</p>
+                            )}
                         </div>
                         <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 text-center border-2 border-purple-200">
                             <Award className="w-6 h-6 text-purple-600 mx-auto mb-2" />
