@@ -166,36 +166,57 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
 
             {/* AI Business Intelligence */}
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                {/* Top Customers - AI Ranked */}
+                {/* Customer Progress Charts */}
                 {metrics?.topCustomers && metrics.topCustomers.length > 0 && (
                     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                         <div className="flex items-center gap-2 mb-4">
-                            <div className="bg-yellow-100 p-2 rounded-lg">
-                                <Users className="w-5 h-5 text-yellow-600" />
+                            <div className="bg-blue-100 p-2 rounded-lg">
+                                <Users className="w-5 h-5 text-blue-600" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-gray-900">🏆 Top Customers</h3>
-                                <p className="text-xs text-gray-500">AI-ranked by loyalty</p>
+                                <h3 className="font-semibold text-gray-900">📊 Customer Progress</h3>
+                                <p className="text-xs text-gray-500">Loyalty journey tracking</p>
                             </div>
                         </div>
-                        <div className="space-y-3">
-                            {metrics.topCustomers.slice(0, 3).map((customer, index) => (
-                                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-500'
-                                            }`}>
-                                            {index + 1}
+                        <div className="space-y-4">
+                            {metrics.topCustomers.slice(0, 5).map((customer, index) => {
+                                const progressPercentage = Math.min((customer.visits / 5) * 100, 100) // Assuming 5 visit goal
+                                const isRewardEarned = customer.visits >= 5
+
+                                return (
+                                    <div key={index} className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <span className="font-medium text-gray-900 text-sm">{customer.name}</span>
+                                            <span className="text-xs text-gray-600">{customer.visits}/5 visits</span>
                                         </div>
-                                        <span className="font-medium text-gray-900 text-sm">{customer.name}</span>
+
+                                        {/* Progress Bar */}
+                                        <div className="relative">
+                                            <div className="bg-gray-200 rounded-full h-3 overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full transition-all duration-500 ${isRewardEarned
+                                                        ? 'bg-gradient-to-r from-green-400 to-green-600'
+                                                        : 'bg-gradient-to-r from-blue-400 to-blue-600'
+                                                        }`}
+                                                    style={{ width: `${progressPercentage}%` }}
+                                                ></div>
+                                            </div>
+                                            {isRewardEarned && (
+                                                <div className="absolute -top-1 right-0 transform translate-x-2">
+                                                    <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                                                        🎁 Reward earned!
+                                                    </span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
-                                    <span className="text-sm font-semibold text-blue-600">{customer.visits}</span>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     </div>
                 )}
 
-                {/* Visit Trends - AI Analyzed */}
+                {/* Weekly & Monthly Progress */}
                 {metrics?.visitTrends && (
                     <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
                         <div className="flex items-center gap-2 mb-4">
@@ -203,24 +224,45 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
                                 <TrendingUp className="w-5 h-5 text-green-600" />
                             </div>
                             <div>
-                                <h3 className="font-semibold text-gray-900">📈 Visit Trends</h3>
-                                <p className="text-xs text-gray-500">AI-analyzed patterns</p>
+                                <h3 className="font-semibold text-gray-900">📈 Progress Trends</h3>
+                                <p className="text-xs text-gray-500">Weekly & monthly analysis</p>
                             </div>
                         </div>
-                        <div className="space-y-3">
-                            {metrics.visitTrends.map((trend, index) => (
-                                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                    <div className="flex items-center gap-3">
-                                        <span className="font-medium text-gray-900 text-sm">{trend.period}</span>
-                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${trend.growth > 0 ? 'bg-green-100 text-green-700' :
-                                                trend.growth < 0 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
-                                            }`}>
-                                            {trend.growth > 0 ? '+' : ''}{trend.growth}%
-                                        </span>
+                        <div className="space-y-4">
+                            {metrics.visitTrends.map((trend, index) => {
+                                const isPositive = trend.growth > 0
+                                const isNegative = trend.growth < 0
+                                const progressWidth = Math.min(Math.abs(trend.growth) * 2, 100) // Scale for visual
+
+                                return (
+                                    <div key={index} className="space-y-2">
+                                        <div className="flex items-center justify-between">
+                                            <div className="flex items-center gap-2">
+                                                <span className="font-medium text-gray-900 text-sm">{trend.period}</span>
+                                                <span className={`text-xs px-2 py-1 rounded-full font-medium ${isPositive ? 'bg-green-100 text-green-700' :
+                                                        isNegative ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                                                    }`}>
+                                                    {trend.growth > 0 ? '+' : ''}{trend.growth}%
+                                                </span>
+                                            </div>
+                                            <span className="text-sm font-semibold text-blue-600">{trend.visits}</span>
+                                        </div>
+
+                                        {/* Progress Visualization */}
+                                        <div className="relative">
+                                            <div className="bg-gray-100 rounded-full h-2 overflow-hidden">
+                                                <div
+                                                    className={`h-full rounded-full transition-all duration-500 ${isPositive ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                                                            isNegative ? 'bg-gradient-to-r from-red-400 to-red-600' :
+                                                                'bg-gradient-to-r from-gray-400 to-gray-600'
+                                                        }`}
+                                                    style={{ width: `${Math.max(progressWidth, 10)}%` }}
+                                                ></div>
+                                            </div>
+                                        </div>
                                     </div>
-                                    <span className="text-sm font-semibold text-blue-600">{trend.visits}</span>
-                                </div>
-                            ))}
+                                )
+                            })}
                         </div>
                     </div>
                 )}
