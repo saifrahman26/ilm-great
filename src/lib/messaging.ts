@@ -1,48 +1,7 @@
 import { Customer } from './supabase'
 import { aiService } from './ai'
 
-// Generate AI-powered message content
-async function generateAIMessage(context: {
-    businessName: string
-    businessType?: string
-    customerName: string
-    visitCount: number
-    visitGoal: number
-    rewardTitle: string
-    isRewardReached: boolean
-    emailType: 'visit_confirmation' | 'reward_earned' | 'inactive_reminder' | 'pending_reward_reminder'
-    pendingRewards?: number
-    daysSinceLastVisit?: number
-    specialOffer?: string
-}): Promise<string> {
-    try {
-        const aiResponse = await aiService.generatePersonalizedEmail(context)
 
-        if (aiResponse.success && aiResponse.content) {
-            return aiResponse.content
-        }
-    } catch (error) {
-        console.log('AI message generation failed, using fallback:', error)
-    }
-
-    // Fallback to default messages
-    switch (context.emailType) {
-        case 'visit_confirmation':
-            if (context.isRewardReached) {
-                return `🎉 Amazing! You've completed ${context.visitCount} visits and earned your <strong>${context.rewardTitle}</strong>! Show this email at your next visit to claim it.`
-            } else {
-                return `Thank you for your visit! You now have <strong>${context.visitCount} of ${context.visitGoal}</strong> visits. Keep going to earn your <strong>${context.rewardTitle}</strong>!`
-            }
-        case 'reward_earned':
-            return `🎉 Congratulations! You've earned your <strong>${context.rewardTitle}</strong>! Show this email to claim your reward.`
-        case 'pending_reward_reminder':
-            return `🎁 Hi ${context.customerName}! You have ${context.pendingRewards || 1} unclaimed reward${(context.pendingRewards || 1) > 1 ? 's' : ''} waiting for you at ${context.businessName}! Come by soon to claim your ${context.rewardTitle}. ✨`
-        case 'inactive_reminder':
-            return `We miss you! Come back to ${context.businessName} and continue your journey to earn your <strong>${context.rewardTitle}</strong>!`
-        default:
-            return `Thank you for being a valued customer at ${context.businessName}!`
-    }
-}
 
 // Generate QR code using QR Server API
 export async function generateQRCode(data: string): Promise<string> {
@@ -99,9 +58,7 @@ export async function sendEmail(customer: Customer, subject: string, htmlContent
 export async function sendVisitConfirmationEmail(
     customer: any,
     business: any,
-    visitCount: number,
-    rewardExpires: boolean = false,
-    rewardExpiryMonths: number = 1
+    visitCount: number
 ): Promise<void> {
     if (!customer.email) {
         console.log('No email provided for customer:', customer.name)
@@ -227,7 +184,7 @@ export async function sendInactiveCustomerOffer(customer: Customer, business?: a
 }
 
 // Send reward token email
-export async function sendRewardTokenEmail(customer: any, business: any, token: string, rewardNumber?: number): Promise<void> {
+export async function sendRewardTokenEmail(customer: any, business: any): Promise<void> {
     if (!customer.email) {
         console.log('No email provided for customer:', customer.name)
         return
@@ -329,9 +286,7 @@ export async function sendQRCodeToCustomer(customer: Customer, businessInfo?: { 
 // Send reward completion email
 export async function sendRewardCompletionEmail(
     customer: any,
-    business: any,
-    rewardExpires: boolean = false,
-    rewardExpiryMonths: number = 1
+    business: any
 ): Promise<void> {
     if (!customer.email) {
         console.log('No email provided for customer:', customer.name)

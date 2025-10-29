@@ -130,7 +130,7 @@ export async function POST(request: NextRequest) {
         if (customer.email) {
             try {
                 const { sendRewardTokenEmail } = await import('@/lib/messaging')
-                await sendRewardTokenEmail(customer, business, token)
+                await sendRewardTokenEmail(customer, business)
             } catch (emailError) {
                 console.error('Failed to send reward token email:', emailError)
             }

@@ -16,7 +16,7 @@ import {
 import Link from 'next/link'
 import DashboardLayout from '@/components/DashboardLayout'
 import RewardSetupPopup from '@/components/RewardSetupPopup'
-import { useSetupGuard } from '@/hooks/useSetupGuard'
+import { useSetupGuard } from '@/lib/hooks/useSetupGuard'
 
 // Force dynamic rendering
 export const dynamic = 'force-dynamic'
