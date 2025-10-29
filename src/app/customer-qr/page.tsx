@@ -31,6 +31,8 @@ function CustomerQRContent() {
     const [business, setBusiness] = useState<Business | null>(null)
     const [loading, setLoading] = useState(true)
     const [error, setError] = useState('')
+    const [downloading, setDownloading] = useState(false)
+    const [sharing, setSharing] = useState(false)
 
     useEffect(() => {
         const fetchCustomerData = async () => {
@@ -60,52 +62,94 @@ function CustomerQRContent() {
     }, [customerId])
 
     const downloadQR = async () => {
-        if (!customer?.qr_code_url) return
+        if (!customer?.id || downloading) return
 
+        setDownloading(true)
         try {
-            // Fetch the image as a blob
-            const response = await fetch(customer.qr_code_url)
-            const blob = await response.blob()
+            console.log('🔽 Starting QR download for customer:', customer.id)
 
-            // Create a download link
-            const url = window.URL.createObjectURL(blob)
+            // Use our dedicated download endpoint
+            const downloadUrl = `/api/qr-download/${customer.id}`
+            console.log('🔽 Download URL:', downloadUrl)
+
+            // Create a temporary link and trigger download
             const link = document.createElement('a')
-            link.href = url
+            link.href = downloadUrl
             link.download = `${customer.name.replace(/\s+/g, '-')}-loyalty-qr.png`
+            link.target = '_blank' // Fallback to open in new tab if download fails
             document.body.appendChild(link)
             link.click()
             document.body.removeChild(link)
 
-            // Clean up the object URL
-            window.URL.revokeObjectURL(url)
+            console.log('✅ Download triggered successfully')
+
+            // Show success feedback
+            setTimeout(() => {
+                alert('✅ QR code download started!')
+            }, 500)
+
         } catch (error) {
-            console.error('Download failed:', error)
-            // Fallback: open in new tab
-            window.open(customer.qr_code_url, '_blank')
+            console.error('❌ Download failed:', error)
+            alert('❌ Download failed. Opening QR code in new tab...')
+            // Fallback: open QR code in new tab
+            if (customer.qr_code_url) {
+                window.open(customer.qr_code_url, '_blank')
+            }
+        } finally {
+            setDownloading(false)
         }
     }
 
     const shareQR = async () => {
-        if (!customer?.qr_code_url) return
+        if (!customer?.qr_code_url || !business?.name || sharing) return
 
-        if (navigator.share) {
-            try {
-                await navigator.share({
-                    title: `${customer.name}'s Loyalty QR Code`,
-                    text: `My loyalty QR code for ${business?.name}`,
-                    url: customer.qr_code_url
-                })
-            } catch (err) {
-                console.log('Error sharing:', err)
+        setSharing(true)
+        try {
+            console.log('📤 Starting QR share for customer:', customer.name)
+
+            // Create shareable content
+            const shareData = {
+                title: `${customer.name}'s Loyalty QR Code`,
+                text: `My loyalty QR code for ${business.name}. Scan to track my visits!`,
+                url: customer.qr_code_url
             }
-        } else {
-            // Fallback: copy to clipboard
-            try {
-                await navigator.clipboard.writeText(customer.qr_code_url)
-                alert('QR code URL copied to clipboard!')
-            } catch (err) {
-                console.log('Error copying to clipboard:', err)
+
+            // Check if Web Share API is supported
+            if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+                try {
+                    console.log('📤 Using Web Share API')
+                    await navigator.share(shareData)
+                    console.log('✅ Share successful')
+                } catch (err) {
+                    console.log('❌ Web Share API failed:', err)
+                    // Fallback to clipboard
+                    fallbackShare()
+                }
+            } else {
+                console.log('📤 Web Share API not supported, using fallback')
+                fallbackShare()
             }
+
+            function fallbackShare() {
+                if (!customer?.qr_code_url) return
+
+                // Fallback: copy to clipboard
+                if (navigator.clipboard) {
+                    navigator.clipboard.writeText(customer.qr_code_url).then(() => {
+                        alert('✅ QR code URL copied to clipboard!')
+                        console.log('✅ Copied to clipboard successfully')
+                    }).catch((err) => {
+                        console.error('❌ Clipboard copy failed:', err)
+                        // Final fallback: show URL in alert
+                        prompt('Copy this QR code URL:', customer.qr_code_url)
+                    })
+                } else {
+                    // Final fallback: show URL in prompt for manual copy
+                    prompt('Copy this QR code URL:', customer.qr_code_url)
+                }
+            }
+        } finally {
+            setSharing(false)
         }
     }
 
@@ -217,17 +261,27 @@ function CustomerQRContent() {
                         <div className="flex space-x-3 mb-6">
                             <button
                                 onClick={downloadQR}
-                                className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 transition-colors duration-200 flex items-center justify-center space-x-2"
+                                disabled={!customer?.id || downloading}
+                                className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 active:bg-blue-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2 transform hover:scale-105 active:scale-95"
                             >
-                                <Download className="w-4 h-4" />
-                                <span>Download</span>
+                                {downloading ? (
+                                    <Loader className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Download className="w-4 h-4" />
+                                )}
+                                <span>{downloading ? 'Downloading...' : 'Download'}</span>
                             </button>
                             <button
                                 onClick={shareQR}
-                                className="flex-1 bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 transition-colors duration-200 flex items-center justify-center space-x-2"
+                                disabled={!customer?.qr_code_url || sharing}
+                                className="flex-1 bg-gray-600 text-white px-4 py-3 rounded-lg hover:bg-gray-700 active:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center space-x-2 transform hover:scale-105 active:scale-95"
                             >
-                                <Share2 className="w-4 h-4" />
-                                <span>Share</span>
+                                {sharing ? (
+                                    <Loader className="w-4 h-4 animate-spin" />
+                                ) : (
+                                    <Share2 className="w-4 h-4" />
+                                )}
+                                <span>{sharing ? 'Sharing...' : 'Share'}</span>
                             </button>
                         </div>
                     </div>
