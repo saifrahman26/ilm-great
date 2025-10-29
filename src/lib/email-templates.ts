@@ -766,7 +766,7 @@ export function getRewardCompletionTemplate({
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
         .header {
-            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 50%, #d35400 100%);
             color: white;
             padding: 40px 30px;
             text-align: center;
@@ -812,12 +812,12 @@ export function getRewardCompletionTemplate({
             padding: 40px 30px;
         }
         .celebration-banner {
-            background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 50%, #fdcb6e 100%);
             padding: 30px;
             border-radius: 15px;
             text-align: center;
             margin: 30px 0;
-            border: 3px solid #ff6b6b;
+            border: 3px solid #f39c12;
             position: relative;
         }
         .celebration-banner::before {
@@ -835,7 +835,7 @@ export function getRewardCompletionTemplate({
         .reward-title {
             font-size: 28px;
             font-weight: bold;
-            color: #d63031;
+            color: #d35400;
             margin: 20px 0 10px 0;
         }
         .reward-description {
@@ -845,17 +845,17 @@ export function getRewardCompletionTemplate({
             line-height: 1.5;
         }
         .visit-achievement {
-            background: linear-gradient(135deg, #a8e6cf 0%, #7fcdcd 100%);
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 50%, #ffe082 100%);
             padding: 25px;
             border-radius: 12px;
             text-align: center;
             margin: 25px 0;
-            border: 2px solid #00b894;
+            border: 2px solid #ffa000;
         }
         .visit-number {
             font-size: 48px;
             font-weight: bold;
-            color: #00b894;
+            color: #e65100;
             margin: 0;
             text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
@@ -865,7 +865,7 @@ export function getRewardCompletionTemplate({
             margin: 5px 0;
         }
         .claim-section {
-            background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%);
+            background: linear-gradient(135deg, #ff8f00 0%, #ff6f00 50%, #e65100 100%);
             padding: 30px;
             border-radius: 12px;
             text-align: center;
@@ -885,7 +885,7 @@ export function getRewardCompletionTemplate({
         .claim-button {
             display: inline-block;
             background: white;
-            color: #fd79a8;
+            color: #e65100;
             padding: 15px 30px;
             text-decoration: none;
             border-radius: 25px;
@@ -916,7 +916,7 @@ export function getRewardCompletionTemplate({
         }
         .business-phone {
             font-size: 16px;
-            color: #ff6b6b;
+            color: #f39c12;
             font-weight: 600;
             margin: 10px 0;
         }
@@ -1040,7 +1040,7 @@ export function getRewardCompletionTemplate({
         
         <div class="content">
             <div style="font-size: 20px; color: #333; margin-bottom: 20px; text-align: center;">
-                Hello ${customerName}! 🎊
+                Dear ${customerName}, 🎊
             </div>
             
             <div class="celebration-banner">
@@ -1051,7 +1051,7 @@ export function getRewardCompletionTemplate({
             <div class="visit-achievement">
                 <div class="visit-number">${visitsCompleted}</div>
                 <div class="visit-label">Visits Completed!</div>
-                <p style="margin: 10px 0; color: #00b894; font-weight: bold;">
+                <p style="margin: 10px 0; color: #e65100; font-weight: bold;">
                     🎯 Goal: ${visitGoal} visits ✅
                 </p>
             </div>
@@ -1059,14 +1059,14 @@ export function getRewardCompletionTemplate({
             <div class="claim-section">
                 <div class="claim-title">🎁 How to Claim Your Reward</div>
                 <div class="claim-instructions">
-                    Show this email to any staff member at ${businessName} to claim your reward!
+                    Present this email to any team member at ${businessName} to claim your reward!
                     <br><br>
                     ${rewardExpires ? `
                     <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; margin: 15px 0;">
                         <p style="margin: 0; font-size: 16px; font-weight: bold;">⏰ IMPORTANT: This reward expires in ${rewardExpiryMonths} month${rewardExpiryMonths === 1 ? '' : 's'}</p>
-                        <p style="margin: 5px 0 0 0; font-size: 14px;">Please claim it before the expiry date to avoid losing your reward!</p>
+                        <p style="margin: 5px 0 0 0; font-size: 14px;">Please redeem before the expiry date to enjoy your reward!</p>
                     </div>
-                    ` : '<strong>Valid for your next visit</strong>'}
+                    ` : '<strong>Ready to redeem on your next visit</strong>'}
                 </div>
                 <a href="#" class="claim-button">📱 Save This Email</a>
             </div>
@@ -1089,7 +1089,7 @@ export function getRewardCompletionTemplate({
                 Powered by <strong>🔗 LinkLoyal</strong> - Making loyalty simple and rewarding
             </p>
             <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                This reward email was generated automatically when you completed ${visitGoal} visits.
+                You've successfully completed ${visitGoal} visits and earned this reward!
             </p>
         </div>
     </div>
