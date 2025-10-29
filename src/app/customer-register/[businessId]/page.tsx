@@ -148,9 +148,28 @@ export default function CustomerRegisterPage() {
                         )}
                     </div>
 
-                    <div className="bg-yellow-50 rounded-lg p-4 mb-6">
-                        <h3 className="font-semibold text-yellow-900 mb-2">What's Next?</h3>
-                        <ul className="text-sm text-yellow-800 space-y-1 text-left">
+                    {/* Google Review Section */}
+                    {customer.googleReviewLink && (
+                        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                            <h3 className="font-semibold text-yellow-900 mb-2">⭐ Help Us Grow!</h3>
+                            <p className="text-sm text-yellow-800 mb-3">
+                                Love your experience? Share it with others by leaving us a Google review!
+                            </p>
+                            <a
+                                href={customer.googleReviewLink}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center space-x-2 bg-yellow-500 text-white px-4 py-2 rounded-lg hover:bg-yellow-600 transition-colors font-medium text-sm"
+                            >
+                                <span>⭐</span>
+                                <span>Leave a Google Review</span>
+                            </a>
+                        </div>
+                    )}
+
+                    <div className="bg-gray-50 rounded-lg p-4 mb-6">
+                        <h3 className="font-semibold text-gray-900 mb-2">What's Next?</h3>
+                        <ul className="text-sm text-gray-700 space-y-1 text-left">
                             <li>• Your personal QR code has been sent to your email</li>
                             <li>• Show your QR code on each visit to earn points</li>
                             <li>• Collect 5 visits to earn your reward</li>

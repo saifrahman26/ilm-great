@@ -36,18 +36,20 @@ export async function POST(request: NextRequest) {
         console.log('🏢 Fetching business information...')
         const { data: businessData, error: businessError } = await supabaseAdmin
             .from('businesses')
-            .select('name, reward_title, visit_goal')
+            .select('name, reward_title, visit_goal, google_review_link')
             .eq('id', businessId)
             .single()
 
         let actualBusinessName = businessName || 'Business'
         let actualRewardTitle = rewardTitle || 'Loyalty Reward'
         let actualVisitGoal = visitGoal || 5
+        let googleReviewLink = null
 
         if (businessData && !businessError) {
             actualBusinessName = businessData.name
             actualRewardTitle = businessData.reward_title
             actualVisitGoal = businessData.visit_goal
+            googleReviewLink = businessData.google_review_link
             console.log('✅ Business info loaded:', businessData)
         } else {
             console.log('⚠️ Could not load business info, using defaults. Error:', businessError)
@@ -257,11 +259,12 @@ export async function POST(request: NextRequest) {
             console.log('⚠️ Email value received:', email)
         }
 
-        // Return updated customer object with QR code info
+        // Return updated customer object with QR code info and Google Review link
         const updatedCustomer = {
             ...customer,
             qr_code_url: qrCodeUrl,
-            qr_data: qrData
+            qr_data: qrData,
+            googleReviewLink: googleReviewLink
         }
 
         return NextResponse.json({
@@ -270,7 +273,8 @@ export async function POST(request: NextRequest) {
             message: `Customer ${name} registered successfully with first visit recorded!`,
             businessName: actualBusinessName,
             rewardTitle: actualRewardTitle,
-            visitGoal: actualVisitGoal
+            visitGoal: actualVisitGoal,
+            googleReviewLink: googleReviewLink
         })
 
     } catch (error) {

@@ -8,6 +8,7 @@ export async function createBusinessRecord(businessData: {
     reward_description?: string
     visit_goal?: number
     business_logo_url?: string
+    google_review_link?: string
 }) {
     try {
         // Get current user
@@ -29,6 +30,7 @@ export async function createBusinessRecord(businessData: {
                 reward_description: businessData.reward_description || 'Get a free coffee on us!',
                 visit_goal: businessData.visit_goal || 5,
                 business_logo_url: businessData.business_logo_url,
+                google_review_link: businessData.google_review_link,
             })
             .select()
             .single()

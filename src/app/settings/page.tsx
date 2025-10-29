@@ -32,6 +32,7 @@ const businessSettingsSchema = z.object({
     reward_title: z.string().min(3, 'Reward title must be at least 3 characters'),
     reward_description: z.string().min(10, 'Reward description must be at least 10 characters'),
     visit_goal: z.number().min(1, 'Visit goal must be at least 1').max(20, 'Visit goal cannot exceed 20'),
+    google_review_link: z.string().url('Please enter a valid Google Review URL').optional().or(z.literal('')),
 })
 
 type BusinessSettingsForm = z.infer<typeof businessSettingsSchema>
@@ -63,6 +64,7 @@ export default function SettingsPage() {
             setValue('reward_title', business.reward_title)
             setValue('reward_description', business.reward_description)
             setValue('visit_goal', business.visit_goal)
+            setValue('google_review_link', business.google_review_link || '')
 
             if (business.business_logo_url) {
                 setLogoPreview(business.business_logo_url)
@@ -123,6 +125,7 @@ export default function SettingsPage() {
                     reward_description: data.reward_description,
                     visit_goal: data.visit_goal,
                     business_logo_url: logoUrl,
+                    google_review_link: data.google_review_link || null,
                 })
                 .eq('id', business.id)
 
@@ -316,6 +319,30 @@ export default function SettingsPage() {
                                     required
                                 />
                             </div>
+                        </div>
+
+                        {/* Google Review Link */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <Award className="w-4 h-4 inline mr-1" />
+                                Google Review Link
+                                <span className="text-xs text-gray-500 ml-2">(Optional but recommended)</span>
+                            </label>
+                            <input
+                                {...register('google_review_link')}
+                                type="url"
+                                placeholder="https://g.page/r/your-business-id/review"
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 placeholder-gray-500 transition-all duration-200 hover:border-gray-400 focus:scale-105"
+                            />
+                            {errors.google_review_link && (
+                                <p className="mt-1 text-sm text-red-600">{errors.google_review_link.message}</p>
+                            )}
+                            <p className="mt-1 text-xs text-gray-500">
+                                Customers will be redirected here after registration to leave reviews.
+                                <a href="https://support.google.com/business/answer/7035772" target="_blank" rel="noopener noreferrer" className="text-teal-600 hover:text-teal-700 ml-1">
+                                    Learn how to get your Google Review link →
+                                </a>
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -47,7 +47,8 @@ export async function POST(request: NextRequest) {
             reward_description: businessData.reward_description || '',
             visit_goal: businessData.visit_goal || 5,
             reward_setup_completed: businessData.reward_setup_completed || false,
-            business_logo_url: businessData.business_logo_url || null
+            business_logo_url: businessData.business_logo_url || null,
+            google_review_link: businessData.google_review_link || null
         }
 
         const { data: newBusiness, error: createError } = await supabaseAdmin
