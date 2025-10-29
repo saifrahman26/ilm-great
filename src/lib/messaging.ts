@@ -73,6 +73,13 @@ export async function sendVisitConfirmationEmail(
 
         const isRewardReached = visitCount > 0 && visitCount % business.visit_goal === 0
 
+        // IMPORTANT: Visit confirmation emails should NEVER be sent when reward is reached
+        // Reward token emails with claim codes are sent separately
+        if (isRewardReached) {
+            console.log('⚠️ Skipping visit confirmation email - reward reached, token email will be sent instead')
+            return
+        }
+
         const emailSent = await sendAIEnhancedEmail(
             customer.email,
             customer.name,
@@ -83,7 +90,7 @@ export async function sendVisitConfirmationEmail(
                 visitCount, // Pass total visits - the email service will handle modulo calculation
                 visitGoal: business.visit_goal,
                 rewardTitle: business.reward_title,
-                isRewardReached,
+                isRewardReached: false, // Always false for visit confirmation emails
                 customerId: customer.id
             }
         )
@@ -194,6 +201,8 @@ export async function sendRewardTokenEmail(customer: any, business: any, token?:
     }
 
     try {
+        console.log('🎫 Sending reward token email with claim code:', token)
+
         // Generate QR code for the reward token
         const qrCodeUrl = await generateQRCode(`REWARD-${token || 'CLAIM'}-${customer.id}`)
 
@@ -214,10 +223,11 @@ export async function sendRewardTokenEmail(customer: any, business: any, token?:
         )
 
         if (emailSent) {
-            console.log('✅ Premium reward email sent to:', customer.email)
-            console.log('🎫 Claim token:', token)
+            console.log('✅ Premium reward email with claim token sent to:', customer.email)
+            console.log('🎫 Claim token included in email:', token)
+            console.log('📧 Email type: PREMIUM REWARD TOKEN EMAIL (not visit confirmation)')
         } else {
-            console.error('❌ Failed to send reward email to:', customer.email)
+            console.error('❌ Failed to send premium reward token email to:', customer.email)
         }
     } catch (error) {
         console.error('❌ Error sending reward email:', error)
