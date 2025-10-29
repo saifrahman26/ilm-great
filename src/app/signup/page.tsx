@@ -77,7 +77,6 @@ export default function SignupPage() {
         handleSubmit,
         formState: { errors },
         watch,
-        reset,
         setValue
     } = useForm<SignupForm>({
         resolver: zodResolver(signupSchema),
@@ -158,7 +157,7 @@ export default function SignupPage() {
             if (checkResponse.ok) {
                 const checkResult = await checkResponse.json()
                 if (checkResult.exists) {
-                    setError('🔒 Already Registered! An account with this email already exists. Please sign in instead.')
+                    setError(`🔒 Account Already Exists! An account with email "${data.email}" is already registered. Please sign in instead.`)
                     setLoading(false)
                     return
                 }
@@ -175,7 +174,7 @@ export default function SignupPage() {
                 if (businessCheckResponse.ok) {
                     const businessCheckResult = await businessCheckResponse.json()
                     if (businessCheckResult.exists) {
-                        setError('🔒 Already Registered! A business with this email already exists. Please sign in instead.')
+                        setError(`🔒 Business Email Already Exists! A business with email "${data.businessEmail}" is already registered. Please use a different business email or sign in.`)
                         setLoading(false)
                         return
                     }
@@ -203,19 +202,19 @@ export default function SignupPage() {
                     error.message.includes('User already registered') ||
                     error.message.includes('already been registered') ||
                     error.message.includes('email address is already registered')) {
-                    setError('🔒 Already Registered! An account with this email already exists. Please sign in instead.')
+                    setError(`🔒 Account Already Exists! An account with email "${data.email}" is already registered. Please sign in instead.`)
                 } else if (error.message.includes('Password should be at least')) {
-                    setError('Password must be at least 6 characters long.')
+                    setError('❌ Password too short! Password must be at least 6 characters long.')
                 } else if (error.message.includes('Invalid email')) {
-                    setError('Please enter a valid email address.')
+                    setError('❌ Invalid Email! Please enter a valid email address.')
                 } else if (error.message.includes('Too many requests') || error.message.includes('429')) {
-                    setError('Too many signup attempts. Please wait a few minutes before trying again.')
+                    setError('⏰ Too Many Attempts! Please wait a few minutes before trying again.')
                 } else if (error.message.includes('Email rate limit exceeded')) {
-                    setError('Email rate limit exceeded. Please wait before trying again.')
+                    setError('📧 Email Limit Exceeded! Please wait before trying again.')
                 } else if (error.message.includes('Signup is disabled')) {
-                    setError('Account creation is temporarily disabled. Please try again later.')
+                    setError('🚫 Signup Temporarily Disabled! Please try again later.')
                 } else {
-                    setError(`Account creation failed: ${error.message}`)
+                    setError(`❌ Account Creation Failed: ${error.message}`)
                 }
                 setLoading(false)
                 return
@@ -676,42 +675,7 @@ export default function SignupPage() {
                                 )}
                             </button>
 
-                            {/* Debug Test Button - Remove in production */}
-                            <button
-                                type="button"
-                                onClick={async () => {
-                                    setError('')
-                                    setSuccess('')
-                                    try {
-                                        const response = await fetch('/api/test-signup', {
-                                            method: 'POST',
-                                            headers: { 'Content-Type': 'application/json' },
-                                            body: JSON.stringify({
-                                                email: 'test@example.com',
-                                                password: 'testpass123',
-                                                businessData: {
-                                                    name: 'Test Business',
-                                                    email: 'business@example.com',
-                                                    phone: '+1234567890'
-                                                }
-                                            })
-                                        })
-                                        const result = await response.json()
-                                        if (result.success) {
-                                            setSuccess('Test passed! Signup should work.')
-                                        } else {
-                                            setError(`Test failed: ${result.error}`)
-                                        }
-                                        console.log('Test result:', result)
-                                    } catch (err) {
-                                        setError('Test request failed')
-                                        console.error('Test error:', err)
-                                    }
-                                }}
-                                className="w-full flex justify-center py-2 px-4 border border-gray-300 rounded-md shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                            >
-                                🧪 Test Signup Configuration
-                            </button>
+
                         </div>
                     </form>
                 </div>
