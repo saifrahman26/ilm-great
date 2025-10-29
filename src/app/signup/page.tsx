@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { z } from 'zod'
 import Link from 'next/link'
-import { Upload, Building, Mail, Phone, Lock, User } from 'lucide-react'
+import { Upload, Building, Mail, Phone, Lock, User, Star } from 'lucide-react'
 import Logo from '@/components/Logo'
 import PhoneInput from '@/components/PhoneInput'
 
@@ -26,6 +26,7 @@ const signupSchema = z.object({
     phone: z.string().min(12, 'Phone number with country code must be at least 12 characters').regex(/^\+\d{1,4}\d{10}$/, 'Please enter a valid phone number with country code'),
     businessCategory: z.string().min(1, 'Please select a business category'),
     customCategory: z.string().optional(),
+    googleReviewLink: z.string().url('Please enter a valid Google Review URL').optional().or(z.literal('')),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
@@ -193,7 +194,8 @@ export default function SignupPage() {
                 visit_goal: 5,
                 reward_setup_completed: false, // Ensure setup is marked as incomplete
                 business_category: data.businessCategory,
-                custom_category: data.businessCategory === 'other' ? data.customCategory : undefined
+                custom_category: data.businessCategory === 'other' ? data.customCategory : undefined,
+                google_review_link: data.googleReviewLink || undefined
             })
 
             if (error) {
@@ -546,6 +548,32 @@ export default function SignupPage() {
                                     </div>
                                 </div>
                             )}
+
+                            {/* Google Review Link */}
+                            <div>
+                                <label htmlFor="googleReviewLink" className="block text-sm font-medium text-gray-700">
+                                    <Star className="w-4 h-4 inline mr-1" />
+                                    Google Review Link
+                                    <span className="text-xs text-gray-500 ml-2">(Optional but recommended)</span>
+                                </label>
+                                <div className="mt-1">
+                                    <input
+                                        {...register('googleReviewLink')}
+                                        type="url"
+                                        placeholder="https://g.page/r/your-business-id/review"
+                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
+                                    />
+                                    {errors.googleReviewLink && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.googleReviewLink.message}</p>
+                                    )}
+                                </div>
+                                <p className="mt-1 text-xs text-gray-500">
+                                    Customers will be redirected here after registration to leave reviews.
+                                    <a href="https://support.google.com/business/answer/7035772" target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:text-blue-500 ml-1">
+                                        Learn how to get your Google Review link →
+                                    </a>
+                                </p>
+                            </div>
 
                             {/* Logo Upload */}
                             <div>
