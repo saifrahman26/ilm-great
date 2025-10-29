@@ -229,12 +229,12 @@ async function sendInactiveCustomerEmail(business: any, customer: any, message: 
     </body>
     </html>`
 
-    await sendEmail({
-        to: customer.email,
+    await sendEmail(
+        customer.email,
         subject,
-        html: emailHtml,
-        from: `${business.name} <noreply@loyallink.com>`
-    })
+        emailHtml,
+        business.name
+    )
 }
 
 // Category-specific offers (same as in generate-inactive-message)
