@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { aiService } from '@/lib/ai'
-import { sendEmail } from '@/lib/email'
+import { sendEmail } from '@/lib/messaging'
 
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -136,7 +136,7 @@ export async function POST(request: NextRequest) {
 
         // Send email
         const emailSent = await sendEmail(
-            customer.email,
+            customer,
             `🎁 Your ${business.reward_title} is waiting at ${business.name}!`,
             emailHtml
         )
