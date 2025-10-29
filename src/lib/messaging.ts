@@ -411,105 +411,426 @@ export async function sendVisitConfirmationEmail(
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Visit Recorded - ${business.name}</title>
     <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background: linear-gradient(135deg, #e0f2fe 0%, #f0f9ff 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: #ffffff;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 40px rgba(59, 130, 246, 0.15);
+        }
+        .header {
+            background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 50%, #10b981 100%);
+            color: white;
+            padding: 50px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '';
+            position: absolute;
+            top: -50px;
+            right: -50px;
+            width: 120px;
+            height: 120px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 50%;
+            opacity: 0.6;
+        }
+        .header::after {
+            content: '';
+            position: absolute;
+            bottom: -30px;
+            left: -30px;
+            width: 80px;
+            height: 80px;
+            background: rgba(16, 185, 129, 0.2);
+            border-radius: 50%;
+        }
+        .linkloyal-brand {
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(10px);
+            display: inline-block;
+            padding: 8px 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,255,255,0.3);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+        }
+        .business-name {
+            font-size: 48px;
+            font-weight: 900;
+            margin: 0 0 15px 0;
+            text-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            letter-spacing: 1.5px;
+            line-height: 1.1;
+        }
+        .visit-status {
+            font-size: 22px;
+            font-weight: 600;
+            margin: 0;
+            opacity: 0.95;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        .content {
+            padding: 40px 30px;
+            background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+        }
+        .greeting {
+            font-size: 20px;
+            color: #1e293b;
+            margin-bottom: 30px;
+            text-align: center;
+            font-weight: 600;
+        }
+        .progress-card {
+            background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+            padding: 35px;
+            border-radius: 20px;
+            margin: 30px 0;
+            border: 3px solid #3b82f6;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-card::before {
+            content: '';
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            width: 60px;
+            height: 60px;
+            background: rgba(59, 130, 246, 0.1);
+            border-radius: 50%;
+        }
+        .progress-title {
+            margin: 0 0 25px 0;
+            color: #1e40af;
+            text-align: center;
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .progress-bar-container {
+            background: rgba(255,255,255,0.8);
+            border-radius: 25px;
+            height: 24px;
+            margin: 25px 0;
+            overflow: hidden;
+            position: relative;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .progress-bar {
+            background: linear-gradient(90deg, #10b981 0%, #059669 100%);
+            height: 100%;
+            width: ${progressPercentage}%;
+            border-radius: 25px;
+            transition: width 0.3s ease;
+            position: relative;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
+        }
+        .progress-percentage {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 12px;
+            font-weight: bold;
+            color: #1e293b;
+            z-index: 2;
+        }
+        .visit-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 20px;
+            margin: 30px 0;
+            text-align: center;
+        }
+        .stat {
+            background: rgba(255,255,255,0.9);
+            padding: 20px 15px;
+            border-radius: 16px;
+            border: 2px solid rgba(59, 130, 246, 0.2);
+            transition: transform 0.2s ease;
+        }
+        .stat:hover {
+            transform: translateY(-2px);
+        }
+        .stat-number {
+            font-size: 32px;
+            font-weight: 900;
+            color: #3b82f6;
+            margin-bottom: 8px;
+            display: block;
+            text-shadow: 0 2px 4px rgba(59, 130, 246, 0.2);
+        }
+        .stat-label {
+            font-size: 12px;
+            color: #64748b;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+        .reward-preview {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            padding: 25px;
+            border-radius: 16px;
+            text-align: center;
+            margin: 30px 0;
+            border: 3px solid #f59e0b;
+            position: relative;
+        }
+        .reward-preview::before {
+            content: '🎁';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 8px;
+            border-radius: 50%;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+        }
+        .reward-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #92400e;
+            margin: 15px 0 5px 0;
+        }
+        .reward-subtitle {
+            font-size: 20px;
+            font-weight: 800;
+            color: #b45309;
+            margin: 10px 0;
+        }
+        .reward-progress {
+            font-size: 16px;
+            color: #d97706;
+            margin: 10px 0;
+        }
+        .expiry-notice {
+            background: rgba(239, 68, 68, 0.1);
+            border: 2px solid #ef4444;
+            padding: 15px;
+            border-radius: 12px;
+            margin-top: 20px;
+        }
+        .expiry-notice p {
+            margin: 0;
+            color: #dc2626;
+            font-weight: 600;
+        }
+        .message-card {
+            background: linear-gradient(135deg, #ecfdf5 0%, #d1fae5 100%);
+            padding: 30px;
+            border-radius: 16px;
+            border-left: 6px solid #10b981;
+            margin: 30px 0;
+            font-size: 18px;
+            color: #065f46;
+            line-height: 1.6;
+        }
+        .qr-section {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            padding: 30px;
+            border-radius: 16px;
+            text-align: center;
+            margin: 30px 0;
+            border: 2px solid #cbd5e1;
+        }
+        .qr-title {
+            color: #1e293b;
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+        .qr-image {
+            width: 160px;
+            height: 160px;
+            border: 4px solid #10b981;
+            border-radius: 16px;
+            padding: 15px;
+            background: white;
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.2);
+        }
+        .qr-instruction {
+            color: #64748b;
+            font-size: 14px;
+            margin-top: 15px;
+            font-weight: 500;
+        }
+        .footer {
+            background: linear-gradient(135deg, #1e293b 0%, #334155 100%);
+            padding: 40px 30px;
+            text-align: center;
+            color: white;
+        }
+        .footer-business {
+            font-size: 24px;
+            font-weight: 800;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+        .footer-phone {
+            font-size: 16px;
+            color: #10b981;
+            font-weight: 600;
+            margin: 10px 0;
+        }
+        .footer-message {
+            font-size: 16px;
+            color: #cbd5e1;
+            margin: 15px 0;
+        }
+        .footer-brand {
+            font-size: 12px;
+            color: #94a3b8;
+            margin-top: 20px;
+            font-weight: 600;
+        }
+        
         @media only screen and (max-width: 600px) {
-            .visit-stats { 
-                flex-direction: column !important; 
-                gap: 15px !important; 
-                margin: 20px 0 !important;
-                padding: 0 !important;
+            .container { 
+                margin: 10px !important; 
+                border-radius: 16px !important;
             }
-            .stat { 
-                margin: 0 !important; 
-                flex: none !important;
-            }
-            .stat-number { 
-                font-size: 24px !important; 
-            }
-            .stat-label { 
-                font-size: 12px !important; 
-            }
-            .progress-card { 
-                padding: 20px !important; 
-                margin: 20px 0 !important; 
+            .header { 
+                padding: 30px 20px !important; 
             }
             .business-name { 
                 font-size: 32px !important; 
+                margin-bottom: 10px !important;
+            }
+            .visit-status {
+                font-size: 18px !important;
+            }
+            .content { 
+                padding: 30px 20px !important; 
+            }
+            .progress-card { 
+                padding: 25px 20px !important; 
+                margin: 20px 0 !important; 
+            }
+            .visit-stats { 
+                grid-template-columns: 1fr !important;
+                gap: 15px !important;
+                margin: 25px 0 !important;
+            }
+            .stat { 
+                padding: 15px !important;
+            }
+            .stat-number { 
+                font-size: 28px !important; 
+            }
+            .stat-label { 
+                font-size: 11px !important; 
+            }
+            .greeting {
+                font-size: 18px !important;
+            }
+            .qr-image {
+                width: 140px !important;
+                height: 140px !important;
+            }
+            .footer {
+                padding: 30px 20px !important;
+            }
+            .footer-business {
+                font-size: 20px !important;
             }
         }
     </style>
 </head>
-<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 0; background-color: #f5f5f5;">
-    <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);">
+<body>
+    <div class="container">
         
         <!-- Header -->
-        <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 40px 30px; text-align: center;">
-            <div style="background: rgba(255,255,255,0.15); backdrop-filter: blur(10px); display: inline-block; padding: 15px 25px; border-radius: 50px; margin-bottom: 20px; border: 2px solid rgba(255,255,255,0.2); font-size: 20px; font-weight: 800; letter-spacing: 1px;">
+        <div class="header">
+            <div class="linkloyal-brand">
                 🔗 LinkLoyal
             </div>
-            <h1 class="business-name" style="margin: 0; font-size: 48px; font-weight: 900; letter-spacing: 1.5px;">${business.name}</h1>
-            <p style="margin: 15px 0 0 0; font-size: 20px; opacity: 0.95; font-weight: 500;">✅ Visit Recorded!</p>
+            <h1 class="business-name">${business.name}</h1>
+            <p class="visit-status">
+                <span>✅</span>
+                <span>Visit Recorded!</span>
+            </p>
         </div>
         
         <!-- Content -->
-        <div style="padding: 40px 30px;">
-            <div style="font-size: 18px; color: #333; margin-bottom: 20px;">
+        <div class="content">
+            <div class="greeting">
                 Hello ${customer.name}! 👋
             </div>
             
             ${isRewardReached ? `
             <!-- Reward Reached -->
-            <div style="background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%); color: white; padding: 30px; border-radius: 12px; text-align: center; margin: 30px 0; box-shadow: 0 4px 15px rgba(251, 191, 36, 0.3);">
-                <div style="font-size: 48px; margin-bottom: 10px;">🎉</div>
-                <h2 style="margin: 0 0 10px 0; font-size: 24px;">Congratulations!</h2>
-                <p style="margin: 0; font-size: 18px; opacity: 0.95;">You've earned your reward!</p>
-                <div style="background: rgba(255,255,255,0.2); padding: 15px; border-radius: 8px; margin-top: 20px;">
-                    <p style="margin: 0; font-size: 20px; font-weight: bold;">${business.reward_title}</p>
+            <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); color: white; padding: 40px 30px; border-radius: 20px; text-align: center; margin: 30px 0; box-shadow: 0 8px 25px rgba(16, 185, 129, 0.3); position: relative; overflow: hidden;">
+                <div style="position: absolute; top: -20px; right: -20px; width: 80px; height: 80px; background: rgba(255,255,255,0.1); border-radius: 50%;"></div>
+                <div style="font-size: 60px; margin-bottom: 15px;">🎉</div>
+                <h2 style="margin: 0 0 15px 0; font-size: 28px; font-weight: 800;">Congratulations!</h2>
+                <p style="margin: 0 0 20px 0; font-size: 20px; opacity: 0.95;">You've earned your reward!</p>
+                <div style="background: rgba(255,255,255,0.2); padding: 20px; border-radius: 12px; margin-top: 25px;">
+                    <p style="margin: 0; font-size: 24px; font-weight: bold;">${business.reward_title}</p>
                 </div>
-                <p style="margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">Show this email to claim your reward!</p>
+                <p style="margin: 20px 0 0 0; font-size: 16px; opacity: 0.9;">Show this email to claim your reward!</p>
             </div>
             ` : `
             <!-- Progress Card -->
-            <div class="progress-card" style="background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%); padding: 30px; border-radius: 12px; margin: 30px 0; border: 2px solid #0ea5e9;">
-                <h3 style="margin: 0 0 15px 0; color: #0c4a6e; text-align: center;">Your Progress</h3>
+            <div class="progress-card">
+                <h3 class="progress-title">Your Progress</h3>
                 
                 <!-- Progress Bar -->
-                <div style="background-color: #e0e0e0; border-radius: 25px; height: 20px; margin: 20px 0; overflow: hidden;">
-                    <div style="background: linear-gradient(90deg, #10b981 0%, #059669 100%); height: 100%; width: ${progressPercentage}%; border-radius: 25px; transition: width 0.3s ease;"></div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar"></div>
+                    <div class="progress-percentage">${Math.round(progressPercentage)}%</div>
                 </div>
                 
                 <!-- Visit Stats -->
-                <div class="visit-stats" style="display: flex; justify-content: space-between; margin: 25px 0; padding: 0 10px; text-align: center;">
-                    <div class="stat" style="flex: 1; margin: 0 5px;">
-                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: #0ea5e9; margin-bottom: 5px; display: block;">${visitCount}</div>
-                        <div class="stat-label" style="font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">VISITS</div>
+                <div class="visit-stats">
+                    <div class="stat">
+                        <div class="stat-number">${visitCount}</div>
+                        <div class="stat-label">VISITS</div>
                     </div>
-                    <div class="stat" style="flex: 1; margin: 0 5px;">
-                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: #0ea5e9; margin-bottom: 5px; display: block;">${business.visit_goal}</div>
-                        <div class="stat-label" style="font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">GOAL</div>
+                    <div class="stat">
+                        <div class="stat-number">${business.visit_goal}</div>
+                        <div class="stat-label">GOAL</div>
                     </div>
-                    <div class="stat" style="flex: 1; margin: 0 5px;">
-                        <div class="stat-number" style="font-size: 28px; font-weight: bold; color: #0ea5e9; margin-bottom: 5px; display: block;">${visitsLeft}</div>
-                        <div class="stat-label" style="font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px;">TO GO</div>
+                    <div class="stat">
+                        <div class="stat-number">${visitsLeft}</div>
+                        <div class="stat-label">TO GO</div>
                     </div>
                 </div>
             </div>
             
             <!-- Reward Preview -->
-            <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 20px; border-radius: 8px; text-align: center; margin: 20px 0; border: 2px solid #f59e0b;">
-                <h3 style="margin: 0; color: #92400e;">🎁 Your Reward</h3>
-                <p style="margin: 10px 0; color: #b45309; font-size: 18px; font-weight: bold;">${business.reward_title}</p>
-                <p style="margin: 10px 0; color: #d97706;">Just ${visitsLeft} more visit${visitsLeft === 1 ? '' : 's'} to go!</p>
+            <div class="reward-preview">
+                <h3 class="reward-title">Your Reward</h3>
+                <p class="reward-subtitle">${business.reward_title}</p>
+                <p class="reward-progress">Just ${visitsLeft} more visit${visitsLeft === 1 ? '' : 's'} to go!</p>
                 ${rewardExpires ? `
-                <div style="background: rgba(255,255,255,0.3); padding: 12px; border-radius: 6px; margin-top: 15px;">
-                    <p style="margin: 0; font-size: 14px; font-weight: bold; color: #92400e;">⏰ Note: Rewards expire after ${rewardExpiryMonths} month${rewardExpiryMonths === 1 ? '' : 's'}</p>
-                    <p style="margin: 5px 0 0 0; font-size: 12px; color: #b45309;">Complete your visits to claim before expiry!</p>
+                <div class="expiry-notice">
+                    <p style="margin: 0 0 5px 0; font-size: 14px; font-weight: bold;">⏰ Note: Rewards expire after ${rewardExpiryMonths} month${rewardExpiryMonths === 1 ? '' : 's'}</p>
+                    <p style="margin: 0; font-size: 12px;">Complete your visits to claim before expiry!</p>
                 </div>
                 ` : ''}
             </div>
             `}
             
             <!-- Message -->
-            <div style="background-color: #f8f9fa; padding: 25px; border-radius: 8px; border-left: 4px solid #10b981; margin: 25px 0; font-size: 16px; color: #555;">
+            <div class="message-card">
                 ${isRewardReached
                 ? `🎉 Amazing! You've completed ${visitCount} visits and earned your <strong>${business.reward_title}</strong>! Show this email at your next visit to claim it.`
                 : `Thank you for your visit! You now have <strong>${visitCount} of ${business.visit_goal}</strong> visits. Keep going to earn your <strong>${business.reward_title}</strong>!`
@@ -517,19 +838,20 @@ export async function sendVisitConfirmationEmail(
             </div>
             
             <!-- QR Code Reminder -->
-            <div style="text-align: center; margin: 30px 0; padding: 20px; background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%); border-radius: 12px;">
-                <h3 style="color: #333; margin-bottom: 15px;">📱 Your QR Code</h3>
-                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://loyallinkk.vercel.app/mark-visit/${customer.id}`)}" alt="Your QR Code" style="width: 150px; height: 150px; border: 3px solid #10b981; border-radius: 12px; padding: 10px; background: white;" />
-                <p style="color: #666; font-size: 14px; margin-top: 15px;">Show this at your next visit!</p>
+            <div class="qr-section">
+                <h3 class="qr-title">📱 Your QR Code</h3>
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`https://loyallinkk.vercel.app/mark-visit/${customer.id}`)}" alt="Your QR Code" class="qr-image" />
+                <p class="qr-instruction">Show this at your next visit!</p>
             </div>
         </div>
         
         <!-- Footer -->
-        <div style="background-color: #f8f9fa; padding: 30px; text-align: center; border-top: 1px solid #e9ecef;">
-            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;"><strong>${business.name}</strong></p>
-            <p style="margin: 5px 0; color: #6c757d; font-size: 14px;">Thank you for your loyalty!</p>
-            <p style="font-size: 14px; color: #666; margin-top: 15px; font-weight: 600;">
-                Powered by <strong>🔗 LoyalLink</strong> - Making loyalty simple and rewarding
+        <div class="footer">
+            <p class="footer-business">${business.name}</p>
+            ${business.phone ? `<p class="footer-phone">📞 ${business.phone}</p>` : ''}
+            <p class="footer-message">Thank you for your loyalty!</p>
+            <p class="footer-brand">
+                Powered by <strong>🔗 LinkLoyal</strong> - Making loyalty simple and rewarding
             </p>
         </div>
     </div>
