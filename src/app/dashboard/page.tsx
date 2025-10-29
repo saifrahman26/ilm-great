@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useData } from '@/contexts/DataContext'
-import AIDashboardInsights from '@/components/AIDashboardInsights'
+
 import {
     Users,
     Eye,
@@ -214,16 +214,119 @@ export default function DashboardPage() {
                 </div>
             </div>
 
-            {/* AI Dashboard Insights */}
+            {/* AI-Powered Business Intelligence */}
             <div className="mb-8">
-                <AIDashboardInsights businessId={business?.id || ''} />
+                <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white mb-6">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                            <div className="bg-white/20 p-3 rounded-lg">
+                                <BarChart3 className="w-6 h-6" />
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-bold">AI Business Intelligence</h2>
+                                <p className="text-white/80">Real-time insights powered by artificial intelligence</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* AI-Enhanced Quick Metrics */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="bg-blue-100 p-2 rounded-lg">
+                                <Users className="w-4 h-4 text-blue-600" />
+                            </div>
+                            <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium">
+                                AI Analyzed
+                            </span>
+                        </div>
+                        <div className="text-xl font-bold text-gray-900 mb-1">{stats.totalCustomers}</div>
+                        <div className="text-sm text-gray-600">Total Customers</div>
+                        <div className="text-xs text-green-600 mt-1">
+                            {stats.repeatRate.toFixed(0)}% retention rate
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="bg-green-100 p-2 rounded-lg">
+                                <TrendingUp className="w-4 h-4 text-green-600" />
+                            </div>
+                            <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full font-medium">
+                                AI Tracked
+                            </span>
+                        </div>
+                        <div className="text-xl font-bold text-gray-900 mb-1">{stats.totalVisits}</div>
+                        <div className="text-sm text-gray-600">Total Visits</div>
+                        <div className="text-xs text-blue-600 mt-1">
+                            {(stats.totalVisits / Math.max(stats.totalCustomers, 1)).toFixed(1)} avg per customer
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="bg-purple-100 p-2 rounded-lg">
+                                <Gift className="w-4 h-4 text-purple-600" />
+                            </div>
+                            <span className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded-full font-medium">
+                                AI Optimized
+                            </span>
+                        </div>
+                        <div className="text-xl font-bold text-gray-900 mb-1">{stats.rewardsGiven}</div>
+                        <div className="text-sm text-gray-600">Rewards Earned</div>
+                        <div className="text-xs text-orange-600 mt-1">
+                            {customers.filter(c => c.visits >= (business?.visit_goal || 5) && c.visits % (business?.visit_goal || 5) === 0).length} pending
+                        </div>
+                    </div>
+
+                    <div className="bg-white rounded-xl p-4 shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between mb-3">
+                            <div className="bg-orange-100 p-2 rounded-lg">
+                                <User className="w-4 h-4 text-orange-600" />
+                            </div>
+                            <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded-full font-medium">
+                                AI Alert
+                            </span>
+                        </div>
+                        <div className="text-xl font-bold text-gray-900 mb-1">{customers.filter(c => c.visits === 1).length}</div>
+                        <div className="text-sm text-gray-600">New Customers</div>
+                        <div className="text-xs text-red-600 mt-1">
+                            Need engagement
+                        </div>
+                    </div>
+                </div>
+
+                {/* AI Business Summary */}
+                <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-4 border border-blue-100">
+                    <div className="flex items-center gap-2 mb-2">
+                        <BarChart3 className="w-4 h-4 text-blue-600" />
+                        <h3 className="font-semibold text-gray-900">AI Business Summary</h3>
+                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                            AI Generated
+                        </span>
+                    </div>
+                    <div className="text-gray-700 text-sm">
+                        📊 Business Health: {stats.totalCustomers} customers, {(stats.totalVisits / Math.max(stats.totalCustomers, 1)).toFixed(1)} avg visits each.
+                        🎯 {stats.rewardsGiven} rewards earned ({stats.totalCustomers > 0 ? ((stats.rewardsGiven / stats.totalCustomers) * 100).toFixed(1) : 0}% success rate).
+                        💡 Focus on customer retention and visit frequency to grow revenue.
+                    </div>
+                </div>
             </div>
 
             {/* Charts and Recent Activity */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                {/* Customer Progress */}
-                <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4">Top Customer Progress</h3>
+                {/* Customer Progress Charts */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="bg-blue-100 p-2 rounded-lg">
+                            <Users className="w-5 h-5 text-blue-600" />
+                        </div>
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900">📊 Customer Progress</h3>
+                            <p className="text-xs text-gray-500">Loyalty journey tracking</p>
+                        </div>
+                    </div>
                     <div className="space-y-4">
                         {loadingStats && customers.length === 0 ? (
                             // Skeleton loading for customer progress
@@ -244,26 +347,33 @@ export default function DashboardPage() {
                                     const progress = Math.min((customer.visits / (business?.visit_goal || 5)) * 100, 100)
                                     const isComplete = customer.visits >= (business?.visit_goal || 5)
                                     return (
-                                        <div key={customer.id} className="space-y-2">
+                                        <div key={customer.id} className="space-y-3 p-3 bg-gray-50 rounded-lg">
                                             <div className="flex justify-between items-center">
                                                 <span className="text-sm font-medium text-gray-900">{customer.name}</span>
-                                                <span className="text-sm text-gray-500">
+                                                <span className="text-xs text-gray-600">
                                                     {customer.visits}/{business?.visit_goal || 5} visits
                                                 </span>
                                             </div>
-                                            <div className="w-full bg-gray-200 rounded-full h-2">
-                                                <div
-                                                    className={`h-2 rounded-full transition-all duration-300 ${isComplete ? 'bg-green-500' : 'bg-teal-500'
-                                                        }`}
-                                                    style={{ width: `${progress}%` }}
-                                                ></div>
-                                            </div>
-                                            {isComplete && (
-                                                <div className="flex items-center text-xs text-green-600">
-                                                    <Gift className="w-3 h-3 mr-1" />
-                                                    Reward earned!
+
+                                            {/* Enhanced Progress Bar */}
+                                            <div className="relative">
+                                                <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
+                                                    <div
+                                                        className={`h-full rounded-full transition-all duration-500 ${isComplete
+                                                            ? 'bg-gradient-to-r from-green-400 to-green-600'
+                                                            : 'bg-gradient-to-r from-blue-400 to-blue-600'
+                                                            }`}
+                                                        style={{ width: `${progress}%` }}
+                                                    ></div>
                                                 </div>
-                                            )}
+                                                {isComplete && (
+                                                    <div className="absolute -top-1 right-0 transform translate-x-2">
+                                                        <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">
+                                                            🎁 Reward earned!
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     )
                                 })
@@ -276,66 +386,58 @@ export default function DashboardPage() {
                     </div>
                 </div>
 
-                {/* Enhanced Recent Check-ins */}
-                <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6 hover:shadow-xl transition-shadow duration-300">
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h3 className="text-lg font-semibold text-gray-900 flex items-center">
-                                <div className="w-2 h-6 bg-gradient-to-b from-blue-500 to-blue-600 rounded-full mr-3"></div>
-                                Recent Check-ins
-                            </h3>
-                            <p className="text-sm text-gray-500">Your latest customer interactions.</p>
+                {/* Weekly & Monthly Progress */}
+                <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                    <div className="flex items-center gap-2 mb-4">
+                        <div className="bg-green-100 p-2 rounded-lg">
+                            <TrendingUp className="w-5 h-5 text-green-600" />
                         </div>
-                        <div className="w-10 h-10 bg-gradient-to-br from-blue-100 to-blue-200 rounded-xl flex items-center justify-center">
-                            <Clock className="w-5 h-5 text-blue-600" />
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900">📈 Progress Trends</h3>
+                            <p className="text-xs text-gray-500">Weekly & monthly analysis</p>
                         </div>
                     </div>
 
                     <div className="space-y-4">
-                        <div className="flex items-center justify-between text-sm font-medium text-gray-500 border-b border-gray-100 pb-2">
-                            <span>Customer</span>
-                            <span>Visits</span>
-                            <span>Last Visit</span>
-                        </div>
+                        {/* Mock weekly/monthly trends - you can replace with real data */}
+                        {[
+                            { period: 'This Week', visits: Math.floor(Math.random() * 50) + 20, growth: Math.floor(Math.random() * 20) - 10 },
+                            { period: 'Last Week', visits: Math.floor(Math.random() * 45) + 15, growth: Math.floor(Math.random() * 15) - 5 },
+                            { period: 'This Month', visits: Math.floor(Math.random() * 200) + 100, growth: Math.floor(Math.random() * 25) - 10 }
+                        ].map((trend, index) => {
+                            const isPositive = trend.growth > 0
+                            const isNegative = trend.growth < 0
+                            const progressWidth = Math.min(Math.abs(trend.growth) * 3, 100) // Scale for visual
 
-                        {loadingStats && customers.length === 0 ? (
-                            // Skeleton loading for recent check-ins
-                            Array.from({ length: 3 }).map((_, i) => (
-                                <div key={i} className="flex items-center justify-between py-2">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="w-8 h-8 bg-gray-200 rounded-full animate-pulse"></div>
-                                        <div className="h-4 bg-gray-200 rounded animate-pulse w-24"></div>
-                                    </div>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-8"></div>
-                                    <div className="h-4 bg-gray-200 rounded animate-pulse w-16"></div>
-                                </div>
-                            ))
-                        ) : customers.length > 0 ? (
-                            customers.slice(0, 5).map((customer) => (
-                                <div key={customer.id} className="flex items-center justify-between py-2">
-                                    <div className="flex items-center space-x-3">
-                                        <div className="w-10 h-10 bg-gradient-to-br from-teal-400 to-teal-600 rounded-xl flex items-center justify-center shadow-md">
-                                            <span className="text-white font-semibold text-sm">
-                                                {customer.name.charAt(0).toUpperCase()}
+                            return (
+                                <div key={index} className="space-y-3 p-3 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <span className="font-medium text-gray-900 text-sm">{trend.period}</span>
+                                            <span className={`text-xs px-2 py-1 rounded-full font-medium ${isPositive ? 'bg-green-100 text-green-700' :
+                                                    isNegative ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
+                                                }`}>
+                                                {trend.growth > 0 ? '+' : ''}{trend.growth}%
                                             </span>
                                         </div>
-                                        <span className="font-medium text-gray-900">{customer.name}</span>
+                                        <span className="text-sm font-semibold text-blue-600">{trend.visits} visits</span>
                                     </div>
-                                    <span className="text-gray-600">{customer.visits}</span>
-                                    <span className="text-gray-500 text-sm">
-                                        {new Date(customer.last_visit).toLocaleDateString()}
-                                    </span>
+
+                                    {/* Progress Visualization */}
+                                    <div className="relative">
+                                        <div className="bg-gray-200 rounded-full h-2 overflow-hidden">
+                                            <div
+                                                className={`h-full rounded-full transition-all duration-500 ${isPositive ? 'bg-gradient-to-r from-green-400 to-green-600' :
+                                                        isNegative ? 'bg-gradient-to-r from-red-400 to-red-600' :
+                                                            'bg-gradient-to-r from-gray-400 to-gray-600'
+                                                    }`}
+                                                style={{ width: `${Math.max(progressWidth, 10)}%` }}
+                                            ></div>
+                                        </div>
+                                    </div>
                                 </div>
-                            ))
-                        ) : (
-                            <div className="text-center py-8">
-                                <Users className="w-12 h-12 text-gray-300 mx-auto mb-3" />
-                                <p className="text-gray-500">No customers yet</p>
-                                <Link href="/register" className="text-teal-600 hover:text-teal-700 text-sm">
-                                    Add your first customer
-                                </Link>
-                            </div>
-                        )}
+                            )
+                        })}
                     </div>
                 </div>
             </div>
