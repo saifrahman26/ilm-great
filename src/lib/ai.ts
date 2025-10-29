@@ -1,3 +1,5 @@
+import { getOpenRouterApiKey, getSiteConfig } from './env'
+
 // AI Service using OpenRouter API
 interface AIMessage {
     role: 'user' | 'assistant' | 'system'
@@ -16,23 +18,8 @@ class AIService {
     private model: string = 'minimax/minimax-m2:free'
 
     constructor() {
-        // Try to get API key from environment variables first
-        this.apiKey = process.env.OPENROUTER_API_KEY || process.env.NEXT_OPENROUTER_API_KEY || ''
-
-        // If no environment variable found, use hardcoded key as fallback
-        if (!this.apiKey) {
-            console.warn('⚠️ OPENROUTER_API_KEY not found in environment variables, using hardcoded fallback')
-            console.warn('Available env keys:', Object.keys(process.env).filter(key => key.includes('OPENROUTER') || key.includes('AI')))
-            this.apiKey = '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'
-        } else {
-            console.log('✅ OpenRouter API key loaded from environment, length:', this.apiKey.length)
-        }
-
-        if (!this.apiKey) {
-            console.error('❌ No OpenRouter API key available')
-        } else {
-            console.log('🔑 API key ready for use')
-        }
+        this.apiKey = getOpenRouterApiKey()
+        console.log('🔑 AI Service initialized with API key length:', this.apiKey.length)
     }
 
     async generateResponse(messages: AIMessage[]): Promise<AIResponse> {
@@ -46,12 +33,13 @@ class AIService {
 
         try {
             console.log('🤖 Making AI request to OpenRouter...')
+            const siteConfig = getSiteConfig()
             const response = await fetch(this.baseUrl, {
                 method: 'POST',
                 headers: {
                     'Authorization': `Bearer ${this.apiKey}`,
-                    'HTTP-Referer': process.env.NEXT_PUBLIC_SITE_URL || 'https://linkloyal.vercel.app',
-                    'X-Title': process.env.NEXT_PUBLIC_SITE_NAME || 'LinkLoyal',
+                    'HTTP-Referer': siteConfig.siteUrl,
+                    'X-Title': siteConfig.siteName,
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
