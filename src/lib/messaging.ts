@@ -879,9 +879,17 @@ export async function sendVisitConfirmationEmail(
             visitGoal: business.visit_goal,
             rewardTitle: business.reward_title,
             isRewardReached,
-            emailType: 'visit_confirmation'
+            emailType: 'visit_confirmation',
+            pendingRewards: isRewardReached ? 1 : 0
         })}
                 </div>
+                
+                ${isRewardReached ? `
+                <div style="background: #d4edda; border: 1px solid #c3e6cb; border-radius: 8px; padding: 15px; margin-top: 15px; text-align: center;">
+                    <h3 style="color: #155724; margin: 0 0 10px 0;">🎉 Reward Ready to Claim!</h3>
+                    <p style="margin: 0; color: #155724; font-weight: bold;">Show this email to our staff to claim your ${business.reward_title}!</p>
+                </div>
+                ` : ''}
             </div>
             
             <!-- QR Code Reminder -->

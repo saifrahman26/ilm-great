@@ -72,7 +72,7 @@ class AIService {
         }
     }
 
-    // Generate insights for dashboard data visualization
+    // Generate comprehensive insights for dashboard data visualization
     async generateDashboardInsights(businessData: {
         totalCustomers: number
         totalVisits: number
@@ -82,29 +82,46 @@ class AIService {
         recentActivity: Array<{ date: string; visits: number }>
         businessName: string
         businessType?: string
+        inactiveCustomers?: number
+        pendingRewards?: number
+        customerRetentionRate?: number
+        visitTrends?: Array<{ period: string; visits: number; growth: number }>
     }): Promise<AIResponse> {
         const messages: AIMessage[] = [
             {
                 role: 'system',
-                content: `You are a business analytics expert specializing in customer loyalty programs. Provide actionable insights and recommendations based on loyalty program data. Keep responses concise, practical, and business-focused.`
+                content: `You are an expert business analytics consultant specializing in customer loyalty programs and business growth strategies. Analyze the data comprehensively and provide detailed, actionable insights that help business owners make informed decisions. Focus on customer retention, revenue optimization, and growth opportunities.`
             },
             {
                 role: 'user',
-                content: `Analyze this loyalty program data for ${businessData.businessName}:
+                content: `Provide a comprehensive business analysis for ${businessData.businessName} (${businessData.businessType || 'Business'}):
 
-📊 METRICS:
+📊 CORE METRICS:
 - Total Customers: ${businessData.totalCustomers}
 - Total Visits: ${businessData.totalVisits}
 - Rewards Earned: ${businessData.rewardsEarned}
 - Average Visits per Customer: ${businessData.averageVisitsPerCustomer.toFixed(1)}
+- Inactive Customers: ${businessData.inactiveCustomers || 'Unknown'}
+- Pending Rewards: ${businessData.pendingRewards || 'Unknown'}
+- Customer Retention Rate: ${businessData.customerRetentionRate || 'Unknown'}%
 
-👥 TOP CUSTOMERS:
+👥 TOP PERFORMERS:
 ${businessData.topCustomers.map(c => `- ${c.name}: ${c.visits} visits`).join('\n')}
 
-📈 RECENT ACTIVITY:
+📈 RECENT ACTIVITY TRENDS:
 ${businessData.recentActivity.map(a => `- ${a.date}: ${a.visits} visits`).join('\n')}
 
-Provide 3-4 key insights and actionable recommendations to improve customer loyalty and business growth. Focus on practical strategies.`
+${businessData.visitTrends ? `📊 VISIT TRENDS:
+${businessData.visitTrends.map(t => `- ${t.period}: ${t.visits} visits (${t.growth > 0 ? '+' : ''}${t.growth}% change)`).join('\n')}` : ''}
+
+Provide a detailed analysis covering:
+1. 🎯 PERFORMANCE ASSESSMENT: Overall business health and key strengths
+2. 📊 CUSTOMER BEHAVIOR INSIGHTS: Patterns and trends in customer engagement
+3. 🚀 GROWTH OPPORTUNITIES: Specific strategies to increase visits and revenue
+4. ⚠️ AREAS FOR IMPROVEMENT: Issues to address and optimization recommendations
+5. 💡 ACTIONABLE NEXT STEPS: Immediate actions to implement this week
+
+Make it comprehensive but easy to understand, with specific numbers and percentages where possible.`
             }
         ]
 
@@ -121,31 +138,49 @@ Provide 3-4 key insights and actionable recommendations to improve customer loya
         rewardTitle: string
         isRewardReached: boolean
         customerHistory?: string
-        emailType: 'visit_confirmation' | 'reward_earned' | 'inactive_reminder'
+        emailType: 'visit_confirmation' | 'reward_earned' | 'inactive_reminder' | 'pending_reward_reminder'
+        daysSinceLastVisit?: number
+        pendingRewards?: number
+        specialOffer?: string
     }): Promise<AIResponse> {
         const messages: AIMessage[] = [
             {
                 role: 'system',
-                content: `You are an expert email copywriter specializing in customer loyalty programs. Write engaging, personalized email content that builds customer relationships and encourages repeat visits. Keep the tone friendly, appreciative, and motivating. Focus on the customer's progress and make them feel valued.`
+                content: `You are an expert email marketing copywriter specializing in customer loyalty programs. Create compelling, personalized email content that drives customer engagement and repeat visits. Use psychology-based persuasion techniques, create urgency when appropriate, and always make customers feel valued and special. Your emails should be warm, personal, and action-oriented.`
             },
             {
                 role: 'user',
-                content: `Write personalized email content for ${context.emailType.replace('_', ' ')}:
+                content: `Create a highly engaging ${context.emailType.replace('_', ' ')} email:
 
-🏪 BUSINESS: ${context.businessName}${context.businessType ? ` (${context.businessType})` : ''}
+�  BUSINESS: ${context.businessName}${context.businessType ? ` (${context.businessType})` : ''}
 👤 CUSTOMER: ${context.customerName}
-📊 PROGRESS: ${context.visitCount}/${context.visitGoal} visits
+� LOYALTY PROGRESS: ${context.visitCount}/${context.visitGoal} visits completed
 🎁 REWARD: ${context.rewardTitle}
-${context.isRewardReached ? '🎉 REWARD EARNED!' : `📈 ${context.visitGoal - context.visitCount} visits to go`}
+${context.isRewardReached ? '🎉 REWARD EARNED & READY TO CLAIM!' : `📈 Only ${context.visitGoal - context.visitCount} more visit${context.visitGoal - context.visitCount === 1 ? '' : 's'} needed!`}
+${context.daysSinceLastVisit ? `⏰ Last visit: ${context.daysSinceLastVisit} days ago` : ''}
+${context.pendingRewards ? `🎁 Pending rewards to claim: ${context.pendingRewards}` : ''}
+${context.specialOffer ? `🎯 Special offer: ${context.specialOffer}` : ''}
 
+EMAIL TYPE REQUIREMENTS:
 ${context.emailType === 'visit_confirmation' ?
-                        'Write a warm thank you message for their visit, celebrate their progress, and motivate them to continue.' :
+                        `VISIT CONFIRMATION: Thank them warmly, celebrate their progress with excitement, create anticipation for their reward, and encourage their next visit. If they've earned a reward, remind them to claim it!` :
                         context.emailType === 'reward_earned' ?
-                            'Write an exciting congratulations message for earning their reward with clear claim instructions.' :
-                            'Write a friendly "we miss you" message to encourage them to return with a special offer.'
+                            `REWARD EARNED: Create excitement and celebration! Give clear, simple instructions on how to claim their reward. Make them feel special and appreciated. Add urgency to claim soon.` :
+                            context.emailType === 'pending_reward_reminder' ?
+                                `PENDING REWARD REMINDER: Remind them they have unclaimed rewards waiting! Create urgency and excitement. Make it easy for them to come back and claim.` :
+                                `INACTIVE CUSTOMER WIN-BACK: Create a compelling reason to return. Use emotional connection, mention what they're missing, offer something special, and create urgency. Make them feel missed and valued.`
                     }
 
-Keep it concise (2-3 sentences), personal, and engaging. Include relevant emojis.`
+REQUIREMENTS:
+- Use warm, personal tone with their name
+- Include relevant emojis to make it engaging
+- Create emotional connection and excitement
+- Include clear call-to-action
+- Make it 2-4 sentences, concise but impactful
+- Use urgency and scarcity when appropriate
+- Make them feel special and valued
+
+Write the email content only, no subject line needed.`
             }
         ]
 
@@ -188,6 +223,54 @@ Keep recommendations practical and implementable.`
         ]
 
         return this.generateResponse(messages)
+    }
+
+    // Generate pending reward reminder email
+    async generatePendingRewardReminder(context: {
+        businessName: string
+        businessType?: string
+        customerName: string
+        pendingRewards: number
+        rewardTitle: string
+        daysSinceEarned: number
+    }): Promise<AIResponse> {
+        return this.generatePersonalizedEmail({
+            businessName: context.businessName,
+            businessType: context.businessType,
+            customerName: context.customerName,
+            visitCount: 0, // Not relevant for this email type
+            visitGoal: 0, // Not relevant for this email type
+            rewardTitle: context.rewardTitle,
+            isRewardReached: true,
+            emailType: 'pending_reward_reminder',
+            pendingRewards: context.pendingRewards,
+            daysSinceLastVisit: context.daysSinceEarned
+        })
+    }
+
+    // Generate inactive customer win-back email
+    async generateWinBackEmail(context: {
+        businessName: string
+        businessType?: string
+        customerName: string
+        visitCount: number
+        visitGoal: number
+        rewardTitle: string
+        daysSinceLastVisit: number
+        specialOffer?: string
+    }): Promise<AIResponse> {
+        return this.generatePersonalizedEmail({
+            businessName: context.businessName,
+            businessType: context.businessType,
+            customerName: context.customerName,
+            visitCount: context.visitCount,
+            visitGoal: context.visitGoal,
+            rewardTitle: context.rewardTitle,
+            isRewardReached: false,
+            emailType: 'inactive_reminder',
+            daysSinceLastVisit: context.daysSinceLastVisit,
+            specialOffer: context.specialOffer
+        })
     }
 }
 

@@ -14,6 +14,10 @@ interface DashboardMetrics {
     averageVisitsPerCustomer: number
     topCustomers: Array<{ name: string; visits: number }>
     recentActivity: Array<{ date: string; visits: number }>
+    inactiveCustomers: number
+    pendingRewards: number
+    customerRetentionRate: number
+    visitTrends: Array<{ period: string; visits: number; growth: number }>
 }
 
 export default function AIDashboardInsights({ businessId }: AIDashboardInsightsProps) {
@@ -87,15 +91,16 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
                 </button>
             </div>
 
-            {/* Quick Metrics */}
+            {/* Enhanced Quick Metrics */}
             {metrics && (
-                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
                     <div className="bg-white rounded-lg p-4 border border-blue-100">
                         <div className="flex items-center gap-2 mb-2">
                             <Users className="w-4 h-4 text-blue-600" />
                             <span className="text-sm font-medium text-gray-600">Customers</span>
                         </div>
                         <p className="text-2xl font-bold text-gray-900">{metrics.totalCustomers}</p>
+                        <p className="text-xs text-gray-500 mt-1">Total registered</p>
                     </div>
                     <div className="bg-white rounded-lg p-4 border border-green-100">
                         <div className="flex items-center gap-2 mb-2">
@@ -103,6 +108,7 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
                             <span className="text-sm font-medium text-gray-600">Total Visits</span>
                         </div>
                         <p className="text-2xl font-bold text-gray-900">{metrics.totalVisits}</p>
+                        <p className="text-xs text-gray-500 mt-1">All time</p>
                     </div>
                     <div className="bg-white rounded-lg p-4 border border-purple-100">
                         <div className="flex items-center gap-2 mb-2">
@@ -110,6 +116,7 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
                             <span className="text-sm font-medium text-gray-600">Rewards</span>
                         </div>
                         <p className="text-2xl font-bold text-gray-900">{metrics.rewardsEarned}</p>
+                        <p className="text-xs text-gray-500 mt-1">Earned</p>
                     </div>
                     <div className="bg-white rounded-lg p-4 border border-orange-100">
                         <div className="flex items-center gap-2 mb-2">
@@ -117,6 +124,23 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
                             <span className="text-sm font-medium text-gray-600">Avg Visits</span>
                         </div>
                         <p className="text-2xl font-bold text-gray-900">{metrics.averageVisitsPerCustomer}</p>
+                        <p className="text-xs text-gray-500 mt-1">Per customer</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-red-100">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Users className="w-4 h-4 text-red-600" />
+                            <span className="text-sm font-medium text-gray-600">Inactive</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">{metrics.inactiveCustomers}</p>
+                        <p className="text-xs text-gray-500 mt-1">30+ days</p>
+                    </div>
+                    <div className="bg-white rounded-lg p-4 border border-yellow-100">
+                        <div className="flex items-center gap-2 mb-2">
+                            <Target className="w-4 h-4 text-yellow-600" />
+                            <span className="text-sm font-medium text-gray-600">Pending</span>
+                        </div>
+                        <p className="text-2xl font-bold text-gray-900">{metrics.pendingRewards}</p>
+                        <p className="text-xs text-gray-500 mt-1">Unclaimed rewards</p>
                     </div>
                 </div>
             )}
@@ -163,26 +187,79 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
                 )}
             </div>
 
-            {/* Top Customers */}
-            {metrics?.topCustomers && metrics.topCustomers.length > 0 && (
-                <div className="mt-6 bg-white rounded-lg p-6 border border-blue-100">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4">🏆 Top Customers</h4>
-                    <div className="space-y-3">
-                        {metrics.topCustomers.slice(0, 3).map((customer, index) => (
-                            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
-                                <div className="flex items-center gap-3">
-                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${index === 0 ? 'bg-yellow-500' :
-                                            index === 1 ? 'bg-gray-400' : 'bg-orange-500'
-                                        }`}>
-                                        {index + 1}
+            {/* Business Performance Grid */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                {/* Top Customers */}
+                {metrics?.topCustomers && metrics.topCustomers.length > 0 && (
+                    <div className="bg-white rounded-lg p-6 border border-blue-100">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">🏆 Top Customers</h4>
+                        <div className="space-y-3">
+                            {metrics.topCustomers.slice(0, 3).map((customer, index) => (
+                                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center gap-3">
+                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${index === 0 ? 'bg-yellow-500' :
+                                                index === 1 ? 'bg-gray-400' : 'bg-orange-500'
+                                            }`}>
+                                            {index + 1}
+                                        </div>
+                                        <span className="font-medium text-gray-900">{customer.name}</span>
                                     </div>
-                                    <span className="font-medium text-gray-900">{customer.name}</span>
+                                    <span className="text-sm font-semibold text-blue-600">
+                                        {customer.visits} visits
+                                    </span>
                                 </div>
-                                <span className="text-sm font-semibold text-blue-600">
-                                    {customer.visits} visits
-                                </span>
-                            </div>
-                        ))}
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Visit Trends */}
+                {metrics?.visitTrends && (
+                    <div className="bg-white rounded-lg p-6 border border-blue-100">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-4">📈 Visit Trends</h4>
+                        <div className="space-y-3">
+                            {metrics.visitTrends.map((trend, index) => (
+                                <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                                    <div className="flex items-center gap-3">
+                                        <span className="font-medium text-gray-900">{trend.period}</span>
+                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${trend.growth > 0
+                                                ? 'bg-green-100 text-green-700'
+                                                : trend.growth < 0
+                                                    ? 'bg-red-100 text-red-700'
+                                                    : 'bg-gray-100 text-gray-700'
+                                            }`}>
+                                            {trend.growth > 0 ? '+' : ''}{trend.growth}%
+                                        </span>
+                                    </div>
+                                    <span className="text-sm font-semibold text-blue-600">
+                                        {trend.visits} visits
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                )}
+            </div>
+
+            {/* Customer Retention Insights */}
+            {metrics && (
+                <div className="mt-6 bg-white rounded-lg p-6 border border-blue-100">
+                    <h4 className="text-lg font-semibold text-gray-900 mb-4">👥 Customer Health</h4>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div className="text-center p-4 bg-green-50 rounded-lg">
+                            <div className="text-2xl font-bold text-green-600">{metrics.customerRetentionRate}%</div>
+                            <div className="text-sm text-gray-600 mt-1">Retention Rate</div>
+                        </div>
+                        <div className="text-center p-4 bg-yellow-50 rounded-lg">
+                            <div className="text-2xl font-bold text-yellow-600">{metrics.pendingRewards}</div>
+                            <div className="text-sm text-gray-600 mt-1">Pending Rewards</div>
+                            <div className="text-xs text-gray-500 mt-1">Need follow-up</div>
+                        </div>
+                        <div className="text-center p-4 bg-red-50 rounded-lg">
+                            <div className="text-2xl font-bold text-red-600">{metrics.inactiveCustomers}</div>
+                            <div className="text-sm text-gray-600 mt-1">Inactive Customers</div>
+                            <div className="text-xs text-gray-500 mt-1">Win-back opportunity</div>
+                        </div>
                     </div>
                 </div>
             )}
