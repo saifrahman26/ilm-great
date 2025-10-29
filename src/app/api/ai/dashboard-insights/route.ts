@@ -123,15 +123,37 @@ export async function POST(request: NextRequest) {
         const aiResponse = await aiService.generateDashboardInsights(businessData)
 
         if (!aiResponse.success) {
+            // Generate comprehensive fallback insights
+            const retentionRate = customerRetentionRate.toFixed(1)
+            const rewardRate = totalCustomers > 0 ? ((rewardsEarned / totalCustomers) * 100).toFixed(1) : '0'
+
+            const fallbackInsights = [
+                `🎯 PERFORMANCE ASSESSMENT: Your loyalty program has ${totalCustomers} customers with a ${retentionRate}% retention rate. ${rewardsEarned} customers have earned rewards (${rewardRate}% success rate).`,
+
+                `📊 CUSTOMER BEHAVIOR: Average of ${averageVisitsPerCustomer.toFixed(1)} visits per customer. ${inactiveCustomers} customers haven't visited in 30+ days, representing a win-back opportunity.`,
+
+                `🚀 GROWTH OPPORTUNITIES: ${pendingRewards} customers have unclaimed rewards - follow up to ensure satisfaction. Focus on re-engaging ${inactiveCustomers} inactive customers.`,
+
+                `💡 ACTIONABLE NEXT STEPS: 1) Send reward reminders to ${pendingRewards} customers, 2) Launch win-back campaign for ${inactiveCustomers} inactive customers, 3) Recognize top customers to encourage loyalty.`
+            ]
+
             return NextResponse.json({
-                success: false,
+                success: true,
+                insights: fallbackInsights.join('\n\n'),
+                isAIGenerated: false,
                 error: aiResponse.error,
-                fallbackInsights: [
-                    `📈 You have ${totalCustomers} loyal customers with an average of ${averageVisitsPerCustomer.toFixed(1)} visits each.`,
-                    `🎯 ${rewardsEarned} customers have earned rewards - that's a ${((rewardsEarned / totalCustomers) * 100).toFixed(1)}% success rate!`,
-                    `👑 Your top customer has ${topCustomers[0]?.visits || 0} visits. Consider recognizing your most loyal customers.`,
-                    `💡 Focus on increasing visit frequency to boost customer lifetime value.`
-                ]
+                metrics: {
+                    totalCustomers,
+                    totalVisits,
+                    rewardsEarned,
+                    averageVisitsPerCustomer: parseFloat(averageVisitsPerCustomer.toFixed(1)),
+                    topCustomers,
+                    recentActivity,
+                    inactiveCustomers,
+                    pendingRewards,
+                    customerRetentionRate: parseFloat(customerRetentionRate.toFixed(1)),
+                    visitTrends
+                }
             })
         }
 

@@ -43,9 +43,12 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
             const data = await response.json()
 
             if (data.success) {
-                setInsights(data.insights || data.fallbackInsights?.join('\n\n') || 'No insights available')
+                setInsights(data.insights || 'No insights available')
                 setMetrics(data.metrics)
-                setIsAIGenerated(!!data.insights)
+                setIsAIGenerated(data.isAIGenerated !== false) // Default to true unless explicitly false
+                if (data.error) {
+                    console.warn('AI generation failed, using fallback:', data.error)
+                }
             } else {
                 setError(data.error || 'Failed to generate insights')
             }
@@ -198,7 +201,7 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
                                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div className="flex items-center gap-3">
                                         <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${index === 0 ? 'bg-yellow-500' :
-                                                index === 1 ? 'bg-gray-400' : 'bg-orange-500'
+                                            index === 1 ? 'bg-gray-400' : 'bg-orange-500'
                                             }`}>
                                             {index + 1}
                                         </div>
@@ -223,10 +226,10 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
                                     <div className="flex items-center gap-3">
                                         <span className="font-medium text-gray-900">{trend.period}</span>
                                         <span className={`text-xs px-2 py-1 rounded-full font-medium ${trend.growth > 0
-                                                ? 'bg-green-100 text-green-700'
-                                                : trend.growth < 0
-                                                    ? 'bg-red-100 text-red-700'
-                                                    : 'bg-gray-100 text-gray-700'
+                                            ? 'bg-green-100 text-green-700'
+                                            : trend.growth < 0
+                                                ? 'bg-red-100 text-red-700'
+                                                : 'bg-gray-100 text-gray-700'
                                             }`}>
                                             {trend.growth > 0 ? '+' : ''}{trend.growth}%
                                         </span>
