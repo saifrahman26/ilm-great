@@ -10,7 +10,15 @@ export async function sendEmail(
     fromName: string = 'LinkLoyal'
 ): Promise<boolean> {
     try {
-        const fromEmail = process.env.VERIFIED_EMAIL || 'warriorsaifdurer@gmail.com'
+        console.log('📧 Attempting to send email...')
+        console.log('📧 To:', to)
+        console.log('📧 Subject:', subject)
+        console.log('📧 API Key present:', !!process.env.RESEND_API_KEY)
+        console.log('📧 API Key length:', process.env.RESEND_API_KEY?.length)
+
+        // Use Resend's onboarding domain for testing
+        const fromEmail = process.env.VERIFIED_EMAIL || 'onboarding@resend.dev'
+        console.log('📧 From email:', fromEmail)
 
         const { data, error } = await resend.emails.send({
             from: `${fromName} <${fromEmail}>`,
@@ -20,14 +28,17 @@ export async function sendEmail(
         })
 
         if (error) {
-            console.error('Resend email error:', error)
+            console.error('❌ Resend email error:', error)
+            console.error('❌ Error details:', JSON.stringify(error, null, 2))
             return false
         }
 
         console.log('✅ Email sent successfully:', data?.id)
+        console.log('✅ Email data:', JSON.stringify(data, null, 2))
         return true
     } catch (error) {
-        console.error('❌ Email sending failed:', error)
+        console.error('❌ Email sending failed with exception:', error)
+        console.error('❌ Exception details:', JSON.stringify(error, null, 2))
         return false
     }
 }

@@ -107,23 +107,53 @@ export default function TestEmailDebug() {
                         </div>
                     </div>
 
-                    <button
-                        onClick={testEmail}
-                        disabled={loading || !email}
-                        className="mt-6 w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
-                    >
-                        {loading ? (
-                            <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
-                                Sending Test Email...
-                            </>
-                        ) : (
-                            <>
-                                <Send className="w-4 h-4" />
-                                Send Test Email
-                            </>
-                        )}
-                    </button>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                        <button
+                            onClick={testEmail}
+                            disabled={loading || !email}
+                            className="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    Sending Test Email...
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="w-4 h-4" />
+                                    Send Test Email
+                                </>
+                            )}
+                        </button>
+
+                        <button
+                            onClick={async () => {
+                                setLoading(true)
+                                try {
+                                    const response = await fetch('/api/test-resend-simple', {
+                                        method: 'POST',
+                                        headers: { 'Content-Type': 'application/json' },
+                                        body: JSON.stringify({ to: email })
+                                    })
+                                    const data = await response.json()
+                                    setResults({ ...data, testType: 'Direct Resend Test' })
+                                } catch (error) {
+                                    setResults({
+                                        success: false,
+                                        error: 'Failed to test direct Resend',
+                                        testType: 'Direct Resend Test'
+                                    })
+                                } finally {
+                                    setLoading(false)
+                                }
+                            }}
+                            disabled={loading || !email}
+                            className="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 font-medium"
+                        >
+                            <AlertCircle className="w-4 h-4" />
+                            Direct Resend Test
+                        </button>
+                    </div>
                 </div>
 
                 {results && (
@@ -141,8 +171,8 @@ export default function TestEmailDebug() {
                             <div>
                                 <h4 className="font-medium text-gray-900 mb-2">Status</h4>
                                 <span className={`px-3 py-1 rounded-full text-sm font-medium ${results.success
-                                        ? 'bg-green-100 text-green-800'
-                                        : 'bg-red-100 text-red-800'
+                                    ? 'bg-green-100 text-green-800'
+                                    : 'bg-red-100 text-red-800'
                                     }`}>
                                     {results.success ? 'Success' : 'Failed'}
                                 </span>
@@ -152,8 +182,8 @@ export default function TestEmailDebug() {
                                 <div>
                                     <h4 className="font-medium text-gray-900 mb-2">Message</h4>
                                     <div className={`border rounded-lg p-3 ${results.success
-                                            ? 'bg-green-50 border-green-200'
-                                            : 'bg-red-50 border-red-200'
+                                        ? 'bg-green-50 border-green-200'
+                                        : 'bg-red-50 border-red-200'
                                         }`}>
                                         <p className={`text-sm ${results.success ? 'text-green-800' : 'text-red-800'
                                             }`}>
