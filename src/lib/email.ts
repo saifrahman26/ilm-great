@@ -218,9 +218,9 @@ function createEmailTemplate(
     emailType: string,
     context: any
 ): string {
-    // Calculate progress percentage
+    // Calculate progress percentage (cap at 100% for display, handle cases where visits exceed goal)
     const progressPercentage = context.visitCount && context.visitGoal
-        ? Math.min((context.visitCount / context.visitGoal) * 100, 100)
+        ? Math.min((Math.min(context.visitCount, context.visitGoal) / context.visitGoal) * 100, 100)
         : 0
 
     return `
@@ -260,54 +260,63 @@ function createEmailTemplate(
             
             <div style="text-align: center; margin-bottom: 15px;">
                 <span style="font-size: 24px; font-weight: bold; color: #4f46e5;">
-                    ${context.visitCount} / ${context.visitGoal}
+                    ${Math.min(context.visitCount, context.visitGoal)} / ${context.visitGoal}
                 </span>
                 <span style="font-size: 16px; color: #6c757d; margin-left: 5px;">visits</span>
             </div>
             
             <!-- Progress Bar -->
             <div style="background: #e9ecef; border-radius: 20px; height: 20px; margin: 15px 0; overflow: hidden; position: relative;">
-                <div style="background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%); height: 100%; width: ${progressPercentage}%; border-radius: 20px; transition: width 0.3s ease;"></div>
+                <div style="background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%); height: 100%; width: ${Math.min(progressPercentage, 100)}%; border-radius: 20px; transition: width 0.3s ease;"></div>
                 <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: ${progressPercentage > 50 ? 'white' : '#495057'}; font-size: 12px; font-weight: bold;">
-                    ${Math.round(progressPercentage)}%
+                    ${Math.round(Math.min(progressPercentage, 100))}%
                 </div>
             </div>
             
             ${!context.isRewardReached ? `
             <p style="margin: 10px 0 0 0; color: #6c757d; text-align: center; font-size: 14px;">
-                ${context.visitGoal - context.visitCount} more visit${context.visitGoal - context.visitCount === 1 ? '' : 's'} to earn your <strong>${context.rewardTitle}</strong>!
+                ${Math.max(0, context.visitGoal - context.visitCount)} more visit${Math.max(0, context.visitGoal - context.visitCount) === 1 ? '' : 's'} to earn your <strong>${context.rewardTitle}</strong>!
             </p>
-            ` : ''}
+            ` : `
+            <p style="margin: 10px 0 0 0; color: #28a745; text-align: center; font-size: 14px; font-weight: bold;">
+                🎉 Congratulations! You've earned your <strong>${context.rewardTitle}</strong>!
+            </p>
+            `}
         </div>
         ` : ''}
         
         ${context.qrCodeUrl && emailType === 'visit_confirmation' ? `
-        <!-- QR Code Section -->
-        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 10px; text-align: center; margin: 25px 0;">
-            <h3 style="color: white; margin: 0 0 15px 0; font-size: 18px;">
+        <!-- Mobile-Optimized QR Code Section -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px 15px; border-radius: 10px; text-align: center; margin: 25px 0;">
+            <h3 style="color: white; margin: 0 0 20px 0; font-size: 18px;">
                 📱 Your Personal QR Code
             </h3>
-            <div style="background: white; padding: 20px; border-radius: 10px; display: inline-block; margin: 10px 0;">
-                <div style="text-align: center; margin-bottom: 15px;">
-                    <h2 style="margin: 0; color: #333; font-size: 20px; font-weight: bold;">
+            <!-- Mobile-optimized QR container -->
+            <div style="background: white; padding: 25px 20px; border-radius: 15px; margin: 15px auto; max-width: 320px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);">
+                <div style="text-align: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; color: #333; font-size: 22px; font-weight: bold;">
                         ${businessName}
                     </h2>
-                    <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Loyalty Program</p>
+                    <p style="margin: 8px 0 0 0; color: #666; font-size: 14px;">Loyalty Program</p>
                 </div>
-                <img src="${context.qrCodeUrl}" alt="Your QR Code" style="max-width: 150px; height: auto; border: 2px solid #4f46e5; border-radius: 8px;" />
-                <p style="margin: 10px 0 0 0; color: #666; font-size: 12px;">
+                <!-- Larger, mobile-friendly QR code -->
+                <div style="text-align: center; margin: 20px 0;">
+                    <img src="${context.qrCodeUrl}" alt="Your QR Code" style="width: 200px; height: 200px; max-width: 100%; border: 3px solid #4f46e5; border-radius: 12px; display: block; margin: 0 auto;" />
+                </div>
+                <p style="margin: 15px 0 0 0; color: #666; font-size: 14px; font-weight: 500;">
                     Customer: ${customerName}
                 </p>
             </div>
-            <div style="margin-top: 15px;">
-                <p style="color: white; margin: 0; font-size: 14px; opacity: 0.9;">
-                    📥 <strong>Save this QR code</strong> to your phone for easy scanning at your next visit!
+            <!-- Mobile-friendly instructions -->
+            <div style="margin-top: 20px; padding: 0 10px;">
+                <p style="color: white; margin: 0 0 10px 0; font-size: 16px; font-weight: 500;">
+                    📥 Save this QR code to your phone!
                 </p>
-                <p style="color: white; margin: 5px 0 10px 0; font-size: 12px; opacity: 0.8;">
+                <p style="color: white; margin: 0 0 15px 0; font-size: 14px; opacity: 0.9; line-height: 1.4;">
                     Show this code to staff to record your visit instantly
                 </p>
                 <a href="https://loyallinkk.vercel.app/qr-download/${context.customerId}" 
-                   style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid rgba(255,255,255,0.3);">
+                   style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 12px 20px; border-radius: 25px; text-decoration: none; font-size: 14px; font-weight: bold; border: 2px solid rgba(255,255,255,0.3); margin-top: 5px;">
                     📱 Download High-Quality QR Code
                 </a>
             </div>
