@@ -169,14 +169,12 @@ ${businessData.recentActivity.map(a => `- ${a.date}: ${a.visits} visits`).join('
 ${businessData.visitTrends ? `📊 VISIT TRENDS:
 ${businessData.visitTrends.map(t => `- ${t.period}: ${t.visits} visits (${t.growth > 0 ? '+' : ''}${t.growth}% change)`).join('\n')}` : ''}
 
-Provide a detailed analysis covering:
-1. 🎯 PERFORMANCE ASSESSMENT: Overall business health and key strengths
-2. 📊 CUSTOMER BEHAVIOR INSIGHTS: Patterns and trends in customer engagement
-3. 🚀 GROWTH OPPORTUNITIES: Specific strategies to increase visits and revenue
-4. ⚠️ AREAS FOR IMPROVEMENT: Issues to address and optimization recommendations
-5. 💡 ACTIONABLE NEXT STEPS: Immediate actions to implement this week
+Provide a concise business summary in 2-3 sentences covering:
+- Overall business health and key metrics
+- Main opportunities for growth
+- One specific actionable recommendation
 
-Make it comprehensive but easy to understand, with specific numbers and percentages where possible.`
+Keep it brief, actionable, and easy to understand. Use emojis and specific numbers.`
             }
         ]
 

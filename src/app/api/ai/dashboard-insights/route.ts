@@ -141,14 +141,8 @@ export async function POST(request: NextRequest) {
         } catch (aiError) {
             console.error('AI insights error:', aiError)
 
-            // Provide fallback insights
-            const fallbackInsights = [
-                `📈 You have ${totalCustomers} loyal customers with an average of ${averageVisitsPerCustomer.toFixed(1)} visits each.`,
-                `🎯 ${rewardsEarned} customers have earned rewards - that's a ${totalCustomers > 0 ? ((rewardsEarned / totalCustomers) * 100).toFixed(1) : 0}% success rate!`,
-                `👑 Your top customer has ${topCustomers[0]?.visits || 0} visits. Consider recognizing your most loyal customers.`,
-                `💡 Focus on increasing visit frequency to boost customer lifetime value.`,
-                `⚠️ ${inactiveCustomers} customers haven't visited in 30+ days - consider a win-back campaign.`
-            ].join('\n\n')
+            // Provide concise fallback insights
+            const fallbackInsights = `📊 Business Health: ${totalCustomers} customers, ${averageVisitsPerCustomer.toFixed(1)} avg visits each. 🎯 ${rewardsEarned} rewards earned (${totalCustomers > 0 ? ((rewardsEarned / totalCustomers) * 100).toFixed(1) : 0}% success rate). ⚠️ ${inactiveCustomers} inactive customers need re-engagement. 💡 Focus on customer retention and visit frequency to grow revenue.`
 
             return NextResponse.json({
                 success: true,

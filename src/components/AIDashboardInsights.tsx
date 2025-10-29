@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Sparkles, TrendingUp, Users, Target, Lightbulb, RefreshCw } from 'lucide-react'
+import { Sparkles, TrendingUp, Users, Target, AlertCircle, RefreshCw, Brain, Award, Calendar, Activity } from 'lucide-react'
 
 interface AIDashboardInsightsProps {
     businessId: string
@@ -45,7 +45,7 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
             if (data.success) {
                 setInsights(data.insights || 'No insights available')
                 setMetrics(data.metrics)
-                setIsAIGenerated(data.isAIGenerated !== false) // Default to true unless explicitly false
+                setIsAIGenerated(data.isAIGenerated !== false)
                 if (data.error) {
                     console.warn('AI generation failed, using fallback:', data.error)
                 }
@@ -71,201 +71,243 @@ export default function AIDashboardInsights({ businessId }: AIDashboardInsightsP
     }
 
     return (
-        <div className="bg-gradient-to-br from-blue-50 to-indigo-100 rounded-xl p-6 border border-blue-200">
-            <div className="flex items-center justify-between mb-4">
-                <div className="flex items-center gap-2">
-                    <div className="p-2 bg-blue-600 rounded-lg">
-                        <Sparkles className="w-5 h-5 text-white" />
+        <div className="space-y-6">
+            {/* AI-Powered Header */}
+            <div className="bg-gradient-to-r from-purple-600 to-blue-600 rounded-xl p-6 text-white">
+                <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                        <div className="bg-white/20 p-3 rounded-lg">
+                            <Brain className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-bold">AI Business Dashboard</h2>
+                            <p className="text-white/80">Real-time insights powered by artificial intelligence</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="text-lg font-semibold text-gray-900">AI Business Insights</h3>
-                        <p className="text-sm text-gray-600">
-                            {isAIGenerated ? 'AI-powered recommendations' : 'Smart analytics'}
-                        </p>
-                    </div>
+                    <button
+                        onClick={generateInsights}
+                        disabled={loading}
+                        className="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-lg flex items-center gap-2 transition-colors disabled:opacity-50"
+                    >
+                        <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
+                        {loading ? 'Analyzing...' : 'Refresh AI'}
+                    </button>
                 </div>
-                <button
-                    onClick={generateInsights}
-                    disabled={loading}
-                    className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                >
-                    <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-                    {loading ? 'Analyzing...' : 'Refresh'}
-                </button>
             </div>
 
-            {/* Enhanced Quick Metrics */}
+            {/* AI-Enhanced Metrics Grid */}
             {metrics && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
-                    <div className="bg-white rounded-lg p-4 border border-blue-100">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Users className="w-4 h-4 text-blue-600" />
-                            <span className="text-sm font-medium text-gray-600">Customers</span>
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="bg-blue-100 p-2 rounded-lg">
+                                <Users className="w-5 h-5 text-blue-600" />
+                            </div>
+                            <span className="text-xs bg-blue-50 text-blue-600 px-2 py-1 rounded-full font-medium">
+                                AI Analyzed
+                            </span>
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{metrics.totalCustomers}</p>
-                        <p className="text-xs text-gray-500 mt-1">Total registered</p>
+                        <div className="text-2xl font-bold text-gray-900 mb-1">{metrics.totalCustomers}</div>
+                        <div className="text-sm text-gray-600">Total Customers</div>
+                        <div className="text-xs text-green-600 mt-2">
+                            {metrics.customerRetentionRate}% retention rate
+                        </div>
                     </div>
-                    <div className="bg-white rounded-lg p-4 border border-green-100">
-                        <div className="flex items-center gap-2 mb-2">
-                            <TrendingUp className="w-4 h-4 text-green-600" />
-                            <span className="text-sm font-medium text-gray-600">Total Visits</span>
+
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="bg-green-100 p-2 rounded-lg">
+                                <Activity className="w-5 h-5 text-green-600" />
+                            </div>
+                            <span className="text-xs bg-green-50 text-green-600 px-2 py-1 rounded-full font-medium">
+                                AI Tracked
+                            </span>
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{metrics.totalVisits}</p>
-                        <p className="text-xs text-gray-500 mt-1">All time</p>
+                        <div className="text-2xl font-bold text-gray-900 mb-1">{metrics.totalVisits}</div>
+                        <div className="text-sm text-gray-600">Total Visits</div>
+                        <div className="text-xs text-blue-600 mt-2">
+                            {metrics.averageVisitsPerCustomer.toFixed(1)} avg per customer
+                        </div>
                     </div>
-                    <div className="bg-white rounded-lg p-4 border border-purple-100">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Target className="w-4 h-4 text-purple-600" />
-                            <span className="text-sm font-medium text-gray-600">Rewards</span>
+
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="bg-purple-100 p-2 rounded-lg">
+                                <Award className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <span className="text-xs bg-purple-50 text-purple-600 px-2 py-1 rounded-full font-medium">
+                                AI Optimized
+                            </span>
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{metrics.rewardsEarned}</p>
-                        <p className="text-xs text-gray-500 mt-1">Earned</p>
+                        <div className="text-2xl font-bold text-gray-900 mb-1">{metrics.rewardsEarned}</div>
+                        <div className="text-sm text-gray-600">Rewards Earned</div>
+                        <div className="text-xs text-orange-600 mt-2">
+                            {metrics.pendingRewards} pending claims
+                        </div>
                     </div>
-                    <div className="bg-white rounded-lg p-4 border border-orange-100">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Lightbulb className="w-4 h-4 text-orange-600" />
-                            <span className="text-sm font-medium text-gray-600">Avg Visits</span>
+
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex items-center justify-between mb-4">
+                            <div className="bg-orange-100 p-2 rounded-lg">
+                                <AlertCircle className="w-5 h-5 text-orange-600" />
+                            </div>
+                            <span className="text-xs bg-orange-50 text-orange-600 px-2 py-1 rounded-full font-medium">
+                                AI Alert
+                            </span>
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{metrics.averageVisitsPerCustomer}</p>
-                        <p className="text-xs text-gray-500 mt-1">Per customer</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 border border-red-100">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Users className="w-4 h-4 text-red-600" />
-                            <span className="text-sm font-medium text-gray-600">Inactive</span>
+                        <div className="text-2xl font-bold text-gray-900 mb-1">{metrics.inactiveCustomers}</div>
+                        <div className="text-sm text-gray-600">Inactive Customers</div>
+                        <div className="text-xs text-red-600 mt-2">
+                            Need re-engagement
                         </div>
-                        <p className="text-2xl font-bold text-gray-900">{metrics.inactiveCustomers}</p>
-                        <p className="text-xs text-gray-500 mt-1">30+ days</p>
-                    </div>
-                    <div className="bg-white rounded-lg p-4 border border-yellow-100">
-                        <div className="flex items-center gap-2 mb-2">
-                            <Target className="w-4 h-4 text-yellow-600" />
-                            <span className="text-sm font-medium text-gray-600">Pending</span>
-                        </div>
-                        <p className="text-2xl font-bold text-gray-900">{metrics.pendingRewards}</p>
-                        <p className="text-xs text-gray-500 mt-1">Unclaimed rewards</p>
                     </div>
                 </div>
             )}
 
-            {/* AI Insights */}
-            <div className="bg-white rounded-lg p-6 border border-blue-100">
-                <div className="flex items-center gap-2 mb-4">
-                    <Sparkles className="w-5 h-5 text-blue-600" />
-                    <h4 className="text-lg font-semibold text-gray-900">Smart Recommendations</h4>
-                    {isAIGenerated && (
-                        <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
-                            AI Generated
-                        </span>
-                    )}
-                </div>
-
-                {loading ? (
-                    <div className="flex items-center justify-center py-8">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-                        <span className="ml-3 text-gray-600">Analyzing your business data...</span>
-                    </div>
-                ) : error ? (
-                    <div className="text-red-600 bg-red-50 p-4 rounded-lg border border-red-200">
-                        <p className="font-medium">Unable to generate insights</p>
-                        <p className="text-sm mt-1">{error}</p>
-                        <button
-                            onClick={generateInsights}
-                            className="mt-2 text-sm text-red-700 hover:text-red-800 underline"
-                        >
-                            Try again
-                        </button>
-                    </div>
-                ) : insights ? (
-                    <div className="prose prose-sm max-w-none">
-                        <div className="text-gray-700 leading-relaxed whitespace-pre-line">
-                            {insights}
-                        </div>
-                    </div>
-                ) : (
-                    <div className="text-gray-500 text-center py-4">
-                        <Lightbulb className="w-8 h-8 mx-auto mb-2 opacity-50" />
-                        <p>Click "Refresh" to generate AI insights for your business</p>
-                    </div>
-                )}
-            </div>
-
-            {/* Business Performance Grid */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-                {/* Top Customers */}
+            {/* AI Business Intelligence */}
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Top Customers - AI Ranked */}
                 {metrics?.topCustomers && metrics.topCustomers.length > 0 && (
-                    <div className="bg-white rounded-lg p-6 border border-blue-100">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-4">🏆 Top Customers</h4>
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="bg-yellow-100 p-2 rounded-lg">
+                                <Users className="w-5 h-5 text-yellow-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-900">🏆 Top Customers</h3>
+                                <p className="text-xs text-gray-500">AI-ranked by loyalty</p>
+                            </div>
+                        </div>
                         <div className="space-y-3">
                             {metrics.topCustomers.slice(0, 3).map((customer, index) => (
                                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div className="flex items-center gap-3">
-                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold ${index === 0 ? 'bg-yellow-500' :
-                                            index === 1 ? 'bg-gray-400' : 'bg-orange-500'
+                                        <div className={`w-6 h-6 rounded-full flex items-center justify-center text-white text-sm font-bold ${index === 0 ? 'bg-yellow-500' : index === 1 ? 'bg-gray-400' : 'bg-orange-500'
                                             }`}>
                                             {index + 1}
                                         </div>
-                                        <span className="font-medium text-gray-900">{customer.name}</span>
+                                        <span className="font-medium text-gray-900 text-sm">{customer.name}</span>
                                     </div>
-                                    <span className="text-sm font-semibold text-blue-600">
-                                        {customer.visits} visits
-                                    </span>
+                                    <span className="text-sm font-semibold text-blue-600">{customer.visits}</span>
                                 </div>
                             ))}
                         </div>
                     </div>
                 )}
 
-                {/* Visit Trends */}
+                {/* Visit Trends - AI Analyzed */}
                 {metrics?.visitTrends && (
-                    <div className="bg-white rounded-lg p-6 border border-blue-100">
-                        <h4 className="text-lg font-semibold text-gray-900 mb-4">📈 Visit Trends</h4>
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="bg-green-100 p-2 rounded-lg">
+                                <TrendingUp className="w-5 h-5 text-green-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-900">📈 Visit Trends</h3>
+                                <p className="text-xs text-gray-500">AI-analyzed patterns</p>
+                            </div>
+                        </div>
                         <div className="space-y-3">
                             {metrics.visitTrends.map((trend, index) => (
                                 <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
                                     <div className="flex items-center gap-3">
-                                        <span className="font-medium text-gray-900">{trend.period}</span>
-                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${trend.growth > 0
-                                            ? 'bg-green-100 text-green-700'
-                                            : trend.growth < 0
-                                                ? 'bg-red-100 text-red-700'
-                                                : 'bg-gray-100 text-gray-700'
+                                        <span className="font-medium text-gray-900 text-sm">{trend.period}</span>
+                                        <span className={`text-xs px-2 py-1 rounded-full font-medium ${trend.growth > 0 ? 'bg-green-100 text-green-700' :
+                                                trend.growth < 0 ? 'bg-red-100 text-red-700' : 'bg-gray-100 text-gray-700'
                                             }`}>
                                             {trend.growth > 0 ? '+' : ''}{trend.growth}%
                                         </span>
                                     </div>
-                                    <span className="text-sm font-semibold text-blue-600">
-                                        {trend.visits} visits
-                                    </span>
+                                    <span className="text-sm font-semibold text-blue-600">{trend.visits}</span>
                                 </div>
                             ))}
+                        </div>
+                    </div>
+                )}
+
+                {/* Customer Health - AI Insights */}
+                {metrics && (
+                    <div className="bg-white rounded-xl p-6 shadow-sm border border-gray-100">
+                        <div className="flex items-center gap-2 mb-4">
+                            <div className="bg-purple-100 p-2 rounded-lg">
+                                <Target className="w-5 h-5 text-purple-600" />
+                            </div>
+                            <div>
+                                <h3 className="font-semibold text-gray-900">👥 Customer Health</h3>
+                                <p className="text-xs text-gray-500">AI health score</p>
+                            </div>
+                        </div>
+                        <div className="space-y-4">
+                            <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                                <div>
+                                    <div className="text-lg font-bold text-green-600">{metrics.customerRetentionRate}%</div>
+                                    <div className="text-xs text-gray-600">Retention Rate</div>
+                                </div>
+                                <div className="text-green-600">✅</div>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-yellow-50 rounded-lg">
+                                <div>
+                                    <div className="text-lg font-bold text-yellow-600">{metrics.pendingRewards}</div>
+                                    <div className="text-xs text-gray-600">Pending Rewards</div>
+                                </div>
+                                <div className="text-yellow-600">⏳</div>
+                            </div>
+                            <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                                <div>
+                                    <div className="text-lg font-bold text-red-600">{metrics.inactiveCustomers}</div>
+                                    <div className="text-xs text-gray-600">Need Attention</div>
+                                </div>
+                                <div className="text-red-600">⚠️</div>
+                            </div>
                         </div>
                     </div>
                 )}
             </div>
 
-            {/* Customer Retention Insights */}
-            {metrics && (
-                <div className="mt-6 bg-white rounded-lg p-6 border border-blue-100">
-                    <h4 className="text-lg font-semibold text-gray-900 mb-4">👥 Customer Health</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <div className="text-center p-4 bg-green-50 rounded-lg">
-                            <div className="text-2xl font-bold text-green-600">{metrics.customerRetentionRate}%</div>
-                            <div className="text-sm text-gray-600 mt-1">Retention Rate</div>
+            {/* AI Insights Summary - Short and Sweet */}
+            <div className="bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-6 border border-blue-100">
+                {loading ? (
+                    <div className="flex items-center justify-center py-4">
+                        <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-blue-600 mr-3"></div>
+                        <span className="text-gray-600">AI is analyzing your business...</span>
+                    </div>
+                ) : error ? (
+                    <div className="text-center py-4">
+                        <div className="text-red-500 mb-2">❌ AI Analysis Failed</div>
+                        <button onClick={generateInsights} className="text-blue-600 hover:text-blue-800 text-sm underline">
+                            Try Again
+                        </button>
+                    </div>
+                ) : insights ? (
+                    <div>
+                        <div className="flex items-center gap-2 mb-3">
+                            <Brain className="w-5 h-5 text-blue-600" />
+                            <h3 className="font-semibold text-gray-900">AI Business Summary</h3>
+                            {isAIGenerated && (
+                                <span className="px-2 py-1 bg-blue-100 text-blue-700 text-xs rounded-full font-medium">
+                                    AI Generated
+                                </span>
+                            )}
                         </div>
-                        <div className="text-center p-4 bg-yellow-50 rounded-lg">
-                            <div className="text-2xl font-bold text-yellow-600">{metrics.pendingRewards}</div>
-                            <div className="text-sm text-gray-600 mt-1">Pending Rewards</div>
-                            <div className="text-xs text-gray-500 mt-1">Need follow-up</div>
-                        </div>
-                        <div className="text-center p-4 bg-red-50 rounded-lg">
-                            <div className="text-2xl font-bold text-red-600">{metrics.inactiveCustomers}</div>
-                            <div className="text-sm text-gray-600 mt-1">Inactive Customers</div>
-                            <div className="text-xs text-gray-500 mt-1">Win-back opportunity</div>
+                        <div className="text-gray-700 text-sm leading-relaxed">
+                            {insights.split('\n').slice(0, 3).join(' ').substring(0, 200)}...
                         </div>
                     </div>
-                </div>
-            )}
+                ) : (
+                    <div className="text-center py-4 text-gray-500">
+                        <Brain className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                        <p className="text-sm">Click "Refresh AI" to get business insights</p>
+                    </div>
+                )}
+            </div>
+
+            {/* AI Footer Note */}
+            <div className="text-center py-4">
+                <p className="text-xs text-gray-500">
+                    🤖 <strong>Powered by AI:</strong> This dashboard uses artificial intelligence to analyze your business data,
+                    track customer behavior, and provide actionable insights for growth.
+                </p>
+            </div>
         </div>
     )
 }
