@@ -18,8 +18,13 @@ class AIService {
     private model: string = 'minimax/minimax-m2:free'
 
     constructor() {
-        this.apiKey = getOpenRouterApiKey()
+        // Always ensure we have an API key
+        this.apiKey = process.env.OPENROUTER_API_KEY || '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'
         console.log('🔑 AI Service initialized with API key length:', this.apiKey.length)
+
+        if (!this.apiKey) {
+            console.error('❌ No API key available')
+        }
     }
 
     async generateResponse(messages: AIMessage[]): Promise<AIResponse> {
