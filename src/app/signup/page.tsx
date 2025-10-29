@@ -24,12 +24,42 @@ const signupSchema = z.object({
     businessName: z.string().min(2, 'Business name must be at least 2 characters'),
     businessEmail: z.string().email({ message: 'Invalid business email address' }),
     phone: z.string().min(12, 'Phone number with country code must be at least 12 characters').regex(/^\+\d{1,4}\d{10}$/, 'Please enter a valid phone number with country code'),
+    businessCategory: z.string().min(1, 'Please select a business category'),
+    customCategory: z.string().optional(),
 }).refine((data) => data.password === data.confirmPassword, {
     message: "Passwords don't match",
     path: ["confirmPassword"],
+}).refine((data) => {
+    if (data.businessCategory === 'other' && (!data.customCategory || data.customCategory.trim().length < 2)) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Please specify your business category",
+    path: ["customCategory"],
 })
 
 type SignupForm = z.infer<typeof signupSchema>
+
+// Business categories
+const businessCategories = [
+    { value: 'cafe', label: '☕ Cafe & Coffee Shop', icon: '☕' },
+    { value: 'restaurant', label: '🍽️ Restaurant', icon: '🍽️' },
+    { value: 'food_hall', label: '🍕 Food Hall & Fast Food', icon: '🍕' },
+    { value: 'bakery', label: '🥖 Bakery & Pastry Shop', icon: '🥖' },
+    { value: 'salon', label: '💇 Hair Salon', icon: '💇' },
+    { value: 'beauty_parlor', label: '💄 Beauty Parlor & Spa', icon: '💄' },
+    { value: 'boutique', label: '👗 Boutique & Fashion Store', icon: '👗' },
+    { value: 'mens_wear', label: '👔 Men\'s Clothing Store', icon: '👔' },
+    { value: 'womens_wear', label: '👚 Women\'s Clothing Store', icon: '👚' },
+    { value: 'retail_store', label: '🛍️ Retail & General Store', icon: '🛍️' },
+    { value: 'pharmacy', label: '💊 Pharmacy & Medical Store', icon: '💊' },
+    { value: 'gym_fitness', label: '💪 Gym & Fitness Center', icon: '💪' },
+    { value: 'electronics', label: '📱 Electronics Store', icon: '📱' },
+    { value: 'jewelry', label: '💎 Jewelry Store', icon: '💎' },
+    { value: 'automotive', label: '🚗 Automotive Services', icon: '🚗' },
+    { value: 'other', label: '📝 Other (Please specify)', icon: '📝' }
+]
 
 export default function SignupPage() {
     const [loading, setLoading] = useState(false)
@@ -163,6 +193,8 @@ export default function SignupPage() {
                 reward_description: '',
                 visit_goal: 5,
                 reward_setup_completed: false, // Ensure setup is marked as incomplete
+                business_category: data.businessCategory,
+                custom_category: data.businessCategory === 'other' ? data.customCategory : null,
             })
 
             if (error) {
@@ -470,6 +502,51 @@ export default function SignupPage() {
                                     />
                                 </div>
                             </div>
+
+                            {/* Business Category */}
+                            <div>
+                                <label htmlFor="businessCategory" className="block text-sm font-medium text-gray-700">
+                                    <Building className="w-4 h-4 inline mr-1" />
+                                    Business Category *
+                                </label>
+                                <div className="mt-1">
+                                    <select
+                                        {...register('businessCategory')}
+                                        className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
+                                    >
+                                        <option value="">Select your business category</option>
+                                        {businessCategories.map((category) => (
+                                            <option key={category.value} value={category.value}>
+                                                {category.label}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    {errors.businessCategory && (
+                                        <p className="mt-1 text-sm text-red-600">{errors.businessCategory.message}</p>
+                                    )}
+                                </div>
+                            </div>
+
+                            {/* Custom Category Input - Show only when "Other" is selected */}
+                            {watch('businessCategory') === 'other' && (
+                                <div>
+                                    <label htmlFor="customCategory" className="block text-sm font-medium text-gray-700">
+                                        <Building className="w-4 h-4 inline mr-1" />
+                                        Specify Your Business Type *
+                                    </label>
+                                    <div className="mt-1">
+                                        <input
+                                            {...register('customCategory')}
+                                            type="text"
+                                            placeholder="e.g., Pet Store, Book Shop, etc."
+                                            className="appearance-none block w-full px-3 py-2 border border-gray-300 rounded-md placeholder-gray-400 focus:outline-none focus:ring-blue-500 focus:border-blue-500 sm:text-sm text-gray-900"
+                                        />
+                                        {errors.customCategory && (
+                                            <p className="mt-1 text-sm text-red-600">{errors.customCategory.message}</p>
+                                        )}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Logo Upload */}
                             <div>

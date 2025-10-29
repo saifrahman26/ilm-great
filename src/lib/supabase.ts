@@ -65,6 +65,8 @@ export interface Business {
     notification_sms?: boolean
     business_logo_url?: string
     google_review_link?: string
+    business_category?: string
+    custom_category?: string
     reward_setup_completed: boolean
     setup_completed_at?: string
     inactive_customer_message?: string

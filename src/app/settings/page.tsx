@@ -25,6 +25,26 @@ import Link from 'next/link'
 import PhoneInput from '@/components/PhoneInput'
 import { CardSkeleton } from '@/components/LoadingSkeleton'
 
+// Business categories
+const businessCategories = [
+    { value: 'cafe', label: '☕ Cafe & Coffee Shop', icon: '☕' },
+    { value: 'restaurant', label: '🍽️ Restaurant', icon: '🍽️' },
+    { value: 'food_hall', label: '🍕 Food Hall & Fast Food', icon: '🍕' },
+    { value: 'bakery', label: '🥖 Bakery & Pastry Shop', icon: '🥖' },
+    { value: 'salon', label: '💇 Hair Salon', icon: '💇' },
+    { value: 'beauty_parlor', label: '💄 Beauty Parlor & Spa', icon: '💄' },
+    { value: 'boutique', label: '👗 Boutique & Fashion Store', icon: '👗' },
+    { value: 'mens_wear', label: '👔 Men\'s Clothing Store', icon: '👔' },
+    { value: 'womens_wear', label: '👚 Women\'s Clothing Store', icon: '👚' },
+    { value: 'retail_store', label: '🛍️ Retail & General Store', icon: '🛍️' },
+    { value: 'pharmacy', label: '💊 Pharmacy & Medical Store', icon: '💊' },
+    { value: 'gym_fitness', label: '💪 Gym & Fitness Center', icon: '💪' },
+    { value: 'electronics', label: '📱 Electronics Store', icon: '📱' },
+    { value: 'jewelry', label: '💎 Jewelry Store', icon: '💎' },
+    { value: 'automotive', label: '🚗 Automotive Services', icon: '🚗' },
+    { value: 'other', label: '📝 Other (Please specify)', icon: '📝' }
+]
+
 const businessSettingsSchema = z.object({
     name: z.string().min(2, 'Business name must be at least 2 characters'),
     email: z.string().min(1, 'Email is required').email('Invalid email address'),
@@ -33,6 +53,16 @@ const businessSettingsSchema = z.object({
     reward_description: z.string().min(10, 'Reward description must be at least 10 characters'),
     visit_goal: z.number().min(1, 'Visit goal must be at least 1').max(20, 'Visit goal cannot exceed 20'),
     google_review_link: z.string().url('Please enter a valid Google Review URL').optional().or(z.literal('')),
+    business_category: z.string().min(1, 'Please select a business category'),
+    custom_category: z.string().optional(),
+}).refine((data) => {
+    if (data.business_category === 'other' && (!data.custom_category || data.custom_category.trim().length < 2)) {
+        return false;
+    }
+    return true;
+}, {
+    message: "Please specify your business category",
+    path: ["custom_category"],
 })
 
 type BusinessSettingsForm = z.infer<typeof businessSettingsSchema>
@@ -65,6 +95,8 @@ export default function SettingsPage() {
             setValue('reward_description', business.reward_description)
             setValue('visit_goal', business.visit_goal)
             setValue('google_review_link', business.google_review_link || '')
+            setValue('business_category', business.business_category || '')
+            setValue('custom_category', business.custom_category || '')
 
             if (business.business_logo_url) {
                 setLogoPreview(business.business_logo_url)
@@ -126,6 +158,8 @@ export default function SettingsPage() {
                     visit_goal: data.visit_goal,
                     business_logo_url: logoUrl,
                     google_review_link: data.google_review_link || null,
+                    business_category: data.business_category,
+                    custom_category: data.business_category === 'other' ? data.custom_category : null,
                 })
                 .eq('id', business.id)
 
@@ -320,6 +354,47 @@ export default function SettingsPage() {
                                 />
                             </div>
                         </div>
+
+                        {/* Business Category */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <Building className="w-4 h-4 inline mr-1" />
+                                Business Category *
+                            </label>
+                            <select
+                                {...register('business_category')}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 transition-all duration-200 hover:border-gray-400 focus:scale-105"
+                            >
+                                <option value="">Select your business category</option>
+                                {businessCategories.map((category) => (
+                                    <option key={category.value} value={category.value}>
+                                        {category.label}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.business_category && (
+                                <p className="mt-1 text-sm text-red-600">{errors.business_category.message}</p>
+                            )}
+                        </div>
+
+                        {/* Custom Category Input - Show only when "Other" is selected */}
+                        {watch('business_category') === 'other' && (
+                            <div>
+                                <label className="block text-sm font-medium text-gray-700 mb-2">
+                                    <Building className="w-4 h-4 inline mr-1" />
+                                    Specify Your Business Type *
+                                </label>
+                                <input
+                                    {...register('custom_category')}
+                                    type="text"
+                                    placeholder="e.g., Pet Store, Book Shop, etc."
+                                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 placeholder-gray-500 transition-all duration-200 hover:border-gray-400 focus:scale-105"
+                                />
+                                {errors.custom_category && (
+                                    <p className="mt-1 text-sm text-red-600">{errors.custom_category.message}</p>
+                                )}
+                            </div>
+                        )}
 
                         {/* Google Review Link */}
                         <div>
