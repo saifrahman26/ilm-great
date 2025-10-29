@@ -2,6 +2,8 @@
 
 A modern, comprehensive loyalty program management system that helps businesses build lasting customer relationships through QR code technology, AI-enhanced communications, and seamless reward management.
 
+> **Latest Update**: Added AI-powered inactive customer engagement system with personalized re-engagement emails and category-specific offers.
+
 ## 🌟 **Key Features**
 
 ### 🎯 **For Businesses**
