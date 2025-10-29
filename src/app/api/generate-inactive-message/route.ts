@@ -2,8 +2,19 @@ import { NextRequest, NextResponse } from 'next/server'
 import { aiService } from '@/lib/ai'
 
 export async function POST(request: NextRequest) {
+    let businessName: string = ''
+    let businessCategory: string = ''
+    let customCategory: string = ''
+    let rewardTitle: string = ''
+    let visitGoal: number = 0
+
     try {
-        const { businessName, businessCategory, customCategory, rewardTitle, visitGoal } = await request.json()
+        const requestData = await request.json()
+        businessName = requestData.businessName
+        businessCategory = requestData.businessCategory
+        customCategory = requestData.customCategory
+        rewardTitle = requestData.rewardTitle
+        visitGoal = requestData.visitGoal
 
         if (!businessName || !businessCategory) {
             return NextResponse.json(
