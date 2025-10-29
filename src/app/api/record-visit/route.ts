@@ -142,9 +142,7 @@ export async function POST(request: NextRequest) {
                 await sendVisitConfirmationEmail(
                     updatedCustomer,
                     business,
-                    newVisitCount,
-                    business.reward_expires || false,
-                    business.reward_expiry_months || 1
+                    newVisitCount
                 )
                 console.log('✅ Visit confirmation email sent')
             } catch (emailError) {
@@ -192,7 +190,7 @@ export async function POST(request: NextRequest) {
                 if (customer.email?.trim()) {
                     try {
                         const { sendRewardTokenEmail } = await import('@/lib/messaging')
-                        await sendRewardTokenEmail(updatedCustomer, business, token, rewardNumber)
+                        await sendRewardTokenEmail(updatedCustomer, business)
                     } catch (emailError) {
                         console.error('❌ Failed to send reward token email:', emailError)
                     }

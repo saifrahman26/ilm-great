@@ -1,213 +1,211 @@
 'use client'
 
 import { useState } from 'react'
-import { Sparkles, RefreshCw, CheckCircle, XCircle } from 'lucide-react'
+import { Brain, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
 
 export default function TestAIDebug() {
-    const [testing, setTesting] = useState(false)
     const [results, setResults] = useState<any>(null)
+    const [loading, setLoading] = useState(false)
 
     const testAI = async () => {
-        setTesting(true)
+        setLoading(true)
         try {
-            const response = await fetch('/api/test-ai')
+            const response = await fetch('/api/debug-ai')
             const data = await response.json()
             setResults(data)
         } catch (error) {
             setResults({
                 success: false,
-                error: error instanceof Error ? error.message : 'Unknown error'
+                error: 'Failed to connect to debug endpoint',
+                details: error
             })
         } finally {
-            setTesting(false)
+            setLoading(false)
         }
     }
 
-    const testEnv = async () => {
-        setTesting(true)
+    const testDashboardInsights = async () => {
+        setLoading(true)
         try {
-            const response = await fetch('/api/debug-ai-env')
+            const response = await fetch('/api/ai/dashboard-insights', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ businessId: 'test-business-id' })
+            })
             const data = await response.json()
-            setResults({ ...results, envDebug: data })
+            setResults({ ...data, testType: 'Dashboard Insights' })
         } catch (error) {
             setResults({
-                ...results,
-                envDebug: { error: error instanceof Error ? error.message : 'Unknown error' }
+                success: false,
+                error: 'Failed to test dashboard insights',
+                details: error,
+                testType: 'Dashboard Insights'
             })
         } finally {
-            setTesting(false)
+            setLoading(false)
+        }
+    }
+
+    const testEmailGeneration = async () => {
+        setLoading(true)
+        try {
+            const response = await fetch('/api/ai/generate-email', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    businessName: 'Test Coffee Shop',
+                    businessType: 'Coffee Shop',
+                    customerName: 'John Doe',
+                    visitCount: 3,
+                    visitGoal: 5,
+                    rewardTitle: 'Free Coffee',
+                    isRewardReached: false,
+                    emailType: 'visit_confirmation'
+                })
+            })
+            const data = await response.json()
+            setResults({ ...data, testType: 'Email Generation' })
+        } catch (error) {
+            setResults({
+                success: false,
+                error: 'Failed to test email generation',
+                details: error,
+                testType: 'Email Generation'
+            })
+        } finally {
+            setLoading(false)
         }
     }
 
     return (
         <div className="min-h-screen bg-gray-50 py-8 px-4">
             <div className="max-w-4xl mx-auto">
-                <div className="bg-white rounded-xl shadow-lg overflow-hidden">
-                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-8">
-                        <div className="flex items-center gap-3">
-                            <div className="p-3 bg-white/20 rounded-lg">
-                                <Sparkles className="w-8 h-8 text-white" />
-                            </div>
-                            <div>
-                                <h1 className="text-3xl font-bold text-white">AI Debug Console</h1>
-                                <p className="text-blue-100 mt-2">Test and debug AI integration</p>
-                            </div>
-                        </div>
+                <div className="text-center mb-8">
+                    <div className="flex items-center justify-center gap-3 mb-4">
+                        <Brain className="w-8 h-8 text-purple-600" />
+                        <h1 className="text-3xl font-bold text-gray-900">AI Debug Console</h1>
                     </div>
+                    <p className="text-gray-600">Test AI functionality and debug issues</p>
+                </div>
 
-                    <div className="p-6">
-                        <div className="space-y-4 mb-6">
-                            <button
-                                onClick={testAI}
-                                disabled={testing}
-                                className="w-full flex items-center justify-center gap-2 bg-blue-600 text-white py-3 px-6 rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                            >
-                                {testing ? (
-                                    <>
-                                        <RefreshCw className="w-5 h-5 animate-spin" />
-                                        Testing AI Service...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles className="w-5 h-5" />
-                                        Test AI Service
-                                    </>
-                                )}
-                            </button>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                    <button
+                        onClick={testAI}
+                        disabled={loading}
+                        className="bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        <Brain className="w-4 h-4" />
+                        Test AI Service
+                    </button>
 
-                            <button
-                                onClick={testEnv}
-                                disabled={testing}
-                                className="w-full flex items-center justify-center gap-2 bg-green-600 text-white py-3 px-6 rounded-lg hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                            >
-                                {testing ? (
-                                    <>
-                                        <RefreshCw className="w-5 h-5 animate-spin" />
-                                        Checking Environment...
-                                    </>
-                                ) : (
-                                    <>
-                                        <CheckCircle className="w-5 h-5" />
-                                        Check Environment Variables
-                                    </>
-                                )}
-                            </button>
+                    <button
+                        onClick={testDashboardInsights}
+                        disabled={loading}
+                        className="bg-green-600 text-white py-3 px-4 rounded-lg hover:bg-green-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        <CheckCircle className="w-4 h-4" />
+                        Test Dashboard
+                    </button>
 
-                            <button
-                                onClick={async () => {
-                                    setTesting(true)
-                                    try {
-                                        const response = await fetch('/api/test-openrouter-direct')
-                                        const data = await response.json()
-                                        setResults({ ...results, directTest: data })
-                                    } catch (error) {
-                                        setResults({
-                                            ...results,
-                                            directTest: { error: error instanceof Error ? error.message : 'Unknown error' }
-                                        })
-                                    } finally {
-                                        setTesting(false)
-                                    }
-                                }}
-                                disabled={testing}
-                                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-                            >
-                                {testing ? (
-                                    <>
-                                        <RefreshCw className="w-5 h-5 animate-spin" />
-                                        Testing Direct API...
-                                    </>
-                                ) : (
-                                    <>
-                                        <Sparkles className="w-5 h-5" />
-                                        Test Direct OpenRouter API
-                                    </>
-                                )}
-                            </button>
+                    <button
+                        onClick={testEmailGeneration}
+                        disabled={loading}
+                        className="bg-purple-600 text-white py-3 px-4 rounded-lg hover:bg-purple-700 disabled:opacity-50 flex items-center justify-center gap-2"
+                    >
+                        <AlertCircle className="w-4 h-4" />
+                        Test Email AI
+                    </button>
+                </div>
+
+                {loading && (
+                    <div className="text-center py-8">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-600 mx-auto mb-4"></div>
+                        <p className="text-gray-600">Testing AI functionality...</p>
+                    </div>
+                )}
+
+                {results && !loading && (
+                    <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+                        <div className="flex items-center gap-2 mb-4">
+                            {results.success ? (
+                                <CheckCircle className="w-5 h-5 text-green-600" />
+                            ) : (
+                                <XCircle className="w-5 h-5 text-red-600" />
+                            )}
+                            <h3 className="text-lg font-semibold">
+                                {results.testType || 'AI Service'} Test Results
+                            </h3>
                         </div>
 
-                        {results && (
-                            <div className="bg-gray-50 rounded-lg p-6">
-                                <h2 className="text-xl font-semibold text-gray-900 mb-4">Test Results</h2>
+                        <div className="space-y-4">
+                            <div>
+                                <h4 className="font-medium text-gray-900 mb-2">Status</h4>
+                                <span className={`px-3 py-1 rounded-full text-sm font-medium ${results.success
+                                        ? 'bg-green-100 text-green-800'
+                                        : 'bg-red-100 text-red-800'
+                                    }`}>
+                                    {results.success ? 'Success' : 'Failed'}
+                                </span>
+                            </div>
 
-                                <div className="space-y-4">
-                                    <div className="flex items-center gap-2">
-                                        {results.success ? (
-                                            <CheckCircle className="w-5 h-5 text-green-600" />
-                                        ) : (
-                                            <XCircle className="w-5 h-5 text-red-600" />
-                                        )}
-                                        <span className={`font-medium ${results.success ? 'text-green-600' : 'text-red-600'}`}>
-                                            {results.success ? 'AI Service Working' : 'AI Service Failed'}
-                                        </span>
+                            {results.error && (
+                                <div>
+                                    <h4 className="font-medium text-gray-900 mb-2">Error</h4>
+                                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                                        <p className="text-red-800 text-sm">{results.error}</p>
                                     </div>
+                                </div>
+                            )}
 
-                                    {results.debug && (
-                                        <div className="bg-white p-4 rounded border">
-                                            <h3 className="font-medium text-gray-900 mb-2">Debug Info:</h3>
-                                            <pre className="text-sm text-gray-600 whitespace-pre-wrap">
-                                                {JSON.stringify(results.debug, null, 2)}
-                                            </pre>
-                                        </div>
-                                    )}
+                            {results.testContent && (
+                                <div>
+                                    <h4 className="font-medium text-gray-900 mb-2">Generated Content</h4>
+                                    <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                                        <p className="text-green-800 text-sm whitespace-pre-wrap">{results.testContent}</p>
+                                    </div>
+                                </div>
+                            )}
 
-                                    {results.testMessage && (
-                                        <div className="bg-white p-4 rounded border">
-                                            <h3 className="font-medium text-gray-900 mb-2">AI Response:</h3>
-                                            <p className="text-gray-700">{results.testMessage}</p>
-                                        </div>
-                                    )}
+                            {results.content && (
+                                <div>
+                                    <h4 className="font-medium text-gray-900 mb-2">AI Response</h4>
+                                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                                        <p className="text-blue-800 text-sm whitespace-pre-wrap">{results.content}</p>
+                                    </div>
+                                </div>
+                            )}
 
-                                    {results.error && (
-                                        <div className="bg-red-50 p-4 rounded border border-red-200">
-                                            <h3 className="font-medium text-red-900 mb-2">Error:</h3>
-                                            <p className="text-red-700">{results.error}</p>
-                                        </div>
-                                    )}
+                            {results.insights && (
+                                <div>
+                                    <h4 className="font-medium text-gray-900 mb-2">AI Insights</h4>
+                                    <div className="bg-purple-50 border border-purple-200 rounded-lg p-3">
+                                        <p className="text-purple-800 text-sm whitespace-pre-wrap">{results.insights}</p>
+                                    </div>
+                                </div>
+                            )}
 
-                                    {results.envDebug && (
-                                        <div className="bg-white p-4 rounded border">
-                                            <h3 className="font-medium text-gray-900 mb-2">Environment Debug:</h3>
-                                            <pre className="text-sm text-gray-600 whitespace-pre-wrap">
-                                                {JSON.stringify(results.envDebug, null, 2)}
-                                            </pre>
-                                        </div>
-                                    )}
+                            {results.environment && (
+                                <div>
+                                    <h4 className="font-medium text-gray-900 mb-2">Environment</h4>
+                                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-3">
+                                        <pre className="text-xs text-gray-700">
+                                            {JSON.stringify(results.environment, null, 2)}
+                                        </pre>
+                                    </div>
+                                </div>
+                            )}
 
-                                    {results.directTest && (
-                                        <div className="bg-white p-4 rounded border">
-                                            <h3 className="font-medium text-gray-900 mb-2">Direct API Test:</h3>
-                                            <div className="space-y-2">
-                                                <div className="flex items-center gap-2">
-                                                    {results.directTest.success ? (
-                                                        <CheckCircle className="w-4 h-4 text-green-600" />
-                                                    ) : (
-                                                        <XCircle className="w-4 h-4 text-red-600" />
-                                                    )}
-                                                    <span className={`text-sm font-medium ${results.directTest.success ? 'text-green-600' : 'text-red-600'}`}>
-                                                        {results.directTest.success ? 'Direct API Working' : 'Direct API Failed'}
-                                                    </span>
-                                                </div>
-                                                {results.directTest.aiResponse && (
-                                                    <div className="bg-green-50 p-3 rounded border border-green-200">
-                                                        <p className="text-sm text-green-800 font-medium">AI Response:</p>
-                                                        <p className="text-sm text-green-700">{results.directTest.aiResponse}</p>
-                                                    </div>
-                                                )}
-                                                {results.directTest.error && (
-                                                    <div className="bg-red-50 p-3 rounded border border-red-200">
-                                                        <p className="text-sm text-red-800 font-medium">Error:</p>
-                                                        <p className="text-sm text-red-700">{results.directTest.error}</p>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    )}
+                            <div>
+                                <h4 className="font-medium text-gray-900 mb-2">Full Response</h4>
+                                <div className="bg-gray-50 border border-gray-200 rounded-lg p-3 max-h-96 overflow-y-auto">
+                                    <pre className="text-xs text-gray-700">
+                                        {JSON.stringify(results, null, 2)}
+                                    </pre>
                                 </div>
                             </div>
-                        )}
+                        </div>
                     </div>
-                </div>
+                )}
             </div>
         </div>
     )

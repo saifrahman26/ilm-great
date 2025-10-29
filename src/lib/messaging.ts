@@ -3,6 +3,8 @@ import { aiService } from './ai'
 
 
 
+
+
 // Generate QR code using QR Server API
 export async function generateQRCode(data: string): Promise<string> {
     try {
