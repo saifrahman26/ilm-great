@@ -57,6 +57,7 @@ export async function sendAIEnhancedEmail(
         isRewardReached?: boolean
         daysSinceLastVisit?: number
         specialOffer?: string
+        customerId?: string
     }
 ): Promise<boolean> {
     try {
@@ -104,8 +105,19 @@ export async function sendAIEnhancedEmail(
                 break
         }
 
+        // Generate QR code for customer (for visit confirmation emails)
+        let qrCodeUrl = ''
+        if (emailType === 'visit_confirmation' && context.customerId) {
+            try {
+                const { generateQRCode } = await import('./messaging')
+                qrCodeUrl = await generateQRCode(`https://loyallinkk.vercel.app/mark-visit/${context.customerId}`)
+            } catch (error) {
+                console.warn('Failed to generate QR code for email:', error)
+            }
+        }
+
         // Create HTML email template
-        const htmlContent = createEmailTemplate(businessName, customerName, emailContent, emailType, context)
+        const htmlContent = createEmailTemplate(businessName, customerName, emailContent, emailType, { ...context, qrCodeUrl })
 
         // Send the email
         return await sendEmail(to, subject, htmlContent, businessName)
@@ -206,11 +218,10 @@ function createEmailTemplate(
     emailType: string,
     context: any
 ): string {
-    const gradientColor = emailType === 'reward_earned'
-        ? 'from-green-600 to-emerald-600'
-        : emailType === 'inactive_reminder'
-            ? 'from-orange-600 to-red-600'
-            : 'from-blue-600 to-purple-600'
+    // Calculate progress percentage
+    const progressPercentage = context.visitCount && context.visitGoal
+        ? Math.min((context.visitCount / context.visitGoal) * 100, 100)
+        : 0
 
     return `
 <!DOCTYPE html>
@@ -240,11 +251,66 @@ function createEmailTemplate(
         </div>
         ` : ''}
         
-        ${context.visitCount !== undefined ? `
-        <div style="background: #f8f9fa; padding: 15px; border-radius: 8px; text-align: center; margin-top: 20px;">
-            <p style="margin: 0; color: #495057; font-size: 14px;">
-                <strong>Visit Progress:</strong> ${context.visitCount} of ${context.visitGoal} visits completed
+        ${context.visitCount !== undefined && context.visitGoal ? `
+        <!-- Progress Bar Section -->
+        <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 25px 0; border: 1px solid #e9ecef;">
+            <h3 style="margin: 0 0 15px 0; color: #495057; text-align: center; font-size: 18px;">
+                🎯 Your Loyalty Progress
+            </h3>
+            
+            <div style="text-align: center; margin-bottom: 15px;">
+                <span style="font-size: 24px; font-weight: bold; color: #4f46e5;">
+                    ${context.visitCount} / ${context.visitGoal}
+                </span>
+                <span style="font-size: 16px; color: #6c757d; margin-left: 5px;">visits</span>
+            </div>
+            
+            <!-- Progress Bar -->
+            <div style="background: #e9ecef; border-radius: 20px; height: 20px; margin: 15px 0; overflow: hidden; position: relative;">
+                <div style="background: linear-gradient(90deg, #4f46e5 0%, #7c3aed 100%); height: 100%; width: ${progressPercentage}%; border-radius: 20px; transition: width 0.3s ease;"></div>
+                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: ${progressPercentage > 50 ? 'white' : '#495057'}; font-size: 12px; font-weight: bold;">
+                    ${Math.round(progressPercentage)}%
+                </div>
+            </div>
+            
+            ${!context.isRewardReached ? `
+            <p style="margin: 10px 0 0 0; color: #6c757d; text-align: center; font-size: 14px;">
+                ${context.visitGoal - context.visitCount} more visit${context.visitGoal - context.visitCount === 1 ? '' : 's'} to earn your <strong>${context.rewardTitle}</strong>!
             </p>
+            ` : ''}
+        </div>
+        ` : ''}
+        
+        ${context.qrCodeUrl && emailType === 'visit_confirmation' ? `
+        <!-- QR Code Section -->
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 25px; border-radius: 10px; text-align: center; margin: 25px 0;">
+            <h3 style="color: white; margin: 0 0 15px 0; font-size: 18px;">
+                📱 Your Personal QR Code
+            </h3>
+            <div style="background: white; padding: 20px; border-radius: 10px; display: inline-block; margin: 10px 0;">
+                <div style="text-align: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0; color: #333; font-size: 20px; font-weight: bold;">
+                        ${businessName}
+                    </h2>
+                    <p style="margin: 5px 0 0 0; color: #666; font-size: 14px;">Loyalty Program</p>
+                </div>
+                <img src="${context.qrCodeUrl}" alt="Your QR Code" style="max-width: 150px; height: auto; border: 2px solid #4f46e5; border-radius: 8px;" />
+                <p style="margin: 10px 0 0 0; color: #666; font-size: 12px;">
+                    Customer: ${customerName}
+                </p>
+            </div>
+            <div style="margin-top: 15px;">
+                <p style="color: white; margin: 0; font-size: 14px; opacity: 0.9;">
+                    📥 <strong>Save this QR code</strong> to your phone for easy scanning at your next visit!
+                </p>
+                <p style="color: white; margin: 5px 0 10px 0; font-size: 12px; opacity: 0.8;">
+                    Show this code to staff to record your visit instantly
+                </p>
+                <a href="https://loyallinkk.vercel.app/qr-download/${context.customerId}" 
+                   style="display: inline-block; background: rgba(255,255,255,0.2); color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid rgba(255,255,255,0.3);">
+                    📱 Download High-Quality QR Code
+                </a>
+            </div>
         </div>
         ` : ''}
     </div>

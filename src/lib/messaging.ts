@@ -83,7 +83,8 @@ export async function sendVisitConfirmationEmail(
                 visitCount,
                 visitGoal: business.visit_goal,
                 rewardTitle: business.reward_title,
-                isRewardReached
+                isRewardReached,
+                customerId: customer.id
             }
         )
 
