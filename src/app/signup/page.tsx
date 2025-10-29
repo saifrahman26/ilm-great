@@ -194,7 +194,7 @@ export default function SignupPage() {
                 visit_goal: 5,
                 reward_setup_completed: false, // Ensure setup is marked as incomplete
                 business_category: data.businessCategory,
-                custom_category: data.businessCategory === 'other' ? data.customCategory : null,
+                custom_category: data.businessCategory === 'other' ? data.customCategory : undefined
             })
 
             if (error) {
