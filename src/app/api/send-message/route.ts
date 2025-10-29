@@ -3,6 +3,15 @@ import { getLoyaltyEmailTemplate, getSimpleEmailTemplate, getVisitReminderTempla
 
 export async function POST(request: NextRequest) {
     try {
+        const body = await request.json()
+
+        // Log the incoming request for debugging
+        console.log('🔍 Send-message request received:')
+        console.log('📝 Request body keys:', Object.keys(body))
+        console.log('📧 Email provided:', !!body.email)
+        console.log('💬 Message provided:', !!body.message)
+        console.log('🏷️ Template:', body.template)
+
         const {
             email,
             message,
@@ -17,11 +26,16 @@ export async function POST(request: NextRequest) {
             emailType,
             context,
             template = 'simple'
-        } = await request.json()
+        } = body
 
         if (!email && template !== 'ai-enhanced') {
+            console.log('❌ Email validation failed - email required for template:', template)
             return NextResponse.json(
-                { error: 'Email is required' },
+                {
+                    error: 'Email is required',
+                    template: template,
+                    providedFields: Object.keys(body)
+                },
                 { status: 400 }
             )
         }
@@ -200,8 +214,13 @@ export async function POST(request: NextRequest) {
             htmlContent = message
         } else {
             if (!message) {
+                console.log('❌ Message validation failed - message required for template:', template)
                 return NextResponse.json(
-                    { error: 'Message is required for this template type' },
+                    {
+                        error: 'Message is required for this template type',
+                        template: template,
+                        providedFields: Object.keys(body)
+                    },
                     { status: 400 }
                 )
             }
