@@ -134,6 +134,13 @@ export async function POST(request: NextRequest) {
         const reachedGoal = newVisitCount > 0 && newVisitCount % business.visit_goal === 0
         const rewardNumber = reachedGoal ? newVisitCount / business.visit_goal : 0
 
+        console.log(`🔍 Visit Analysis:`)
+        console.log(`   - Customer: ${customer.name}`)
+        console.log(`   - New visit count: ${newVisitCount}`)
+        console.log(`   - Visit goal: ${business.visit_goal}`)
+        console.log(`   - Reached goal: ${reachedGoal}`)
+        console.log(`   - Reward number: ${rewardNumber}`)
+
         // Send visit confirmation email if customer has email (but not if they reached reward goal)
         if (customer.email?.trim() && !reachedGoal) {
             console.log('📧 Sending visit confirmation email...')
@@ -190,7 +197,7 @@ export async function POST(request: NextRequest) {
                 if (customer.email?.trim()) {
                     try {
                         const { sendRewardTokenEmail } = await import('@/lib/messaging')
-                        await sendRewardTokenEmail(updatedCustomer, business)
+                        await sendRewardTokenEmail(updatedCustomer, business, token)
                     } catch (emailError) {
                         console.error('❌ Failed to send reward token email:', emailError)
                     }

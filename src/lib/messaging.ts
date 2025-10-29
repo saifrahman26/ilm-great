@@ -186,35 +186,39 @@ export async function sendInactiveCustomerOffer(customer: Customer, business?: a
 }
 
 // Send reward token email
-export async function sendRewardTokenEmail(customer: any, business: any): Promise<void> {
+export async function sendRewardTokenEmail(customer: any, business: any, token?: string): Promise<void> {
     if (!customer.email) {
         console.log('No email provided for customer:', customer.name)
         return
     }
 
     try {
-        // Use AI-enhanced email service
-        const { sendAIEnhancedEmail } = await import('./email')
+        // Generate QR code for the reward token
+        const qrCodeUrl = await generateQRCode(`REWARD-${token || 'CLAIM'}-${customer.id}`)
 
-        const emailSent = await sendAIEnhancedEmail(
+        // Use AI-enhanced email service with premium template
+        const { sendPremiumRewardEmail } = await import('./email')
+
+        const emailSent = await sendPremiumRewardEmail(
             customer.email,
             customer.name,
             business.name,
             business.business_type || 'Business',
-            'reward_earned',
             {
                 rewardTitle: business.reward_title,
-                isRewardReached: true
+                claimToken: token || `REWARD-${Date.now()}`,
+                qrCodeUrl,
+                businessId: business.id
             }
         )
 
         if (emailSent) {
-            console.log('✅ AI-enhanced reward token email sent to:', customer.email)
+            console.log('✅ Premium reward email sent to:', customer.email)
         } else {
-            console.error('❌ Failed to send reward token email to:', customer.email)
+            console.error('❌ Failed to send reward email to:', customer.email)
         }
     } catch (error) {
-        console.error('❌ Error sending reward token email:', error)
+        console.error('❌ Error sending reward email:', error)
         throw error
     }
 }
