@@ -11,6 +11,7 @@ async function generateAIMessage(context: {
     rewardTitle: string
     isRewardReached: boolean
     emailType: 'visit_confirmation' | 'reward_earned' | 'inactive_reminder'
+    pendingRewards?: number
 }): Promise<string> {
     try {
         const aiResponse = await aiService.generatePersonalizedEmail(context)
