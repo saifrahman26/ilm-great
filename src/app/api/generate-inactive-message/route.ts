@@ -39,22 +39,43 @@ Requirements:
 
 The message should make the customer feel valued and excited to return.`
 
-        const aiResponse = await aiService.generateWinBackEmail({
-            businessName,
-            businessType,
-            customerName: 'Customer', // Generic for template
-            visitCount: 0, // Will be personalized per customer
-            visitGoal,
-            rewardTitle,
-            daysSinceLastVisit: 0, // Will be personalized per customer
-            specialOffer: randomOffer
-        })
+        // Try AI generation first, with fallback to template
+        let aiMessage = ''
 
-        if (!aiResponse.success) {
-            throw new Error(aiResponse.error || 'Failed to generate AI content')
+        try {
+            const aiResponse = await aiService.generateWinBackEmail({
+                businessName,
+                businessType,
+                customerName: 'Customer', // Generic for template
+                visitCount: 0, // Will be personalized per customer
+                visitGoal: visitGoal || 5,
+                rewardTitle: rewardTitle || 'Reward',
+                daysSinceLastVisit: 14, // Default for template
+                specialOffer: randomOffer
+            })
+
+            if (aiResponse.success && aiResponse.content) {
+                aiMessage = aiResponse.content
+            } else {
+                throw new Error(aiResponse.error || 'AI generation returned no content')
+            }
+        } catch (aiError) {
+            console.log('AI generation failed, using fallback template:', aiError)
+
+            // Fallback to template message
+            aiMessage = `Hi there! 👋
+
+We miss seeing you at ${businessName}! It's been a while since your last visit, and we wanted to reach out because you're such a valued customer.
+
+As a thank you for your loyalty, we'd love to welcome you back with a special offer: ${randomOffer}! 
+
+${rewardTitle ? `Keep visiting to earn your ${rewardTitle} after ${visitGoal} visits.` : 'Keep collecting visits to earn amazing rewards!'}
+
+Come visit us soon - we can't wait to see you again!
+
+Warm regards,
+The ${businessName} Team`
         }
-
-        const aiMessage = aiResponse.content
 
         return NextResponse.json({
             message: aiMessage,
@@ -64,8 +85,20 @@ The message should make the customer feel valued and excited to return.`
 
     } catch (error) {
         console.error('Error generating inactive message:', error)
+        console.error('Error details:', {
+            businessName,
+            businessCategory,
+            customCategory,
+            rewardTitle,
+            visitGoal,
+            error: error instanceof Error ? error.message : 'Unknown error'
+        })
+
         return NextResponse.json(
-            { error: 'Failed to generate message' },
+            {
+                error: 'Failed to generate message',
+                details: error instanceof Error ? error.message : 'Unknown error'
+            },
             { status: 500 }
         )
     }
