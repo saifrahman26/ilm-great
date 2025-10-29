@@ -92,6 +92,38 @@ export default function TestAIDebug() {
                                     </>
                                 )}
                             </button>
+
+                            <button
+                                onClick={async () => {
+                                    setTesting(true)
+                                    try {
+                                        const response = await fetch('/api/test-openrouter-direct')
+                                        const data = await response.json()
+                                        setResults({ ...results, directTest: data })
+                                    } catch (error) {
+                                        setResults({
+                                            ...results,
+                                            directTest: { error: error instanceof Error ? error.message : 'Unknown error' }
+                                        })
+                                    } finally {
+                                        setTesting(false)
+                                    }
+                                }}
+                                disabled={testing}
+                                className="w-full flex items-center justify-center gap-2 bg-purple-600 text-white py-3 px-6 rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                            >
+                                {testing ? (
+                                    <>
+                                        <RefreshCw className="w-5 h-5 animate-spin" />
+                                        Testing Direct API...
+                                    </>
+                                ) : (
+                                    <>
+                                        <Sparkles className="w-5 h-5" />
+                                        Test Direct OpenRouter API
+                                    </>
+                                )}
+                            </button>
                         </div>
 
                         {results && (
@@ -139,6 +171,36 @@ export default function TestAIDebug() {
                                             <pre className="text-sm text-gray-600 whitespace-pre-wrap">
                                                 {JSON.stringify(results.envDebug, null, 2)}
                                             </pre>
+                                        </div>
+                                    )}
+
+                                    {results.directTest && (
+                                        <div className="bg-white p-4 rounded border">
+                                            <h3 className="font-medium text-gray-900 mb-2">Direct API Test:</h3>
+                                            <div className="space-y-2">
+                                                <div className="flex items-center gap-2">
+                                                    {results.directTest.success ? (
+                                                        <CheckCircle className="w-4 h-4 text-green-600" />
+                                                    ) : (
+                                                        <XCircle className="w-4 h-4 text-red-600" />
+                                                    )}
+                                                    <span className={`text-sm font-medium ${results.directTest.success ? 'text-green-600' : 'text-red-600'}`}>
+                                                        {results.directTest.success ? 'Direct API Working' : 'Direct API Failed'}
+                                                    </span>
+                                                </div>
+                                                {results.directTest.aiResponse && (
+                                                    <div className="bg-green-50 p-3 rounded border border-green-200">
+                                                        <p className="text-sm text-green-800 font-medium">AI Response:</p>
+                                                        <p className="text-sm text-green-700">{results.directTest.aiResponse}</p>
+                                                    </div>
+                                                )}
+                                                {results.directTest.error && (
+                                                    <div className="bg-red-50 p-3 rounded border border-red-200">
+                                                        <p className="text-sm text-red-800 font-medium">Error:</p>
+                                                        <p className="text-sm text-red-700">{results.directTest.error}</p>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
                                     )}
                                 </div>

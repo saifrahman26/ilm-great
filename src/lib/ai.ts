@@ -16,21 +16,22 @@ class AIService {
     private model: string = 'minimax/minimax-m2:free'
 
     constructor() {
-        // Try multiple ways to get the API key
-        this.apiKey = process.env.OPENROUTER_API_KEY ||
-            process.env.NEXT_OPENROUTER_API_KEY ||
-            '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'
+        // Try to get API key from environment variables first
+        this.apiKey = process.env.OPENROUTER_API_KEY || process.env.NEXT_OPENROUTER_API_KEY || ''
 
-        if (!this.apiKey || this.apiKey === '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') {
-            console.warn('⚠️ Using hardcoded API key for testing')
+        // If no environment variable found, use hardcoded key as fallback
+        if (!this.apiKey) {
+            console.warn('⚠️ OPENROUTER_API_KEY not found in environment variables, using hardcoded fallback')
+            console.warn('Available env keys:', Object.keys(process.env).filter(key => key.includes('OPENROUTER') || key.includes('AI')))
             this.apiKey = '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'
+        } else {
+            console.log('✅ OpenRouter API key loaded from environment, length:', this.apiKey.length)
         }
 
         if (!this.apiKey) {
-            console.warn('⚠️ OPENROUTER_API_KEY not found in environment variables')
-            console.warn('Available env keys:', Object.keys(process.env).filter(key => key.includes('OPENROUTER') || key.includes('AI')))
+            console.error('❌ No OpenRouter API key available')
         } else {
-            console.log('✅ OpenRouter API key loaded successfully, length:', this.apiKey.length)
+            console.log('🔑 API key ready for use')
         }
     }
 
