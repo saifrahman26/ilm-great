@@ -15,7 +15,13 @@ interface AIResponse {
 class AIService {
     private apiKey: string
     private baseUrl: string = 'https://openrouter.ai/api/v1/chat/completions'
-    private model: string = 'minimax/minimax-m2:free'
+    private model: string = 'google/gemma-2-9b-it:free'
+    private fallbackModels: string[] = [
+        'google/gemma-2-9b-it:free',
+        'meta-llama/llama-3.2-3b-instruct:free',
+        'microsoft/phi-3-mini-128k-instruct:free',
+        'huggingfaceh4/zephyr-7b-beta:free'
+    ]
 
     constructor() {
         // Use the env helper function to get the API key
@@ -36,54 +42,88 @@ class AIService {
             }
         }
 
-        try {
-            console.log('🤖 Making AI request to OpenRouter...')
-            const siteConfig = getSiteConfig()
-            const response = await fetch(this.baseUrl, {
-                method: 'POST',
-                headers: {
-                    'Authorization': `Bearer ${this.apiKey}`,
-                    'HTTP-Referer': siteConfig.siteUrl,
-                    'X-Title': siteConfig.siteName,
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    model: this.model,
-                    messages: messages,
-                    temperature: 0.7,
-                    max_tokens: 1000
+        // Try multiple models in case one fails
+        for (let i = 0; i < this.fallbackModels.length; i++) {
+            const currentModel = this.fallbackModels[i]
+
+            try {
+                console.log(`🤖 Trying AI model ${i + 1}/${this.fallbackModels.length}: ${currentModel}`)
+                const siteConfig = getSiteConfig()
+
+                const response = await fetch(this.baseUrl, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${this.apiKey}`,
+                        'HTTP-Referer': siteConfig.siteUrl,
+                        'X-Title': siteConfig.siteName,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        model: currentModel,
+                        messages: messages,
+                        temperature: 0.7,
+                        max_tokens: 1000
+                    })
                 })
-            })
 
-            console.log('📡 OpenRouter response status:', response.status)
+                console.log(`📡 OpenRouter response status for ${currentModel}:`, response.status)
 
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }))
-                console.error('❌ OpenRouter API error:', errorData)
-                throw new Error(`OpenRouter API error (${response.status}): ${errorData.error?.message || response.statusText}`)
+                if (!response.ok) {
+                    const errorData = await response.json().catch(() => ({ error: { message: 'Unknown error' } }))
+                    console.error(`❌ Model ${currentModel} failed:`, errorData)
+
+                    // If this is the last model, throw the error
+                    if (i === this.fallbackModels.length - 1) {
+                        throw new Error(`All AI models failed. Last error (${response.status}): ${errorData.error?.message || response.statusText}`)
+                    }
+
+                    // Otherwise, continue to next model
+                    continue
+                }
+
+                const data = await response.json()
+                console.log(`✅ OpenRouter response received from ${currentModel}`)
+
+                const content = data.choices?.[0]?.message?.content
+
+                if (!content) {
+                    console.error(`❌ No content in response from ${currentModel}:`, data)
+
+                    // If this is the last model, throw the error
+                    if (i === this.fallbackModels.length - 1) {
+                        throw new Error('No content received from any AI model')
+                    }
+
+                    // Otherwise, continue to next model
+                    continue
+                }
+
+                console.log(`🎉 AI content generated successfully using ${currentModel}`)
+                return {
+                    success: true,
+                    content: content.trim()
+                }
+
+            } catch (error) {
+                console.error(`💥 Error with model ${currentModel}:`, error)
+
+                // If this is the last model, return the error
+                if (i === this.fallbackModels.length - 1) {
+                    return {
+                        success: false,
+                        error: error instanceof Error ? error.message : 'All AI models failed'
+                    }
+                }
+
+                // Otherwise, continue to next model
+                continue
             }
+        }
 
-            const data = await response.json()
-            console.log('✅ OpenRouter response received')
-
-            const content = data.choices?.[0]?.message?.content
-
-            if (!content) {
-                console.error('❌ No content in OpenRouter response:', data)
-                throw new Error('No content received from AI')
-            }
-
-            console.log('🎉 AI content generated successfully')
-            return {
-                success: true,
-                content: content.trim()
-            }
-        } catch (error) {
-            console.error('💥 AI Service Error:', error)
-            return {
-                success: false,
-                error: error instanceof Error ? error.message : 'Unknown AI error'
-            }
+        // This should never be reached, but just in case
+        return {
+            success: false,
+            error: 'Unexpected error: no models were tried'
         }
     }
 

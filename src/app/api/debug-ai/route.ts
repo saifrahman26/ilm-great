@@ -5,17 +5,17 @@ export async function GET() {
     try {
         console.log('🔍 Testing AI service...')
 
-        // Test basic AI functionality
-        const testResponse = await aiService.generatePersonalizedEmail({
-            businessName: 'Test Coffee Shop',
-            businessType: 'Coffee Shop',
-            customerName: 'John Doe',
-            visitCount: 3,
-            visitGoal: 5,
-            rewardTitle: 'Free Coffee',
-            isRewardReached: false,
-            emailType: 'visit_confirmation'
-        })
+        // Test basic AI functionality with a simple message
+        const testResponse = await aiService.generateResponse([
+            {
+                role: 'system',
+                content: 'You are a helpful assistant. Respond briefly and clearly.'
+            },
+            {
+                role: 'user',
+                content: 'Write a short thank you message for a coffee shop customer who just completed their 3rd visit out of 5 needed for a free coffee reward.'
+            }
+        ])
 
         return NextResponse.json({
             success: true,

@@ -51,60 +51,52 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        // Calculate comprehensive metrics
+        // Calculate metrics
         const totalCustomers = customers?.length || 0
-        const totalVisits = customers?.reduce((sum, customer) => sum + (customer.visit_count || 0), 0) || 0
+        const totalVisits = customers?.reduce((sum, customer) => sum + (customer.visits || 0), 0) || 0
         const rewardsEarned = customers?.filter(customer =>
-            (customer.visit_count || 0) >= (business.visit_goal || 5)
+            (customer.visits || 0) >= (business.visit_goal || 5)
         ).length || 0
         const averageVisitsPerCustomer = totalCustomers > 0 ? totalVisits / totalCustomers : 0
 
-        // Calculate additional metrics for comprehensive analysis
-        const inactiveCustomers = customers?.filter(customer => {
-            const lastVisit = customer.last_visit ? new Date(customer.last_visit) : new Date(customer.created_at)
-            const daysSinceLastVisit = Math.floor((Date.now() - lastVisit.getTime()) / (1000 * 60 * 60 * 24))
-            return daysSinceLastVisit > 30
-        }).length || 0
-
-        const activeCustomers = totalCustomers - inactiveCustomers
-        const customerRetentionRate = totalCustomers > 0 ? ((activeCustomers / totalCustomers) * 100) : 0
-
-        // Calculate pending rewards (customers who have earned but not claimed)
-        const pendingRewards = customers?.filter(customer => {
-            const earnedRewards = Math.floor((customer.visit_count || 0) / (business.visit_goal || 5))
-            const claimedRewards = customer.rewards_claimed || 0
-            return earnedRewards > claimedRewards
-        }).length || 0
-
         // Get top customers
         const topCustomers = customers
-            ?.sort((a, b) => (b.visit_count || 0) - (a.visit_count || 0))
+            ?.sort((a, b) => (b.visits || 0) - (a.visits || 0))
             .slice(0, 5)
             .map(customer => ({
                 name: customer.name || 'Unknown',
-                visits: customer.visit_count || 0
+                visits: customer.visits || 0
             })) || []
 
-        // Generate visit trends (enhanced with growth indicators)
-        const visitTrends = [
-            { period: 'This Week', visits: Math.floor(Math.random() * 50) + 20, growth: Math.floor(Math.random() * 40) - 20 },
-            { period: 'Last Week', visits: Math.floor(Math.random() * 45) + 15, growth: Math.floor(Math.random() * 30) - 15 },
-            { period: 'This Month', visits: Math.floor(Math.random() * 200) + 100, growth: Math.floor(Math.random() * 50) - 25 },
-            { period: 'Last Month', visits: Math.floor(Math.random() * 180) + 80, growth: Math.floor(Math.random() * 35) - 17 }
-        ]
-
-        // Get recent activity (enhanced with more realistic data)
+        // Get recent activity (mock data for now - you can implement actual visit tracking)
         const recentActivity = [
-            { date: 'Today', visits: Math.floor(Math.random() * 15) + 5 },
-            { date: 'Yesterday', visits: Math.floor(Math.random() * 20) + 8 },
-            { date: '2 days ago', visits: Math.floor(Math.random() * 18) + 6 },
-            { date: '3 days ago', visits: Math.floor(Math.random() * 12) + 4 },
-            { date: '4 days ago', visits: Math.floor(Math.random() * 10) + 3 },
-            { date: '5 days ago', visits: Math.floor(Math.random() * 8) + 2 },
-            { date: '6 days ago', visits: Math.floor(Math.random() * 14) + 5 }
+            { date: 'Today', visits: Math.floor(Math.random() * 10) + 1 },
+            { date: 'Yesterday', visits: Math.floor(Math.random() * 15) + 1 },
+            { date: '2 days ago', visits: Math.floor(Math.random() * 12) + 1 },
+            { date: '3 days ago', visits: Math.floor(Math.random() * 8) + 1 },
+            { date: '4 days ago', visits: Math.floor(Math.random() * 6) + 1 }
         ]
 
-        // Generate AI insights with comprehensive data
+        // Calculate additional metrics
+        const inactiveCustomers = customers?.filter(customer => {
+            if (!customer.last_visit) return true
+            const lastVisit = new Date(customer.last_visit)
+            const thirtyDaysAgo = new Date()
+            thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+            return lastVisit < thirtyDaysAgo
+        }).length || 0
+
+        const pendingRewards = rewardsEarned // For now, assume all earned rewards are pending
+        const customerRetentionRate = totalCustomers > 0 ? Math.round(((totalCustomers - inactiveCustomers) / totalCustomers) * 100) : 0
+
+        // Mock visit trends
+        const visitTrends = [
+            { period: 'This Week', visits: Math.floor(Math.random() * 50) + 20, growth: Math.floor(Math.random() * 20) - 10 },
+            { period: 'Last Week', visits: Math.floor(Math.random() * 45) + 15, growth: Math.floor(Math.random() * 15) - 5 },
+            { period: 'This Month', visits: Math.floor(Math.random() * 200) + 100, growth: Math.floor(Math.random() * 25) - 10 }
+        ]
+
+        // Generate AI insights
         const businessData = {
             totalCustomers,
             totalVisits,
@@ -120,28 +112,49 @@ export async function POST(request: NextRequest) {
             visitTrends
         }
 
-        const aiResponse = await aiService.generateDashboardInsights(businessData)
+        try {
+            console.log('🤖 Generating AI insights for business:', business.name)
+            const aiResponse = await aiService.generateDashboardInsights(businessData)
 
-        if (!aiResponse.success) {
-            // Generate comprehensive fallback insights
-            const retentionRate = customerRetentionRate.toFixed(1)
-            const rewardRate = totalCustomers > 0 ? ((rewardsEarned / totalCustomers) * 100).toFixed(1) : '0'
+            if (aiResponse.success) {
+                return NextResponse.json({
+                    success: true,
+                    insights: aiResponse.content,
+                    isAIGenerated: true,
+                    metrics: {
+                        totalCustomers,
+                        totalVisits,
+                        rewardsEarned,
+                        averageVisitsPerCustomer: parseFloat(averageVisitsPerCustomer.toFixed(1)),
+                        topCustomers,
+                        recentActivity,
+                        inactiveCustomers,
+                        pendingRewards,
+                        customerRetentionRate,
+                        visitTrends
+                    }
+                })
+            } else {
+                console.warn('AI insights failed, using fallback:', aiResponse.error)
+                throw new Error(aiResponse.error || 'AI generation failed')
+            }
+        } catch (aiError) {
+            console.error('AI insights error:', aiError)
 
+            // Provide fallback insights
             const fallbackInsights = [
-                `🎯 PERFORMANCE ASSESSMENT: Your loyalty program has ${totalCustomers} customers with a ${retentionRate}% retention rate. ${rewardsEarned} customers have earned rewards (${rewardRate}% success rate).`,
-
-                `📊 CUSTOMER BEHAVIOR: Average of ${averageVisitsPerCustomer.toFixed(1)} visits per customer. ${inactiveCustomers} customers haven't visited in 30+ days, representing a win-back opportunity.`,
-
-                `🚀 GROWTH OPPORTUNITIES: ${pendingRewards} customers have unclaimed rewards - follow up to ensure satisfaction. Focus on re-engaging ${inactiveCustomers} inactive customers.`,
-
-                `💡 ACTIONABLE NEXT STEPS: 1) Send reward reminders to ${pendingRewards} customers, 2) Launch win-back campaign for ${inactiveCustomers} inactive customers, 3) Recognize top customers to encourage loyalty.`
-            ]
+                `📈 You have ${totalCustomers} loyal customers with an average of ${averageVisitsPerCustomer.toFixed(1)} visits each.`,
+                `🎯 ${rewardsEarned} customers have earned rewards - that's a ${totalCustomers > 0 ? ((rewardsEarned / totalCustomers) * 100).toFixed(1) : 0}% success rate!`,
+                `👑 Your top customer has ${topCustomers[0]?.visits || 0} visits. Consider recognizing your most loyal customers.`,
+                `💡 Focus on increasing visit frequency to boost customer lifetime value.`,
+                `⚠️ ${inactiveCustomers} customers haven't visited in 30+ days - consider a win-back campaign.`
+            ].join('\n\n')
 
             return NextResponse.json({
                 success: true,
-                insights: fallbackInsights.join('\n\n'),
+                insights: fallbackInsights,
                 isAIGenerated: false,
-                error: aiResponse.error,
+                error: aiError instanceof Error ? aiError.message : 'AI unavailable',
                 metrics: {
                     totalCustomers,
                     totalVisits,
@@ -151,28 +164,11 @@ export async function POST(request: NextRequest) {
                     recentActivity,
                     inactiveCustomers,
                     pendingRewards,
-                    customerRetentionRate: parseFloat(customerRetentionRate.toFixed(1)),
+                    customerRetentionRate,
                     visitTrends
                 }
             })
         }
-
-        return NextResponse.json({
-            success: true,
-            insights: aiResponse.content,
-            metrics: {
-                totalCustomers,
-                totalVisits,
-                rewardsEarned,
-                averageVisitsPerCustomer: parseFloat(averageVisitsPerCustomer.toFixed(1)),
-                topCustomers,
-                recentActivity,
-                inactiveCustomers,
-                pendingRewards,
-                customerRetentionRate: parseFloat(customerRetentionRate.toFixed(1)),
-                visitTrends
-            }
-        })
 
     } catch (error) {
         console.error('Dashboard insights error:', error)
