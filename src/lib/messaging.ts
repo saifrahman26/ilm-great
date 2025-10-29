@@ -71,7 +71,7 @@ export async function sendVisitConfirmationEmail(
         // Use AI-enhanced email service
         const { sendAIEnhancedEmail } = await import('./email')
 
-        const isRewardReached = visitCount >= business.visit_goal
+        const isRewardReached = visitCount > 0 && visitCount % business.visit_goal === 0
 
         const emailSent = await sendAIEnhancedEmail(
             customer.email,

@@ -256,7 +256,7 @@ function createEmailTemplate(
 </html>`
 }
 
-// Premium reward email HTML template
+// Clean and elegant reward email template
 function createPremiumRewardTemplate(
     businessName: string,
     customerName: string,
@@ -274,118 +274,72 @@ function createPremiumRewardTemplate(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎁 EXCLUSIVE REWARD - ${businessName}</title>
+    <title>🎁 Reward Earned - ${businessName}</title>
 </head>
-<body style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 650px; margin: 0 auto; padding: 0; background-color: #f8fafc;">
+<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f9f9f9;">
     
-    <!-- Premium Header with Gradient -->
-    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%); color: white; padding: 40px 30px; text-align: center; border-radius: 0;">
-        <div style="background: rgba(255,255,255,0.1); padding: 20px; border-radius: 15px; backdrop-filter: blur(10px);">
-            <h1 style="margin: 0; font-size: 32px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);">
-                🎁 EXCLUSIVE REWARD EARNED
-            </h1>
-            <p style="margin: 15px 0 0 0; font-size: 18px; opacity: 0.95; font-weight: 500;">
-                ${businessName} • Premium Loyalty Program
-            </p>
-        </div>
+    <!-- Header -->
+    <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 30px; text-align: center;">
+        <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🎁 Reward Earned!</h1>
+        <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">${businessName}</p>
     </div>
     
-    <!-- AI-Generated Premium Message -->
-    <div style="background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%); padding: 30px; margin: 0; border-left: 5px solid #ff6b6b;">
-        <div style="display: flex; align-items: center; margin-bottom: 15px;">
-            <div style="background: #ff6b6b; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 15px; font-size: 20px;">
-                🤖
-            </div>
-            <h3 style="margin: 0; color: #d63031; font-size: 18px; font-weight: bold;">
-                AI-Powered Personal Message
-            </h3>
+    <!-- AI Message -->
+    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 0;">
+        <div style="display: flex; align-items: center; margin-bottom: 10px;">
+            <span style="font-size: 20px; margin-right: 10px;">🤖</span>
+            <strong style="color: #856404;">Personal AI Message</strong>
         </div>
-        <div style="font-size: 16px; line-height: 1.7; color: #2d3436; font-style: italic; background: rgba(255,255,255,0.7); padding: 20px; border-radius: 10px; border-left: 4px solid #ff6b6b;">
+        <p style="margin: 0; color: #856404; font-style: italic; line-height: 1.5;">
             ${aiMessage}
-        </div>
+        </p>
     </div>
     
     <!-- Main Content -->
-    <div style="background: white; padding: 40px 30px; margin: 0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
-        <h2 style="color: #2d3436; margin-top: 0; font-size: 24px; text-align: center;">
-            Hello ${customerName}! 👋
-        </h2>
+    <div style="background: white; padding: 30px;">
+        <h2 style="color: #333; margin-top: 0; text-align: center;">Hello ${customerName}! 👋</h2>
         
-        <!-- Reward Details Card -->
-        <div style="background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%); padding: 25px; border-radius: 15px; text-align: center; margin: 25px 0; border: 2px solid #00b894;">
-            <h3 style="margin: 0 0 15px 0; color: #00b894; font-size: 22px;">
-                🏆 YOUR EXCLUSIVE REWARD
-            </h3>
-            <div style="background: white; padding: 20px; border-radius: 10px; margin: 15px 0; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
-                <p style="margin: 0; font-size: 24px; font-weight: bold; color: #2d3436;">
-                    ${context.rewardTitle}
-                </p>
-            </div>
-        </div>
-        
-        <!-- Claim Instructions -->
-        <div style="background: #f1f2f6; padding: 25px; border-radius: 15px; margin: 25px 0; border-left: 5px solid #6c5ce7;">
-            <h4 style="margin: 0 0 15px 0; color: #6c5ce7; font-size: 18px;">
-                🎯 HOW TO CLAIM YOUR REWARD
-            </h4>
-            <ol style="margin: 0; padding-left: 20px; color: #2d3436;">
-                <li style="margin-bottom: 10px; font-size: 16px;">Show this email to our staff</li>
-                <li style="margin-bottom: 10px; font-size: 16px;">Present your unique claim code: <strong style="background: #6c5ce7; color: white; padding: 5px 10px; border-radius: 5px; font-family: monospace;">${context.claimToken}</strong></li>
-                <li style="margin-bottom: 10px; font-size: 16px;">Or scan the QR code below</li>
-                <li style="margin-bottom: 0; font-size: 16px;">Enjoy your well-deserved reward! 🎉</li>
-            </ol>
-        </div>
-        
-        <!-- QR Code Section -->
-        <div style="text-align: center; margin: 30px 0; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 15px;">
-            <h4 style="color: white; margin: 0 0 20px 0; font-size: 18px;">
-                📱 SCAN TO CLAIM INSTANTLY
-            </h4>
-            <div style="background: white; padding: 20px; border-radius: 15px; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.2);">
-                <img src="${context.qrCodeUrl}" alt="Reward Claim QR Code" style="max-width: 180px; height: auto; border-radius: 10px;" />
-            </div>
-            <p style="color: white; margin: 15px 0 0 0; font-size: 14px; opacity: 0.9;">
-                Show this QR code to staff for instant reward redemption
+        <!-- Reward Card -->
+        <div style="background: #f8f9fa; border: 2px solid #28a745; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0;">
+            <h3 style="margin: 0 0 10px 0; color: #28a745; font-size: 20px;">🏆 Your Reward</h3>
+            <p style="margin: 0; font-size: 22px; font-weight: bold; color: #333;">
+                ${context.rewardTitle}
             </p>
         </div>
         
-        <!-- Unique Claim Code Highlight -->
-        <div style="background: linear-gradient(135deg, #fd79a8 0%, #fdcb6e 100%); padding: 20px; border-radius: 15px; text-align: center; margin: 25px 0;">
-            <h4 style="margin: 0 0 10px 0; color: white; font-size: 16px; text-shadow: 1px 1px 2px rgba(0,0,0,0.3);">
-                🔐 YOUR UNIQUE CLAIM CODE
-            </h4>
-            <div style="background: white; padding: 15px; border-radius: 10px; font-family: 'Courier New', monospace; font-size: 20px; font-weight: bold; color: #2d3436; letter-spacing: 2px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);">
+        <!-- Claim Code -->
+        <div style="background: #e9ecef; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
+            <h4 style="margin: 0 0 10px 0; color: #495057;">🔐 Claim Code</h4>
+            <div style="background: white; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 18px; font-weight: bold; color: #333; letter-spacing: 1px; border: 2px dashed #6c757d;">
                 ${context.claimToken}
             </div>
-            <p style="margin: 10px 0 0 0; color: white; font-size: 12px; opacity: 0.9;">
-                Keep this code safe - it's your key to claiming your reward!
-            </p>
         </div>
         
-        <!-- Important Notice -->
-        <div style="background: #ffe8e8; border: 2px solid #ff6b6b; padding: 20px; border-radius: 10px; margin: 25px 0;">
-            <div style="display: flex; align-items: center; margin-bottom: 10px;">
-                <span style="font-size: 24px; margin-right: 10px;">⚠️</span>
-                <h4 style="margin: 0; color: #d63031; font-size: 16px;">IMPORTANT - SAVE THIS EMAIL</h4>
+        <!-- QR Code -->
+        <div style="text-align: center; margin: 25px 0;">
+            <h4 style="margin: 0 0 15px 0; color: #495057;">📱 Or Scan This QR Code</h4>
+            <div style="background: white; padding: 15px; border-radius: 10px; display: inline-block; border: 1px solid #dee2e6;">
+                <img src="${context.qrCodeUrl}" alt="Reward QR Code" style="max-width: 150px; height: auto;" />
             </div>
-            <p style="margin: 0; color: #2d3436; font-size: 14px; line-height: 1.5;">
-                This email contains your unique reward claim code and QR code. Please save it or take a screenshot. 
-                Your reward is valid and ready to be claimed at your next visit to ${businessName}.
-            </p>
+        </div>
+        
+        <!-- Instructions -->
+        <div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
+            <h4 style="margin: 0 0 10px 0; color: #0c5460;">How to Claim:</h4>
+            <ol style="margin: 0; padding-left: 20px; color: #0c5460;">
+                <li>Show this email to staff</li>
+                <li>Present your claim code or QR code</li>
+                <li>Enjoy your reward! 🎉</li>
+            </ol>
         </div>
     </div>
     
-    <!-- Premium Footer -->
-    <div style="background: #2d3436; color: white; text-align: center; padding: 30px; margin: 0;">
-        <h3 style="margin: 0 0 15px 0; font-size: 18px;">🌟 Thank You for Your Loyalty!</h3>
-        <p style="margin: 0 0 15px 0; opacity: 0.8; font-size: 14px;">
-            You're part of an exclusive community at ${businessName}
+    <!-- Footer -->
+    <div style="background: #343a40; color: white; text-align: center; padding: 20px;">
+        <p style="margin: 0 0 10px 0; font-size: 16px;">Thank you for your loyalty! 🌟</p>
+        <p style="margin: 0; font-size: 12px; opacity: 0.8;">
+            Powered by LinkLoyal - Simple Loyalty Program
         </p>
-        <div style="background: rgba(255,255,255,0.1); padding: 15px; border-radius: 10px; margin-top: 20px;">
-            <p style="margin: 0; font-size: 12px; opacity: 0.7;">
-                Powered by 🔗 LinkLoyal - Premium Loyalty Experience
-            </p>
-        </div>
     </div>
 </body>
 </html>`

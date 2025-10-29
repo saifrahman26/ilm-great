@@ -160,6 +160,28 @@ export async function POST(request: NextRequest) {
 
         if (reachedGoal) {
             console.log('🎉 Customer reached reward milestone!')
+            console.log(`   - This is reward #${rewardNumber} for ${customer.name}`)
+
+            // Check if reward already exists for this visit count to prevent duplicates
+            const { data: existingReward } = await supabaseAdmin
+                .from('rewards')
+                .select('id')
+                .eq('customer_id', customerId)
+                .eq('points_used', business.visit_goal)
+                .eq('status', 'pending')
+                .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Within last 24 hours
+                .single()
+
+            if (existingReward) {
+                console.log('⚠️ Reward already exists for this milestone, skipping email')
+                return NextResponse.json({
+                    success: true,
+                    customer: updatedCustomer,
+                    visits: newVisitCount,
+                    reachedGoal,
+                    message: `Visit recorded! ${customer.name} already has a pending reward.`
+                })
+            }
 
             // Generate reward token directly here instead of separate API call
             try {
