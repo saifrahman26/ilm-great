@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { generateAIContent } from '@/lib/ai'
+import { aiService } from '@/lib/ai'
 
 export async function POST(request: NextRequest) {
     try {
@@ -39,7 +39,22 @@ Requirements:
 
 The message should make the customer feel valued and excited to return.`
 
-        const aiMessage = await generateAIContent(prompt)
+        const aiResponse = await aiService.generateWinBackEmail({
+            businessName,
+            businessType,
+            customerName: 'Customer', // Generic for template
+            visitCount: 0, // Will be personalized per customer
+            visitGoal,
+            rewardTitle,
+            daysSinceLastVisit: 0, // Will be personalized per customer
+            specialOffer: randomOffer
+        })
+
+        if (!aiResponse.success) {
+            throw new Error(aiResponse.error || 'Failed to generate AI content')
+        }
+
+        const aiMessage = aiResponse.content
 
         return NextResponse.json({
             message: aiMessage,

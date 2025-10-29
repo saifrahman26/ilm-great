@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 import { sendEmail } from '@/lib/email'
-import { generateAIContent } from '@/lib/ai'
+import { aiService } from '@/lib/ai'
 
 // Use service role key for admin operations
 const supabaseAdmin = createClient(
@@ -145,7 +145,22 @@ Create a 150-200 word message that:
 Keep it friendly, personal, and not pushy.`
 
     try {
-        return await generateAIContent(prompt)
+        const aiResponse = await aiService.generateWinBackEmail({
+            businessName: business.name,
+            businessType,
+            customerName: customer.name,
+            visitCount: customer.visits,
+            visitGoal: business.visit_goal,
+            rewardTitle: business.reward_title,
+            daysSinceLastVisit: Math.floor((new Date().getTime() - new Date(customer.last_visit).getTime()) / (1000 * 60 * 60 * 24)),
+            specialOffer: randomOffer
+        })
+
+        if (aiResponse.success && aiResponse.content) {
+            return aiResponse.content
+        } else {
+            throw new Error(aiResponse.error || 'AI generation failed')
+        }
     } catch (error) {
         console.error('Failed to generate AI message, using fallback:', error)
         return `Hi ${customer.name}! 👋
