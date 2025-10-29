@@ -3,7 +3,25 @@ import { getLoyaltyEmailTemplate, getSimpleEmailTemplate, getVisitReminderTempla
 
 export async function POST(request: NextRequest) {
     try {
-        const body = await request.json()
+        let body
+        try {
+            body = await request.json()
+        } catch (jsonError) {
+            console.log('❌ Invalid JSON in request body:', jsonError)
+            return NextResponse.json(
+                { error: 'Invalid JSON in request body' },
+                { status: 400 }
+            )
+        }
+
+        // Check if this is an empty or invalid request
+        if (!body || Object.keys(body).length === 0) {
+            console.log('❌ Empty request body received')
+            return NextResponse.json(
+                { error: 'Request body is empty' },
+                { status: 400 }
+            )
+        }
 
         // Log the incoming request for debugging
         console.log('🔍 Send-message request received:')
