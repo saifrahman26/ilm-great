@@ -186,7 +186,7 @@ export async function sendInactiveCustomerOffer(customer: Customer, business?: a
     }
 }
 
-// Send reward token email with ACCURATE visit data
+// Send reward token email
 export async function sendRewardTokenEmail(customer: any, business: any, token?: string): Promise<void> {
     if (!customer.email) {
         console.log('No email provided for customer:', customer.name)
@@ -194,40 +194,28 @@ export async function sendRewardTokenEmail(customer: any, business: any, token?:
     }
 
     try {
-        // Use reward completion template with ACCURATE data
-        const { getRewardCompletionTemplate } = await import('./email-templates')
-        const { sendEmail } = await import('./email')
+        // Generate QR code for the reward token
+        const qrCodeUrl = await generateQRCode(`REWARD-${token || 'CLAIM'}-${customer.id}`)
 
-        // Calculate ACCURATE reward data
-        const visitGoal = business.visit_goal || 5
-        const visitsCompleted = customer.visits // ACTUAL visits from database
-        const rewardNumber = Math.floor(visitsCompleted / visitGoal)
+        // Use AI-enhanced email service with premium template
+        const { sendPremiumRewardEmail } = await import('./email')
 
-        console.log(`🎉 Sending reward email for customer ${customer.name}:`)
-        console.log(`   - Actual visits: ${visitsCompleted}`)
-        console.log(`   - Visit goal: ${visitGoal}`)
-        console.log(`   - Reward number: ${rewardNumber}`)
-
-        const emailHtml = getRewardCompletionTemplate({
-            customerName: customer.name,
-            businessName: business.name,
-            businessPhone: business.phone || '',
-            rewardTitle: business.reward_title || 'Loyalty Reward',
-            rewardDescription: business.reward_description || `Congratulations! You've completed ${visitGoal} visits and earned your reward!`,
-            visitsCompleted: visitsCompleted, // ACCURATE count
-            visitGoal: visitGoal,
-            rewardExpires: false,
-            rewardExpiryMonths: 1
-        })
-
-        const emailSent = await sendEmail(
+        const emailSent = await sendPremiumRewardEmail(
             customer.email,
-            `🎉 Reward Earned! - ${business.name}`,
-            emailHtml
+            customer.name,
+            business.name,
+            business.business_type || 'Business',
+            {
+                rewardTitle: business.reward_title,
+                claimToken: token || `REWARD-${Date.now()}`,
+                qrCodeUrl,
+                businessId: business.id
+            }
         )
 
         if (emailSent) {
-            console.log('✅ Accurate reward completion email sent to:', customer.email)
+            console.log('✅ Premium reward email sent to:', customer.email)
+            console.log('🎫 Claim token:', token)
         } else {
             console.error('❌ Failed to send reward email to:', customer.email)
         }

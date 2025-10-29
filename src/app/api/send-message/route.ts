@@ -58,6 +58,33 @@ export async function POST(request: NextRequest) {
                     details: error instanceof Error ? error.message : 'Unknown error'
                 }, { status: 500 })
             }
+        } else if (template === 'premium-reward' && customerName && businessName && context) {
+            // Use the premium reward email service
+            const { sendPremiumRewardEmail } = await import('@/lib/email')
+
+            try {
+                const emailSent = await sendPremiumRewardEmail(
+                    email,
+                    customerName,
+                    businessName,
+                    businessType || 'Business',
+                    context
+                )
+
+                return NextResponse.json({
+                    success: emailSent,
+                    message: emailSent ? 'Premium reward email sent successfully!' : 'Failed to send premium reward email',
+                    service: 'premium-reward',
+                    template: 'premium-reward'
+                })
+            } catch (error) {
+                console.error('❌ Premium reward email error:', error)
+                return NextResponse.json({
+                    success: false,
+                    error: 'Premium reward email failed',
+                    details: error instanceof Error ? error.message : 'Unknown error'
+                }, { status: 500 })
+            }
         } else if (template === 'loyalty' && (points || customerName)) {
             htmlContent = getLoyaltyEmailTemplate({
                 customerName,

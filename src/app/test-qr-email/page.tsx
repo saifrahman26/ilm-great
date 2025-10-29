@@ -94,6 +94,48 @@ export default function TestQREmailPage() {
         }
     }
 
+    const sendRewardTokenEmail = async () => {
+        setLoading(true)
+        setResult(null)
+
+        try {
+            // Test the premium reward email with unique claim token
+            const response = await fetch('/api/send-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: email,
+                    customerName: 'Test Customer',
+                    businessName: 'Test Coffee Shop',
+                    businessType: 'Coffee Shop',
+                    emailType: 'reward_earned',
+                    context: {
+                        rewardTitle: 'Free Coffee',
+                        claimToken: '123456', // Test claim token
+                        qrCodeUrl: 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=REWARD-123456-test',
+                        businessId: 'test-business-123'
+                    },
+                    template: 'premium-reward'
+                })
+            })
+
+            const data = await response.json()
+            setResult({
+                success: response.ok,
+                data: data,
+                testType: 'premium_reward_token'
+            })
+        } catch (error) {
+            setResult({
+                success: false,
+                error: 'Network error',
+                details: error
+            })
+        } finally {
+            setLoading(false)
+        }
+    }
+
     return (
         <div className="min-h-screen bg-gray-50 p-8">
             <div className="max-w-2xl mx-auto bg-white rounded-lg shadow p-6">
@@ -153,6 +195,24 @@ export default function TestQREmailPage() {
                                 </>
                             )}
                         </button>
+
+                        <button
+                            onClick={sendRewardTokenEmail}
+                            disabled={loading || !email}
+                            className="w-full bg-green-600 text-white py-2 px-4 rounded-md hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
+                        >
+                            {loading ? (
+                                <>
+                                    <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                                    <span>Sending...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <Send className="w-4 h-4" />
+                                    <span>Test Reward Token Email</span>
+                                </>
+                            )}
+                        </button>
                     </div>
 
                     {result && (
@@ -169,9 +229,17 @@ export default function TestQREmailPage() {
                             </div>
                             {result.success && (
                                 <div className="text-green-700">
-                                    <p>✅ {result.testType === 'visit_confirmation_reward_reached' ? 'Reward reached email' : 'Progress email'} sent successfully!</p>
+                                    <p>✅ {
+                                        result.testType === 'visit_confirmation_reward_reached' ? 'Reward reached email' :
+                                            result.testType === 'visit_confirmation_progress' ? 'Progress email' :
+                                                result.testType === 'premium_reward_token' ? 'Premium reward token email' :
+                                                    'Email'
+                                    } sent successfully!</p>
                                     <p>📧 Check your inbox: {email}</p>
                                     <p className="text-sm mt-1">Test type: {result.testType}</p>
+                                    {result.testType === 'premium_reward_token' && (
+                                        <p className="text-sm mt-1 font-bold text-green-800">🎫 Should include claim token: 123456</p>
+                                    )}
                                     {result.data?.result?.id && (
                                         <p className="text-sm mt-1">Email ID: {result.data.result.id}</p>
                                     )}
