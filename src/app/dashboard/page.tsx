@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from '@/contexts/AuthContext'
 import { useData } from '@/contexts/DataContext'
+import AIDashboardInsights from '@/components/AIDashboardInsights'
 import {
     Users,
     Eye,
@@ -211,6 +212,11 @@ export default function DashboardPage() {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            {/* AI Dashboard Insights */}
+            <div className="mb-8">
+                <AIDashboardInsights businessId={business?.id || ''} />
             </div>
 
             {/* Charts and Recent Activity */}

@@ -1,4 +1,43 @@
 import { Customer } from './supabase'
+import { aiService } from './ai'
+
+// Generate AI-powered message content
+async function generateAIMessage(context: {
+    businessName: string
+    businessType?: string
+    customerName: string
+    visitCount: number
+    visitGoal: number
+    rewardTitle: string
+    isRewardReached: boolean
+    emailType: 'visit_confirmation' | 'reward_earned' | 'inactive_reminder'
+}): Promise<string> {
+    try {
+        const aiResponse = await aiService.generatePersonalizedEmail(context)
+
+        if (aiResponse.success && aiResponse.content) {
+            return aiResponse.content
+        }
+    } catch (error) {
+        console.log('AI message generation failed, using fallback:', error)
+    }
+
+    // Fallback to default messages
+    switch (context.emailType) {
+        case 'visit_confirmation':
+            if (context.isRewardReached) {
+                return `🎉 Amazing! You've completed ${context.visitCount} visits and earned your <strong>${context.rewardTitle}</strong>! Show this email at your next visit to claim it.`
+            } else {
+                return `Thank you for your visit! You now have <strong>${context.visitCount} of ${context.visitGoal}</strong> visits. Keep going to earn your <strong>${context.rewardTitle}</strong>!`
+            }
+        case 'reward_earned':
+            return `🎉 Congratulations! You've earned your <strong>${context.rewardTitle}</strong>! Show this email to claim your reward.`
+        case 'inactive_reminder':
+            return `We miss you! Come back to ${context.businessName} and continue your journey to earn your <strong>${context.rewardTitle}</strong>!`
+        default:
+            return `Thank you for being a valued customer at ${context.businessName}!`
+    }
+}
 
 // Helper function to generate branded email header
 function generateEmailHeader(businessName: string, businessLogo?: string) {
@@ -831,10 +870,18 @@ export async function sendVisitConfirmationEmail(
             
             <!-- Message -->
             <div class="message-card">
-                ${isRewardReached
-                ? `🎉 Amazing! You've completed ${visitCount} visits and earned your <strong>${business.reward_title}</strong>! Show this email at your next visit to claim it.`
-                : `Thank you for your visit! You now have <strong>${visitCount} of ${business.visit_goal}</strong> visits. Keep going to earn your <strong>${business.reward_title}</strong>!`
-            }
+                <div id="ai-message">
+                    ${await generateAIMessage({
+            businessName: business.name,
+            businessType: business.business_type,
+            customerName: customer.name,
+            visitCount,
+            visitGoal: business.visit_goal,
+            rewardTitle: business.reward_title,
+            isRewardReached,
+            emailType: 'visit_confirmation'
+        })}
+                </div>
             </div>
             
             <!-- QR Code Reminder -->
