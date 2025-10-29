@@ -71,6 +71,7 @@ export interface Business {
     setup_completed_at?: string
     inactive_customer_message?: string
     inactive_days_threshold?: number
+    enable_inactive_emails?: boolean
     reward_expires?: boolean
     reward_expiry_months?: number
     created_at: string

@@ -19,7 +19,8 @@ import {
     Target,
     Award,
     Shield,
-    AlertCircle
+    AlertCircle,
+    Sparkles
 } from 'lucide-react'
 import Link from 'next/link'
 import PhoneInput from '@/components/PhoneInput'
@@ -55,6 +56,9 @@ const businessSettingsSchema = z.object({
     google_review_link: z.string().url('Please enter a valid Google Review URL').optional().or(z.literal('')),
     business_category: z.string().min(1, 'Please select a business category'),
     custom_category: z.string().optional(),
+    inactive_days_threshold: z.number().min(3, 'Minimum 3 days').max(90, 'Maximum 90 days'),
+    inactive_customer_message: z.string().optional(),
+    enable_inactive_emails: z.boolean().optional(),
 }).refine((data) => {
     if (data.business_category === 'other' && (!data.custom_category || data.custom_category.trim().length < 2)) {
         return false;
@@ -74,6 +78,7 @@ export default function SettingsPage() {
     const [success, setSuccess] = useState('')
     const [logoFile, setLogoFile] = useState<File | null>(null)
     const [logoPreview, setLogoPreview] = useState<string>('')
+    const [generatingMessage, setGeneratingMessage] = useState(false)
 
     const {
         register,
@@ -97,12 +102,37 @@ export default function SettingsPage() {
             setValue('google_review_link', business.google_review_link || '')
             setValue('business_category', business.business_category || '')
             setValue('custom_category', business.custom_category || '')
+            setValue('inactive_days_threshold', business.inactive_days_threshold || getDefaultInactiveDays(business.business_category))
+            setValue('inactive_customer_message', business.inactive_customer_message || '')
+            setValue('enable_inactive_emails', business.enable_inactive_emails ?? true)
 
             if (business.business_logo_url) {
                 setLogoPreview(business.business_logo_url)
             }
         }
     }, [business, setValue])
+
+    // Get default inactive days based on business category
+    const getDefaultInactiveDays = (category?: string) => {
+        const categoryDefaults: Record<string, number> = {
+            'cafe': 7,
+            'restaurant': 14,
+            'food_hall': 10,
+            'bakery': 7,
+            'salon': 21,
+            'beauty_parlor': 21,
+            'boutique': 30,
+            'mens_wear': 30,
+            'womens_wear': 30,
+            'retail_store': 21,
+            'pharmacy': 14,
+            'gym_fitness': 7,
+            'electronics': 45,
+            'jewelry': 60,
+            'automotive': 90,
+        }
+        return categoryDefaults[category || ''] || 14
+    }
 
     const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
@@ -113,6 +143,38 @@ export default function SettingsPage() {
                 setLogoPreview(e.target?.result as string)
             }
             reader.readAsDataURL(file)
+        }
+    }
+
+    // Generate AI-powered inactive customer message
+    const generateInactiveMessage = async () => {
+        if (!business) return
+
+        setGeneratingMessage(true)
+        try {
+            const response = await fetch('/api/generate-inactive-message', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    businessName: business.name,
+                    businessCategory: business.business_category,
+                    customCategory: business.custom_category,
+                    rewardTitle: business.reward_title,
+                    visitGoal: business.visit_goal
+                })
+            })
+
+            if (response.ok) {
+                const result = await response.json()
+                setValue('inactive_customer_message', result.message)
+                setSuccess('AI message generated successfully!')
+            } else {
+                setError('Failed to generate AI message. Please try again.')
+            }
+        } catch (err) {
+            setError('Error generating AI message. Please try again.')
+        } finally {
+            setGeneratingMessage(false)
         }
     }
 
@@ -160,6 +222,9 @@ export default function SettingsPage() {
                     google_review_link: data.google_review_link || null,
                     business_category: data.business_category,
                     custom_category: data.business_category === 'other' ? data.custom_category : null,
+                    inactive_days_threshold: data.inactive_days_threshold,
+                    inactive_customer_message: data.inactive_customer_message || null,
+                    enable_inactive_emails: data.enable_inactive_emails ?? true,
                 })
                 .eq('id', business.id)
 
@@ -563,6 +628,122 @@ export default function SettingsPage() {
                                 <li>• Make rewards valuable but sustainable for your business</li>
                                 <li>• Clear, specific descriptions work better than vague ones</li>
                                 <li>• Consider seasonal or limited-time rewards to create urgency</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Inactive Customer Engagement Card */}
+                <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-500 delay-300">
+                    <div className="bg-gradient-to-r from-amber-500 to-orange-600 px-6 py-4">
+                        <div className="flex items-center space-x-2">
+                            <Mail className="w-5 h-5 text-white" />
+                            <h2 className="text-lg font-semibold text-white">Inactive Customer Engagement</h2>
+                        </div>
+                    </div>
+
+                    <div className="p-6 space-y-6">
+                        {/* Enable/Disable Toggle */}
+                        <div className="flex items-center justify-between p-4 bg-amber-50 rounded-lg border border-amber-200">
+                            <div>
+                                <h4 className="font-medium text-amber-900">Enable Inactive Customer Emails</h4>
+                                <p className="text-sm text-amber-800 mt-1">
+                                    Automatically send re-engagement emails to customers who haven't visited recently
+                                </p>
+                            </div>
+                            <label className="relative inline-flex items-center cursor-pointer">
+                                <input
+                                    type="checkbox"
+                                    {...register('enable_inactive_emails')}
+                                    className="sr-only peer"
+                                />
+                                <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-amber-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-amber-600"></div>
+                            </label>
+                        </div>
+
+                        {/* Inactive Days Threshold */}
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-2">
+                                <Target className="w-4 h-4 inline mr-1" />
+                                Days Before Considering Customer Inactive
+                            </label>
+                            <select
+                                {...register('inactive_days_threshold', { valueAsNumber: true })}
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-gray-900 transition-all duration-200 hover:border-gray-400 focus:scale-105"
+                            >
+                                <option value={7}>7 days (High frequency businesses)</option>
+                                <option value={14}>14 days (Regular businesses)</option>
+                                <option value={21}>21 days (Service businesses)</option>
+                                <option value={30}>30 days (Retail/Fashion)</option>
+                                <option value={45}>45 days (Electronics/Specialty)</option>
+                                <option value={60}>60 days (Luxury/Jewelry)</option>
+                                <option value={90}>90 days (Automotive/Seasonal)</option>
+                            </select>
+                            <p className="text-xs text-gray-500 mt-1">
+                                Recommended: {getDefaultInactiveDays(watch('business_category'))} days for {businessCategories.find(c => c.value === watch('business_category'))?.label || 'your business type'}
+                            </p>
+                        </div>
+
+                        {/* Custom Message */}
+                        <div>
+                            <div className="flex items-center justify-between mb-2">
+                                <label className="block text-sm font-medium text-gray-700">
+                                    <Mail className="w-4 h-4 inline mr-1" />
+                                    Custom Inactive Customer Message
+                                </label>
+                                <button
+                                    type="button"
+                                    onClick={generateInactiveMessage}
+                                    disabled={generatingMessage}
+                                    className="inline-flex items-center space-x-1 text-xs bg-gradient-to-r from-purple-500 to-pink-500 text-white px-3 py-1 rounded-full hover:from-purple-600 hover:to-pink-600 transition-all duration-200 disabled:opacity-50"
+                                >
+                                    {generatingMessage ? (
+                                        <>
+                                            <div className="animate-spin rounded-full h-3 w-3 border-b border-white"></div>
+                                            <span>Generating...</span>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <Sparkles className="w-3 h-3" />
+                                            <span>Generate with AI</span>
+                                        </>
+                                    )}
+                                </button>
+                            </div>
+                            <textarea
+                                {...register('inactive_customer_message')}
+                                rows={4}
+                                placeholder="Leave empty to use AI-generated messages based on your business type..."
+                                className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-amber-500 focus:border-transparent text-gray-900 placeholder-gray-500 transition-all duration-200 hover:border-gray-400 focus:scale-105 resize-none"
+                            />
+                            <p className="text-xs text-gray-500 mt-1">
+                                If left empty, AI will generate personalized messages with offers based on your business category
+                            </p>
+                        </div>
+
+                        {/* Preview */}
+                        <div className="bg-gradient-to-r from-amber-50 to-orange-50 rounded-lg p-4 border border-amber-200">
+                            <h4 className="font-medium text-amber-900 mb-2">Email Preview:</h4>
+                            <div className="bg-white rounded-lg p-3 border text-sm">
+                                <p className="font-medium text-gray-900 mb-2">We miss you at {watch('name') || 'Your Business'}! 👋</p>
+                                <p className="text-gray-700 mb-2">
+                                    {watch('inactive_customer_message') ||
+                                        `It's been a while since your last visit! Come back and enjoy a special 20% discount on your next purchase. Your loyalty means everything to us.`}
+                                </p>
+                                <p className="text-xs text-gray-500">
+                                    + Personalized offers based on business type and AI recommendations
+                                </p>
+                            </div>
+                        </div>
+
+                        {/* Tips */}
+                        <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                            <h4 className="font-medium text-blue-900 mb-2">💡 Engagement Tips:</h4>
+                            <ul className="text-sm text-blue-800 space-y-1">
+                                <li>• Shorter intervals work better for frequent-visit businesses (cafes, gyms)</li>
+                                <li>• Include specific offers or incentives to encourage return visits</li>
+                                <li>• AI generates offers based on your business category (20% off, BOGO, etc.)</li>
+                                <li>• Personal messages perform better than generic ones</li>
                             </ul>
                         </div>
                     </div>
