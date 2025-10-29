@@ -142,7 +142,9 @@ export async function POST(request: NextRequest) {
                 await sendVisitConfirmationEmail(
                     updatedCustomer,
                     business,
-                    newVisitCount
+                    newVisitCount,
+                    business.reward_expires || false,
+                    business.reward_expiry_months || 1
                 )
                 console.log('✅ Visit confirmation email sent')
             } catch (emailError) {
