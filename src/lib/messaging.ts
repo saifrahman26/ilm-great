@@ -10,8 +10,10 @@ async function generateAIMessage(context: {
     visitGoal: number
     rewardTitle: string
     isRewardReached: boolean
-    emailType: 'visit_confirmation' | 'reward_earned' | 'inactive_reminder'
+    emailType: 'visit_confirmation' | 'reward_earned' | 'inactive_reminder' | 'pending_reward_reminder'
     pendingRewards?: number
+    daysSinceLastVisit?: number
+    specialOffer?: string
 }): Promise<string> {
     try {
         const aiResponse = await aiService.generatePersonalizedEmail(context)
@@ -33,6 +35,8 @@ async function generateAIMessage(context: {
             }
         case 'reward_earned':
             return `🎉 Congratulations! You've earned your <strong>${context.rewardTitle}</strong>! Show this email to claim your reward.`
+        case 'pending_reward_reminder':
+            return `🎁 Hi ${context.customerName}! You have ${context.pendingRewards || 1} unclaimed reward${(context.pendingRewards || 1) > 1 ? 's' : ''} waiting for you at ${context.businessName}! Come by soon to claim your ${context.rewardTitle}. ✨`
         case 'inactive_reminder':
             return `We miss you! Come back to ${context.businessName} and continue your journey to earn your <strong>${context.rewardTitle}</strong>!`
         default:
