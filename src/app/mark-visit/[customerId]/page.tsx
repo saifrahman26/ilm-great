@@ -1,460 +1,376 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, Suspense } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import { CheckCircle, AlertCircle, User, Gift, Loader, ArrowLeft, Phone, Mail } from 'lucide-react'
 import { useAuth } from '@/contexts/AuthContext'
-import { supabase } from '@/lib/supabase'
-import { CheckCircle, User, Calendar, Award, Loader2 } from 'lucide-react'
 
-export default function MarkVisitPage() {
+interface Customer {
+    id: string
+    name: string
+    email: string
+    phone: string
+    visits: number
+    business_id: string
+}
+
+interface Business {
+    id: string
+    name: string
+    reward_title: string
+    reward_description: string
+    visit_goal: number
+}
+
+function MarkVisitContent() {
     const params = useParams()
     const router = useRouter()
-    const { user, business, loading: authLoading } = useAuth()
+    const { user, business: userBusiness } = useAuth()
     const customerId = params.customerId as string
 
-    const [customer, setCustomer] = useState<any>(null)
+    const [customer, setCustomer] = useState<Customer | null>(null)
+    const [business, setBusiness] = useState<Business | null>(null)
     const [loading, setLoading] = useState(true)
-    const [marking, setMarking] = useState(false)
+    const [recording, setRecording] = useState(false)
     const [error, setError] = useState('')
     const [success, setSuccess] = useState(false)
-    const [loadingTimeout, setLoadingTimeout] = useState(false)
-    const [rewardEarned, setRewardEarned] = useState(false)
+    const [visitRecorded, setVisitRecorded] = useState(false)
 
     useEffect(() => {
-        console.log('🔍 Auth state:', {
-            authLoading,
-            hasUser: !!user,
-            hasBusiness: !!business,
-            businessId: business?.id,
-            customerId
-        })
-
-        // Add timeout to prevent infinite loading
-        const timeout = setTimeout(() => {
-            if (authLoading || loading) {
-                console.log('⚠️ Loading timeout reached')
-                setLoadingTimeout(true)
+        const fetchCustomerData = async () => {
+            if (!customerId) {
+                setError('No customer ID provided')
                 setLoading(false)
+                return
             }
-        }, 10000) // 10 second timeout
 
-        if (!authLoading) {
-            if (user && business) {
-                loadCustomer()
-            } else {
-                // If no user or business after auth loads, stop loading
-                setLoading(false)
+            try {
+                const response = await fetch(`/api/customer/${customerId}`)
+                const result = await response.json()
+
+                if (!response.ok) {
+                    setError(result.error || 'Customer not found')
+                } else {
+                    setCustomer(result.customer)
+                    setBusiness(result.business)
+                }
+            } catch (err) {
+                setError('Failed to load customer information')
             }
-        }
-
-        return () => clearTimeout(timeout)
-    }, [customerId, authLoading, user, business])
-
-    const loadCustomer = async () => {
-        try {
-            setLoading(true)
-            setError('')
-
-            console.log('🔍 Loading customer:', { customerId, businessId: business?.id })
-
-            const { data, error: fetchError } = await supabase
-                .from('customers')
-                .select('*')
-                .eq('id', customerId)
-                .single()
-
-            if (fetchError) throw fetchError
-
-            console.log('✅ Customer loaded:', {
-                id: data.id,
-                name: data.name,
-                business_id: data.business_id,
-                matchesBusiness: data.business_id === business?.id
-            })
-
-            setCustomer(data)
-        } catch (err) {
-            console.error('❌ Error loading customer:', err)
-            setError('Customer not found')
-        } finally {
             setLoading(false)
         }
-    }
 
-    const markVisit = async () => {
-        // More robust validation with string conversion
-        // Priority: business.id -> user.id -> customer.business_id (as fallback)
-        const actualCustomerId = String(customer?.id || customerId || '').trim()
-        const actualBusinessId = String(business?.id || user?.id || customer?.business_id || '').trim()
+        fetchCustomerData()
+    }, [customerId])
 
-        // Temporary debugging - log all available data
-        console.log('🔍 All available data:', {
-            customer,
-            business,
-            user,
-            customerId,
-            'customer?.id': customer?.id,
-            'business?.id': business?.id,
-            'user?.id': user?.id,
-            actualCustomerId,
-            actualBusinessId
-        })
+    const recordVisit = async () => {
+        if (!customer || !user || recording || visitRecorded) return
 
-        console.log('🔍 Validation check:', {
-            customer: customer,
-            business: business,
-            user: user,
-            actualCustomerId,
-            actualBusinessId,
-            customerId,
-            businessFromAuth: business?.id,
-            userIdFallback: user?.id
-        })
-
-        if (!actualCustomerId || actualCustomerId === '' || !actualBusinessId || actualBusinessId === '') {
-            console.error('❌ Missing or empty required IDs:', {
-                actualCustomerId,
-                actualBusinessId,
-                customerExists: !!customer,
-                businessExists: !!business,
-                userExists: !!user,
-                customerIdLength: actualCustomerId?.length,
-                businessIdLength: actualBusinessId?.length
-            })
-            setError(`Missing required data: Customer ID: "${actualCustomerId || 'missing'}", Business ID: "${actualBusinessId || 'missing'}"`)
+        // Check if user's business matches customer's business
+        if (userBusiness?.id !== customer.business_id) {
+            setError('This customer belongs to a different business')
             return
         }
 
+        setRecording(true)
+        setError('')
+
         try {
-            setMarking(true)
-            setError('')
-
-            console.log('📝 Marking visit with validated IDs:', {
-                customerId: actualCustomerId,
-                businessId: actualBusinessId,
-                customerName: customer?.name,
-                businessName: business?.name
-            })
-
-            const requestBody = {
-                customerId: actualCustomerId,
-                businessId: actualBusinessId
-            }
-
-            console.log('📤 Request body:', requestBody)
-            console.log('📤 Request body stringified:', JSON.stringify(requestBody))
-
             const response = await fetch('/api/record-visit', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(requestBody)
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    customerId: customer.id,
+                    businessId: customer.business_id
+                })
             })
 
             const result = await response.json()
 
-            if (!response.ok) {
-                throw new Error(result.error || 'Failed to record visit')
+            if (response.ok) {
+                setSuccess(true)
+                setVisitRecorded(true)
+                // Update customer visits count
+                setCustomer(prev => prev ? { ...prev, visits: prev.visits + 1 } : null)
+            } else {
+                setError(result.error || 'Failed to record visit')
             }
-
-            setSuccess(true)
-            setCustomer(result.customer)
-            setRewardEarned(result.reachedGoal || false)
-
-            // Show success message and redirect after 2 seconds
-            setTimeout(() => {
-                router.push('/dashboard')
-            }, 2000)
-
         } catch (err) {
-            console.error('Error marking visit:', err)
-            setError(err instanceof Error ? err.message : 'Failed to record visit')
+            setError('Failed to record visit')
         } finally {
-            setMarking(false)
+            setRecording(false)
         }
     }
 
-    if ((authLoading || loading) && !loadingTimeout) {
+    if (loading) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center">
                 <div className="text-center">
-                    <Loader2 className="w-12 h-12 text-purple-600 animate-spin mx-auto mb-4" />
-                    <p className="text-gray-600 text-lg">Loading customer information...</p>
-                    <p className="text-gray-500 text-sm mt-2">This should only take a moment</p>
+                    <Loader className="w-8 h-8 animate-spin text-blue-600 mx-auto mb-4" />
+                    <p className="text-gray-600">Loading customer information...</p>
                 </div>
             </div>
         )
     }
 
-    // Handle loading timeout
-    if (loadingTimeout) {
+    if (error || !customer || !business) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
-                    <div className="w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-3xl">⏰</span>
+            <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4">
+                <div className="text-center max-w-md mx-auto">
+                    <div className="bg-red-100 rounded-full p-3 mx-auto w-16 h-16 flex items-center justify-center mb-4">
+                        <AlertCircle className="w-8 h-8 text-red-600" />
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Loading Issue</h2>
-                    <p className="text-gray-600 mb-6">
-                        The page is taking longer than expected to load. This might be a connection issue.
-                    </p>
-                    <div className="space-y-3">
-                        <button
-                            onClick={() => window.location.reload()}
-                            className="w-full bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-                        >
-                            Refresh Page
-                        </button>
-                        <button
-                            onClick={() => router.push('/login')}
-                            className="w-full bg-gray-100 text-gray-700 px-6 py-3 rounded-lg font-semibold hover:bg-gray-200 transition-colors"
-                        >
-                            Go to Login
-                        </button>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    if (error && !customer) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-3xl">❌</span>
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Customer Not Found</h2>
-                    <p className="text-gray-600 mb-6">{error}</p>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Error</h2>
+                    <p className="text-gray-600 mb-4">{error || 'Customer or business information not found'}</p>
                     <button
-                        onClick={() => router.push('/dashboard')}
-                        className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
+                        onClick={() => router.back()}
+                        className="bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition-colors"
                     >
-                        Back to Dashboard
+                        Go Back
                     </button>
                 </div>
             </div>
         )
     }
 
-    if (success) {
+    // Calculate progress
+    const visitGoal = business.visit_goal
+    const currentCycleVisits = customer.visits % visitGoal
+    const displayVisits = currentCycleVisits === 0 && customer.visits > 0 ? visitGoal : currentCycleVisits
+    const progressPercentage = (displayVisits / visitGoal) * 100
+    const totalRewards = Math.floor(customer.visits / visitGoal)
+    const willEarnReward = (customer.visits + 1) % visitGoal === 0
+
+    if (success && visitRecorded) {
         return (
-            <div className="min-h-screen bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 flex items-center justify-center px-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
-                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <div className="min-h-screen bg-gradient-to-br from-green-50 to-emerald-100 flex items-center justify-center px-4">
+                <div className="text-center max-w-md mx-auto">
+                    <div className="bg-green-100 rounded-full p-4 mx-auto w-20 h-20 flex items-center justify-center mb-6">
                         <CheckCircle className="w-12 h-12 text-green-600" />
                     </div>
-                    <h2 className="text-3xl font-bold text-gray-900 mb-2">Visit Recorded! 🎉</h2>
+                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Visit Recorded!</h2>
                     <p className="text-gray-600 mb-4">
-                        <strong>{customer?.name}</strong> now has <strong>{customer?.visits}</strong> visit{customer?.visits !== 1 ? 's' : ''}
+                        {customer.name}'s visit has been successfully recorded.
                     </p>
-                    {rewardEarned && (
-                        <div className="bg-yellow-50 border-2 border-yellow-300 rounded-lg p-4 mb-4">
-                            <p className="text-yellow-800 font-semibold">
-                                🎁 Reward Earned!
-                            </p>
+
+                    {willEarnReward && (
+                        <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-4 mb-4">
+                            <div className="flex items-center justify-center mb-2">
+                                <Gift className="w-6 h-6 text-yellow-600 mr-2" />
+                                <span className="font-semibold text-yellow-800">Reward Earned!</span>
+                            </div>
                             <p className="text-yellow-700 text-sm">
-                                Customer has reached the reward goal!
+                                {customer.name} has completed {visitGoal} visits and earned: {business.reward_title}
                             </p>
                         </div>
                     )}
-                    <p className="text-sm text-gray-500">Redirecting to dashboard...</p>
-                </div>
-            </div>
-        )
-    }
 
-    // Check if user is logged in AND is a business owner
-    if (!user || !business) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
-                    <div className="w-16 h-16 bg-blue-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-3xl">👋</span>
+                    <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
+                        <h3 className="font-semibold text-gray-900 mb-2">Updated Progress</h3>
+                        <div className="flex justify-between text-sm text-gray-600 mb-2">
+                            <span>Visits: {customer.visits + 1}</span>
+                            <span>Goal: {visitGoal}</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                                className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
+                                style={{ width: `${Math.min(((customer.visits + 1) % visitGoal || visitGoal) / visitGoal * 100, 100)}%` }}
+                            ></div>
+                        </div>
                     </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Hello Customer!</h2>
-                    <p className="text-gray-600 mb-4">
-                        This is your personal QR code for earning loyalty points.
-                    </p>
-                    <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-                        <h3 className="font-semibold text-blue-900 mb-2">📱 How to use this QR code:</h3>
-                        <ol className="text-sm text-blue-800 text-left space-y-1">
-                            <li>1. Show this screen to the business staff</li>
-                            <li>2. They will scan your QR code</li>
-                            <li>3. Your visit will be recorded automatically</li>
-                            <li>4. Earn rewards after multiple visits!</li>
-                        </ol>
-                    </div>
+
                     <div className="space-y-3">
                         <button
-                            onClick={() => router.push('/login')}
-                            className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors w-full"
+                            onClick={() => router.push('/scanner')}
+                            className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
                         >
-                            Business Owner? Login Here
+                            Scan Another Customer
                         </button>
-                        <p className="text-xs text-gray-500">
-                            Only business owners can record visits
-                        </p>
+                        <button
+                            onClick={() => router.push('/dashboard')}
+                            className="w-full bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                        >
+                            Back to Dashboard
+                        </button>
                     </div>
-                </div>
-            </div>
-        )
-    }
-
-    // Verify the customer belongs to this business
-    if (customer && customer.business_id !== business.id) {
-        return (
-            <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50 flex items-center justify-center px-4">
-                <div className="bg-white rounded-2xl shadow-xl p-8 md:p-10 max-w-md w-full text-center">
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <span className="text-3xl">⚠️</span>
-                    </div>
-                    <h2 className="text-2xl font-bold text-gray-900 mb-2">Wrong Business</h2>
-                    <p className="text-gray-600 mb-6">
-                        This customer belongs to a different business.
-                    </p>
-                    <button
-                        onClick={() => router.push('/dashboard')}
-                        className="bg-purple-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-700 transition-colors"
-                    >
-                        Back to Dashboard
-                    </button>
                 </div>
             </div>
         )
     }
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-purple-50 via-blue-50 to-teal-50">
-            <div className="max-w-4xl mx-auto px-4 py-8 md:py-12">
-                {/* Header */}
-                <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-6">
-                    <div className="bg-gradient-to-r from-purple-600 via-blue-600 to-teal-600 p-6 md:p-8 text-white">
-                        <h1 className="text-2xl md:text-3xl font-bold mb-1">Record Customer Visit</h1>
-                        <p className="text-purple-100 text-sm md:text-base">{business?.name}</p>
-                    </div>
-                </div>
-
-                {/* Customer Info Card */}
-                <div className="bg-white rounded-2xl shadow-xl p-6 md:p-10 mb-6">
-                    <div className="flex items-start space-x-4 mb-6">
-                        <div className="w-16 h-16 bg-gradient-to-br from-purple-500 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0">
-                            <User className="w-8 h-8 text-white" />
+        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 py-4 px-4">
+            <div className="max-w-md mx-auto">
+                <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
+                    {/* Header */}
+                    <div className="bg-gradient-to-r from-blue-600 to-purple-600 px-6 py-4 text-center">
+                        <div className="w-12 h-12 bg-white rounded-full flex items-center justify-center mx-auto mb-3">
+                            <User className="w-6 h-6 text-blue-600" />
                         </div>
-                        <div className="flex-1">
-                            <h2 className="text-2xl font-bold text-gray-900 mb-1">{customer?.name}</h2>
-                            <div className="space-y-1 text-gray-600">
-                                <p className="flex items-center">
-                                    <span className="font-medium mr-2">📱</span>
-                                    {customer?.phone}
-                                </p>
-                                {customer?.email && (
-                                    <p className="flex items-center">
-                                        <span className="font-medium mr-2">📧</span>
-                                        {customer.email}
-                                    </p>
+                        <h1 className="text-xl font-bold text-white mb-1">Record Visit</h1>
+                        <p className="text-blue-100 text-sm">Confirm customer visit</p>
+                    </div>
+
+                    {/* Business Info */}
+                    <div className="px-6 py-4 bg-gray-50 border-b text-center">
+                        <h3 className="font-semibold text-gray-900">{business.name}</h3>
+                        <p className="text-sm text-gray-600">{business.reward_title}</p>
+                    </div>
+
+                    {/* Customer Info */}
+                    <div className="px-6 py-6">
+                        <div className="text-center mb-6">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">{customer.name}</h2>
+                            <div className="space-y-2">
+                                {customer.phone && (
+                                    <div className="flex items-center justify-center text-gray-600">
+                                        <Phone className="w-4 h-4 mr-2" />
+                                        <span>{customer.phone}</span>
+                                    </div>
+                                )}
+                                {customer.email && (
+                                    <div className="flex items-center justify-center text-gray-600">
+                                        <Mail className="w-4 h-4 mr-2" />
+                                        <span className="text-sm">{customer.email}</span>
+                                    </div>
                                 )}
                             </div>
                         </div>
-                    </div>
 
-                    {/* Visit Stats */}
-                    <div className="grid grid-cols-2 md:grid-cols-2 gap-4 md:gap-6 mb-6">
-                        <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200">
-                            <div className="flex items-center justify-between mb-2">
-                                <Calendar className="w-5 h-5 text-blue-600" />
-                                <span className="text-xs font-semibold text-blue-600 uppercase">Current</span>
-                            </div>
-                            <p className="text-3xl font-bold text-blue-900">{customer?.visits || 0}</p>
-                            <p className="text-sm text-blue-700">Total Visits</p>
-                        </div>
-
-                        <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl p-4 border-2 border-purple-200">
-                            <div className="flex items-center justify-between mb-2">
-                                <Award className="w-5 h-5 text-purple-600" />
-                                <span className="text-xs font-semibold text-purple-600 uppercase">Goal</span>
-                            </div>
-                            <p className="text-3xl font-bold text-purple-900">{business?.visit_goal || 5}</p>
-                            <p className="text-sm text-purple-700">Visits Needed</p>
-                        </div>
-                    </div>
-
-                    {/* Progress Bar */}
-                    <div className="mb-6">
-                        <div className="flex justify-between text-sm text-gray-600 mb-2">
-                            <span>Progress to Reward</span>
-                            <span className="font-semibold">
-                                {Math.min(Math.round(((customer?.visits || 0) / (business?.visit_goal || 5)) * 100), 100)}%
-                            </span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-3 overflow-hidden">
-                            <div
-                                className="bg-gradient-to-r from-purple-500 to-blue-500 h-full rounded-full transition-all duration-500"
-                                style={{
-                                    width: `${Math.min(((customer?.visits || 0) / (business?.visit_goal || 5)) * 100, 100)}%`
-                                }}
-                            />
-                        </div>
-                        <p className="text-sm text-gray-500 mt-2 text-center">
-                            {(business?.visit_goal || 5) - (customer?.visits || 0) > 0
-                                ? `${(business?.visit_goal || 5) - (customer?.visits || 0)} more visit${(business?.visit_goal || 5) - (customer?.visits || 0) === 1 ? '' : 's'} to earn reward`
-                                : '🎉 Reward goal reached!'}
-                        </p>
-                    </div>
-
-                    {/* Last Visit */}
-                    {customer?.last_visit && (
+                        {/* Current Progress */}
                         <div className="bg-gray-50 rounded-lg p-4 mb-6">
-                            <p className="text-sm text-gray-600">
-                                <span className="font-semibold">Last Visit:</span>{' '}
-                                {new Date(customer.last_visit).toLocaleDateString('en-US', {
-                                    year: 'numeric',
-                                    month: 'long',
-                                    day: 'numeric',
-                                    hour: '2-digit',
-                                    minute: '2-digit'
-                                })}
+                            <div className="flex items-center justify-between mb-3">
+                                <div className="flex items-center space-x-2">
+                                    <Gift className="w-5 h-5 text-purple-600" />
+                                    <span className="font-medium text-gray-900">Current Progress</span>
+                                </div>
+                                <span className="text-sm font-medium text-gray-600">
+                                    {displayVisits} / {visitGoal} visits
+                                </span>
+                            </div>
+
+                            <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                                <div
+                                    className="bg-gradient-to-r from-blue-600 to-purple-600 h-3 rounded-full transition-all duration-500"
+                                    style={{ width: `${progressPercentage}%` }}
+                                ></div>
+                            </div>
+
+                            <p className="text-sm text-gray-600 text-center">
+                                {displayVisits >= visitGoal
+                                    ? `🎉 Ready to claim: ${business.reward_title}!`
+                                    : `${visitGoal - displayVisits} more visit${visitGoal - displayVisits === 1 ? '' : 's'} to earn reward`
+                                }
                             </p>
+
+                            {totalRewards > 0 && (
+                                <p className="text-xs text-green-600 text-center mt-2">
+                                    Total rewards earned: {totalRewards}
+                                </p>
+                            )}
                         </div>
-                    )}
 
+                        {/* After Visit Preview */}
+                        {willEarnReward && (
+                            <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-6">
+                                <div className="flex items-center justify-center mb-2">
+                                    <Gift className="w-5 h-5 text-yellow-600 mr-2" />
+                                    <span className="font-semibold text-yellow-800">Will Earn Reward!</span>
+                                </div>
+                                <p className="text-yellow-700 text-sm text-center">
+                                    This visit will complete {visitGoal} visits and earn: {business.reward_title}
+                                </p>
+                            </div>
+                        )}
 
-
-                    {/* Error Message */}
-                    {error && (
-                        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-                            <p className="text-red-800 text-sm">{error}</p>
-                        </div>
-                    )}
-
-                    {/* Mark Visit Button */}
-                    <div className="flex flex-col md:flex-row gap-3 md:gap-4">
-                        <button
-                            onClick={markVisit}
-                            disabled={marking || !(customer?.id || customerId) || !(business?.id || user?.id)}
-                            className="flex-1 bg-gradient-to-r from-green-500 to-emerald-600 text-white py-4 px-6 rounded-xl font-bold text-lg hover:shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center space-x-2"
-                        >
-                            {marking ? (
-                                <>
-                                    <Loader2 className="w-5 h-5 animate-spin" />
-                                    <span>Recording Visit...</span>
-                                </>
+                        {/* Action Buttons */}
+                        <div className="space-y-3">
+                            {!user ? (
+                                <div className="text-center">
+                                    <p className="text-gray-600 mb-4">Please log in to record visits</p>
+                                    <button
+                                        onClick={() => router.push('/login')}
+                                        className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium"
+                                    >
+                                        Log In
+                                    </button>
+                                </div>
+                            ) : userBusiness?.id !== customer.business_id ? (
+                                <div className="text-center">
+                                    <p className="text-red-600 mb-4">This customer belongs to a different business</p>
+                                    <button
+                                        onClick={() => router.back()}
+                                        className="w-full bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium"
+                                    >
+                                        Go Back
+                                    </button>
+                                </div>
                             ) : (
                                 <>
-                                    <CheckCircle className="w-5 h-5" />
-                                    <span>Mark Visit</span>
+                                    <button
+                                        onClick={recordVisit}
+                                        disabled={recording || visitRecorded}
+                                        className="w-full bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors font-medium flex items-center justify-center space-x-2"
+                                    >
+                                        {recording ? (
+                                            <>
+                                                <Loader className="w-5 h-5 animate-spin" />
+                                                <span>Recording Visit...</span>
+                                            </>
+                                        ) : (
+                                            <>
+                                                <CheckCircle className="w-5 h-5" />
+                                                <span>Mark Visit</span>
+                                            </>
+                                        )}
+                                    </button>
+                                    <button
+                                        onClick={() => router.back()}
+                                        className="w-full bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-700 transition-colors font-medium flex items-center justify-center space-x-2"
+                                    >
+                                        <ArrowLeft className="w-5 h-5" />
+                                        <span>Cancel</span>
+                                    </button>
                                 </>
                             )}
-                        </button>
+                        </div>
 
-                        <button
-                            onClick={() => router.push('/dashboard')}
-                            className="md:w-auto md:px-8 bg-gray-100 text-gray-700 py-3 px-6 rounded-xl font-semibold hover:bg-gray-200 transition-colors"
-                        >
-                            Cancel
-                        </button>
+                        {error && (
+                            <div className="mt-4 bg-red-50 border border-red-200 rounded-lg p-3">
+                                <p className="text-red-700 text-sm text-center">{error}</p>
+                            </div>
+                        )}
                     </div>
+                </div>
+
+                {/* Instructions */}
+                <div className="mt-6 bg-white rounded-lg p-4 shadow-sm">
+                    <h3 className="font-semibold text-gray-900 mb-2">Instructions:</h3>
+                    <ul className="text-sm text-gray-600 space-y-1">
+                        <li>1. Verify this is the correct customer</li>
+                        <li>2. Click "Mark Visit" to record their visit</li>
+                        <li>3. Customer will receive confirmation via email/SMS</li>
+                        <li>4. Rewards are automatically tracked</li>
+                    </ul>
                 </div>
             </div>
         </div>
+    )
+}
+
+export default function MarkVisitPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+                <div className="text-center">
+                    <div className="inline-block animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mb-4"></div>
+                    <p className="text-gray-600">Loading...</p>
+                </div>
+            </div>
+        }>
+            <MarkVisitContent />
+        </Suspense>
     )
 }

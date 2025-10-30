@@ -1,5 +1,6 @@
 interface EmailTemplateProps {
     customerName?: string
+    customerId?: string
     points?: number
     totalPoints?: number
     message: string
@@ -10,6 +11,7 @@ interface EmailTemplateProps {
 
 export function getLoyaltyEmailTemplate({
     customerName = 'Valued Customer',
+    customerId = '',
     points,
     totalPoints,
     message,
@@ -320,7 +322,7 @@ export function getLoyaltyEmailTemplate({
                     <h3 style="color: #333; margin-bottom: 15px; font-size: 20px; font-weight: bold;">📱 Your Personal QR Code</h3>
                     <p style="color: #666; margin-bottom: 20px; font-size: 16px;" class="qr-instructions">Show this code to staff to record your visit instantly:</p>
                     <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 16px; margin: 20px 0; display: inline-block;">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`https://loyallinkk.vercel.app/customer-qr?name=${encodeURIComponent(customerName)}&business=${businessName}`)}" 
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=240x240&data=${encodeURIComponent(`https://loyallinkk.vercel.app/mark-visit/CUSTOMER_ID_PLACEHOLDER`)}" 
                              alt="Customer QR Code" 
                              style="border: 4px solid white; border-radius: 12px; padding: 8px; background: white; display: block;" 
                              class="qr-code" />
@@ -331,18 +333,18 @@ export function getLoyaltyEmailTemplate({
                             💡 <strong>Can't scan?</strong> Visit: <a href="https://loyallinkk.vercel.app/customer-qr" style="color: #667eea; text-decoration: none; font-weight: 600;">loyallinkk.vercel.app/customer-qr</a>
                         </p>
                         <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 12px;">
-                            <a href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=png&download=1&data=${encodeURIComponent(`https://loyallinkk.vercel.app/customer-qr?name=${encodeURIComponent(customerName)}&business=${businessName}`)}" 
+                            <a href="https://api.qrserver.com/v1/create-qr-code/?size=400x400&format=png&download=1&data=${encodeURIComponent(`https://loyallinkk.vercel.app/mark-visit/CUSTOMER_ID_PLACEHOLDER`)}" 
                                style="background: #667eea; color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 600; display: inline-block;">
                                 📱 Download QR Code
                             </a>
-                            <a href="https://loyallinkk.vercel.app/customer-qr" 
+                            <a href="https://loyallinkk.vercel.app/customer-qr?id=CUSTOMER_ID_PLACEHOLDER" 
                                style="background: #28a745; color: white; padding: 8px 16px; border-radius: 20px; text-decoration: none; font-size: 12px; font-weight: 600; display: inline-block;">
-                                🌐 Open Web App
+                                🌐 View QR Code
                             </a>
                         </div>
                     </div>
                 </div>
-                <a href="https://loyallinkk.vercel.app/customer-qr" class="cta-button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; display: inline-block;">📱 View My Loyalty Account</a>
+                <a href="https://loyallinkk.vercel.app/customer-qr?id=CUSTOMER_ID_PLACEHOLDER" class="cta-button" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; text-decoration: none; border-radius: 25px; font-weight: 600; display: inline-block;">📱 View My Loyalty Account</a>
             </div>
         </div>
         
@@ -365,7 +367,7 @@ export function getLoyaltyEmailTemplate({
     </div>
 </body>
 </html>
-  `.trim()
+  `.trim().replace(/CUSTOMER_ID_PLACEHOLDER/g, customerId)
 }
 
 export function getVisitReminderTemplate({

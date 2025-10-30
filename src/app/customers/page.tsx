@@ -134,12 +134,13 @@ export default function CustomersPage() {
                 body: JSON.stringify({
                     email: customer.email,
                     customerName: customer.name,
+                    customerId: customer.id,
                     currentVisits: customer.visits,
                     visitGoal: business?.visit_goal || 5,
                     businessName: business?.name,
                     message: `Thank you for being a loyal customer! You have ${customer.visits} visits with us.`,
                     subject: `Thank you from ${business?.name}!`,
-                    template: 'thank-you'
+                    template: 'loyalty'
                 })
             })
 

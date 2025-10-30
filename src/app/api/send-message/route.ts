@@ -35,6 +35,7 @@ export async function POST(request: NextRequest) {
             message,
             subject,
             customerName,
+            customerId,
             points,
             totalPoints,
             businessName,
@@ -215,6 +216,7 @@ export async function POST(request: NextRequest) {
         } else if (template === 'loyalty' && (points || customerName)) {
             htmlContent = getLoyaltyEmailTemplate({
                 customerName,
+                customerId,
                 points,
                 totalPoints,
                 message,
