@@ -51,14 +51,31 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Found', existingRewards?.length || 0, 'existing rewards')
 
-        // Test 3: Create a test reward
+        // Test 3: Get a real customer and business ID for testing
+        const { data: sampleCustomer } = await supabaseAdmin
+            .from('customers')
+            .select('id, business_id')
+            .limit(1)
+            .single()
+
+        if (!sampleCustomer) {
+            return NextResponse.json({
+                success: false,
+                error: 'No customers found in database - need at least one customer to test rewards',
+                existingRewards: existingRewards?.length || 0
+            })
+        }
+
+        console.log('✅ Using sample customer:', sampleCustomer.id, 'business:', sampleCustomer.business_id)
+
+        // Test 3: Create a test reward with real UUIDs
         const testToken = 'TEST' + Math.floor(100000 + Math.random() * 900000).toString()
 
         const { data: testReward, error: createError } = await supabaseAdmin
             .from('rewards')
             .insert({
-                customer_id: 'test-customer-id',
-                business_id: 'test-business-id',
+                customer_id: sampleCustomer.id,
+                business_id: sampleCustomer.business_id,
                 reward_title: 'Test Reward',
                 points_used: 5,
                 claim_token: testToken,
