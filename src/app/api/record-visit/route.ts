@@ -228,10 +228,16 @@ export async function POST(request: NextRequest) {
                         .single()
 
                     if (rewardError) {
-                        console.log('⚠️ Could not save reward to database (table might not exist):', rewardError.message)
+                        console.error('❌ Could not save reward to database:', rewardError)
+                        console.error('❌ Reward error details:', JSON.stringify(rewardError, null, 2))
                         // Continue anyway - we'll still send the email
                     } else {
-                        console.log('✅ Reward record created:', reward.id)
+                        console.log('✅ REWARD RECORD CREATED SUCCESSFULLY!')
+                        console.log('✅ Reward ID:', reward.id)
+                        console.log('✅ Claim Token:', token)
+                        console.log('✅ Customer ID:', customerId)
+                        console.log('✅ Business ID:', businessId)
+                        console.log('✅ Status:', reward.status)
                     }
                 } catch (dbError) {
                     console.log('⚠️ Rewards table not available, continuing with email only')

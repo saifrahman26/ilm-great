@@ -116,8 +116,15 @@ function ClaimRewardContent() {
                     <div className="bg-red-100 rounded-full p-3 mx-auto w-16 h-16 flex items-center justify-center mb-4">
                         <AlertCircle className="w-8 h-8 text-red-600" />
                     </div>
-                    <h2 className="text-xl font-semibold text-gray-900 mb-2">Reward Not Found</h2>
-                    <p className="text-gray-600 mb-4">{error || 'This reward token is invalid or has expired'}</p>
+                    <h2 className="text-xl font-semibold text-gray-900 mb-2">
+                        {error?.includes('already been claimed') ? 'Already Claimed' : 'Reward Not Found'}
+                    </h2>
+                    <p className="text-gray-600 mb-4">
+                        {error?.includes('already been claimed')
+                            ? 'This reward has already been claimed and cannot be used again.'
+                            : error || 'This reward token is invalid or has expired'
+                        }
+                    </p>
                     <button
                         onClick={() => router.push('/')}
                         className="bg-orange-600 text-white px-6 py-2 rounded-lg hover:bg-orange-700 transition-colors"

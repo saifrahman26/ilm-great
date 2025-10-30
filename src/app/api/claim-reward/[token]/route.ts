@@ -29,6 +29,25 @@ export async function GET(
 
         console.log('🎁 Looking up reward token:', token)
 
+        // First, check if rewards table exists and has any data
+        const { data: allRewards, error: tableError } = await supabaseAdmin
+            .from('rewards')
+            .select('claim_token, status, created_at')
+            .limit(5)
+
+        if (tableError) {
+            console.error('❌ Rewards table error:', tableError)
+            return NextResponse.json(
+                { error: 'Rewards system not available. Please contact support.' },
+                { status: 500 }
+            )
+        }
+
+        console.log('🎁 Rewards table check - Total rewards found:', allRewards?.length || 0)
+        if (allRewards && allRewards.length > 0) {
+            console.log('🎁 Sample reward tokens:', allRewards.map(r => ({ token: r.claim_token, status: r.status })))
+        }
+
         // Find reward by token
         const { data: reward, error: rewardError } = await supabaseAdmin
             .from('rewards')
@@ -37,7 +56,24 @@ export async function GET(
             .single()
 
         if (rewardError || !reward) {
-            console.error('❌ Reward not found:', rewardError)
+            console.error('❌ Reward not found for token:', token)
+            console.error('❌ Error details:', rewardError)
+
+            // Check if it's already claimed
+            const { data: claimedReward } = await supabaseAdmin
+                .from('rewards')
+                .select('*')
+                .eq('claim_token', token)
+                .eq('status', 'claimed')
+                .single()
+
+            if (claimedReward) {
+                return NextResponse.json(
+                    { error: 'This reward has already been claimed' },
+                    { status: 410 }
+                )
+            }
+
             return NextResponse.json(
                 { error: 'Reward token not found or invalid' },
                 { status: 404 }
