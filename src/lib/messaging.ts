@@ -73,10 +73,14 @@ export async function sendVisitConfirmationEmail(
 
         const isRewardReached = visitCount > 0 && visitCount % business.visit_goal === 0
 
-        // IMPORTANT: Visit confirmation emails should NEVER be sent when reward is reached
-        // Reward token emails with claim codes are sent separately
+        // IMPORTANT: This function should only be called when NO reward is reached
+        // The record-visit API handles the reward detection logic
+        console.log('📧 Sending visit confirmation email (reward detection handled by caller)')
+
+        // Double-check: if reward is reached, this function shouldn't be called
         if (isRewardReached) {
-            console.log('⚠️ Skipping visit confirmation email - reward reached, token email will be sent instead')
+            console.error('❌ ERROR: sendVisitConfirmationEmail called when reward was reached!')
+            console.error('❌ This should not happen - reward emails should be sent separately')
             return
         }
 
