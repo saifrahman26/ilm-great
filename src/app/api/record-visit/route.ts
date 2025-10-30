@@ -136,10 +136,14 @@ export async function POST(request: NextRequest) {
 
         console.log(`🔍 Visit Analysis:`)
         console.log(`   - Customer: ${customer.name}`)
+        console.log(`   - Customer email: ${customer.email}`)
+        console.log(`   - Current visits: ${customer.visits}`)
         console.log(`   - New visit count: ${newVisitCount}`)
         console.log(`   - Visit goal: ${business.visit_goal}`)
+        console.log(`   - Modulo calculation: ${newVisitCount} % ${business.visit_goal} = ${newVisitCount % business.visit_goal}`)
         console.log(`   - Reached goal: ${reachedGoal}`)
         console.log(`   - Reward number: ${rewardNumber}`)
+        console.log(`   - Business reward title: ${business.reward_title}`)
 
         // Send visit confirmation email if customer has email (but not if they reached reward goal)
         if (customer.email?.trim() && !reachedGoal) {
