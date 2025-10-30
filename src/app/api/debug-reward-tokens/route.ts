@@ -16,22 +16,10 @@ export async function POST(request: NextRequest) {
     try {
         console.log('🔍 Debugging reward tokens...')
 
-        // Get all rewards with customer and business info
+        // Get all rewards first
         const { data: rewards, error: rewardsError } = await supabaseAdmin
             .from('rewards')
-            .select(`
-                id,
-                claim_token,
-                status,
-                reward_title,
-                points_used,
-                created_at,
-                claimed_at,
-                customer_id,
-                business_id,
-                customers!inner(name, email),
-                businesses!inner(name)
-            `)
+            .select('*')
             .order('created_at', { ascending: false })
             .limit(20)
 
@@ -46,7 +34,7 @@ export async function POST(request: NextRequest) {
 
         console.log('✅ Found', rewards?.length || 0, 'rewards')
 
-        // Format the rewards data
+        // Format the rewards data with simplified info
         const formattedRewards = rewards?.map(reward => ({
             id: reward.id,
             claim_token: reward.claim_token,
@@ -55,9 +43,6 @@ export async function POST(request: NextRequest) {
             points_used: reward.points_used,
             created_at: reward.created_at,
             claimed_at: reward.claimed_at,
-            customer_name: reward.customers?.name,
-            customer_email: reward.customers?.email,
-            business_name: reward.businesses?.name,
             customer_id: reward.customer_id,
             business_id: reward.business_id
         })) || []
