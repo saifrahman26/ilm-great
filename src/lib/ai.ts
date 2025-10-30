@@ -329,3 +329,101 @@ Keep recommendations practical and implementable.`
 
 export const aiService = new AIService()
 export default aiService
+    /
+/ Generate offer message for marketing campaigns
+export async function generateOfferMessage(context: {
+    businessName: string
+    businessCategory: string
+    offerTitle: string
+    targetAudience: string
+    customerCount: number
+}): Promise<string> {
+    const messages: AIMessage[] = [
+        {
+            role: 'system',
+            content: `You are an expert marketing copywriter specializing in promotional messages and offers. Create compelling, persuasive marketing messages that drive customer action. Use psychology-based persuasion techniques, create urgency, and make offers irresistible. Your messages should be concise, engaging, and action-oriented.`
+        },
+        {
+            role: 'user',
+            content: `Create a compelling promotional message for this offer:
+
+🏢 BUSINESS: ${context.businessName} (${context.businessCategory})
+🎯 OFFER: ${context.offerTitle}
+👥 TARGET AUDIENCE: ${context.targetAudience} (${context.customerCount} customers)
+
+REQUIREMENTS:
+- Write a persuasive promotional message (2-4 sentences)
+- Include the offer title naturally in the message
+- Create urgency and excitement
+- Include a clear call-to-action
+- Use emojis to make it engaging
+- Make it feel personal and exclusive
+- Add urgency with time-sensitive language
+- Make customers feel special and valued
+
+TARGET AUDIENCE CONTEXT:
+${context.targetAudience === 'active' ? 'These are your most loyal, active customers who visit regularly' :
+                    context.targetAudience === 'inactive' ? 'These customers haven\'t visited recently and need motivation to return' :
+                        context.targetAudience === 'high_visits' ? 'These are your VIP customers with many visits who deserve special treatment' :
+                            context.targetAudience === 'low_visits' ? 'These are newer customers who need encouragement to visit more often' :
+                                context.targetAudience === 'new_customers' ? 'These are brand new customers who just joined your loyalty program' :
+                                    'These are all your customers across different engagement levels'
+                }
+
+Write only the promotional message, no subject line or greeting needed.`
+        }
+    ]
+
+    const response = await aiService.generateResponse(messages)
+
+    if (!response.success || !response.content) {
+        throw new Error(response.error || 'Failed to generate offer message')
+    }
+
+    return response.content
+}
+
+// Enhance existing offer message with AI
+export async function enhanceOfferMessage(context: {
+    originalMessage: string
+    businessName: string
+    businessCategory: string
+}): Promise<string> {
+    const messages: AIMessage[] = [
+        {
+            role: 'system',
+            content: `You are an expert marketing copywriter specializing in improving promotional messages. Take existing marketing content and make it more compelling, persuasive, and action-oriented. Enhance the emotional appeal, add urgency, improve clarity, and make the call-to-action stronger while keeping the core message intact.`
+        },
+        {
+            role: 'user',
+            content: `Enhance this promotional message to make it more compelling and persuasive:
+
+🏢 BUSINESS: ${context.businessName} (${context.businessCategory})
+
+ORIGINAL MESSAGE:
+"${context.originalMessage}"
+
+ENHANCEMENT REQUIREMENTS:
+- Keep the core offer and message intact
+- Make it more persuasive and compelling
+- Add emotional appeal and excitement
+- Improve urgency and scarcity
+- Strengthen the call-to-action
+- Add relevant emojis for engagement
+- Make it feel more personal and exclusive
+- Improve readability and flow
+- Keep it concise (2-4 sentences)
+- Make customers feel special and valued
+
+Write only the enhanced promotional message, no additional text needed.`
+        }
+    ]
+
+    const response = await aiService.generateResponse(messages)
+
+    if (!response.success || !response.content) {
+        throw new Error(response.error || 'Failed to enhance offer message')
+    }
+
+    return response.content
+}

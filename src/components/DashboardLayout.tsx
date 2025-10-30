@@ -13,7 +13,8 @@ import {
     User,
     UserPlus,
     Camera,
-    Gift
+    Gift,
+    Send
 } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
@@ -38,6 +39,7 @@ export default function DashboardLayout({ children, title, subtitle }: Dashboard
         { name: 'Add Customer', href: '/register', icon: UserPlus },
         { name: 'Manual Visit', href: '/manual-visit', icon: User },
         { name: 'QR Scanner', href: '/scanner', icon: Camera },
+        { name: 'Marketing Offers', href: '/offers', icon: Send },
         { name: 'Rewards', href: '/rewards', icon: Gift },
         { name: 'Claim Reward', href: '/claim-reward', icon: Gift },
         { name: 'QR Code', href: '/qr-code-fast', icon: QrCode },
