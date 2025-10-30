@@ -419,72 +419,339 @@ function createPremiumRewardTemplate(
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="x-apple-disable-message-reformatting">
     <title>🎁 Reward Earned - ${businessName}</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f5f5f5;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background-color: #ffffff;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 50%, #d35400 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+        .header::before {
+            content: '🎉';
+            position: absolute;
+            font-size: 100px;
+            opacity: 0.1;
+            top: -20px;
+            right: -20px;
+        }
+        .business-name {
+            font-size: 48px;
+            font-weight: 900;
+            margin: 0 0 15px 0;
+            text-shadow: 0 3px 6px rgba(0,0,0,0.4);
+            letter-spacing: 1.2px;
+            line-height: 1.1;
+        }
+        .header .subtitle {
+            margin: 15px 0 20px 0;
+            font-size: 20px;
+            opacity: 0.95;
+            font-weight: 500;
+        }
+        .linkloyal-brand {
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(5px);
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 15px;
+            margin-top: 15px;
+            border: 1px solid rgba(255,255,255,0.15);
+            font-size: 11px;
+            font-weight: 500;
+            letter-spacing: 0.3px;
+            opacity: 0.7;
+        }
+        .content {
+            padding: 40px 30px;
+        }
+        .greeting {
+            font-size: 18px;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        .ai-message {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 50%, #ffe082 100%);
+            padding: 25px;
+            border-radius: 12px;
+            border-left: 4px solid #f39c12;
+            margin: 25px 0;
+            font-size: 16px;
+            color: #e65100;
+            font-style: italic;
+            line-height: 1.6;
+        }
+        .reward-card {
+            background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 50%, #fdcb6e 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            margin: 30px 0;
+            border: 3px solid #f39c12;
+            position: relative;
+        }
+        .reward-card::before {
+            content: '🏆';
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: white;
+            padding: 10px;
+            border-radius: 50%;
+            font-size: 30px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+        .reward-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: #d35400;
+            margin: 20px 0 10px 0;
+        }
+        .claim-section {
+            background: linear-gradient(135deg, #ff8f00 0%, #ff6f00 50%, #e65100 100%);
+            padding: 30px;
+            border-radius: 12px;
+            text-align: center;
+            margin: 30px 0;
+            color: white;
+        }
+        .claim-title {
+            font-size: 24px;
+            font-weight: bold;
+            margin: 0 0 15px 0;
+        }
+        .claim-token {
+            background: white;
+            color: #e65100;
+            padding: 15px 20px;
+            border-radius: 8px;
+            font-family: monospace;
+            font-size: 24px;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin: 20px 0;
+            border: 2px dashed #ff8f00;
+            display: inline-block;
+        }
+        .qr-section {
+            text-align: center;
+            margin: 25px 0;
+        }
+        .qr-code {
+            background: white;
+            padding: 15px;
+            border-radius: 12px;
+            display: inline-block;
+            border: 2px solid #f39c12;
+            box-shadow: 0 4px 15px rgba(243, 156, 18, 0.3);
+        }
+        .instructions {
+            background: linear-gradient(135deg, #fff8e1 0%, #ffecb3 100%);
+            border: 2px solid #f39c12;
+            border-radius: 12px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        .instructions h4 {
+            margin: 0 0 15px 0;
+            color: #e65100;
+            font-size: 18px;
+        }
+        .instructions ol {
+            margin: 0;
+            padding-left: 20px;
+            color: #e65100;
+        }
+        .instructions li {
+            margin: 8px 0;
+            font-weight: 500;
+        }
+        .footer {
+            background-color: #f8f9fa;
+            padding: 30px;
+            text-align: center;
+            border-top: 1px solid #e9ecef;
+        }
+        .footer p {
+            margin: 5px 0;
+            color: #6c757d;
+            font-size: 14px;
+        }
+        .business-contact {
+            font-size: 20px;
+            font-weight: 800;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        /* Mobile-First Responsive Design */
+        @media (max-width: 600px) {
+            .container {
+                margin: 0 !important;
+                box-shadow: none !important;
+                width: 100% !important;
+                border-radius: 0 !important;
+            }
+            .header, .content, .footer {
+                padding: 20px 16px !important;
+            }
+            .header {
+                padding: 30px 16px !important;
+            }
+            .business-name {
+                font-size: 28px !important;
+                margin-bottom: 12px !important;
+                line-height: 1.2 !important;
+            }
+            .header .subtitle {
+                font-size: 16px !important;
+                margin: 12px 0 16px 0 !important;
+                line-height: 1.3 !important;
+            }
+            .linkloyal-brand {
+                font-size: 10px !important;
+                padding: 4px 10px !important;
+                margin-top: 12px !important;
+            }
+            .reward-title {
+                font-size: 24px !important;
+                line-height: 1.2 !important;
+                margin: 16px 0 12px 0 !important;
+            }
+            .reward-card {
+                padding: 24px 16px !important;
+                margin: 24px 0 !important;
+                border-radius: 16px !important;
+            }
+            .reward-card::before {
+                font-size: 24px !important;
+                padding: 8px !important;
+                top: -12px !important;
+            }
+            .claim-section {
+                padding: 24px 16px !important;
+                margin: 24px 0 !important;
+                border-radius: 16px !important;
+            }
+            .claim-title {
+                font-size: 22px !important;
+                line-height: 1.2 !important;
+                margin: 0 0 16px 0 !important;
+            }
+            .claim-token {
+                font-size: 20px !important;
+                padding: 12px 16px !important;
+                letter-spacing: 1px !important;
+            }
+            .ai-message {
+                padding: 20px !important;
+                font-size: 15px !important;
+                line-height: 1.5 !important;
+                border-radius: 12px !important;
+            }
+            .instructions {
+                padding: 20px !important;
+                margin: 20px 0 !important;
+                border-radius: 12px !important;
+            }
+            .instructions h4 {
+                font-size: 16px !important;
+            }
+            .qr-code img {
+                max-width: 120px !important;
+            }
+        }
+    </style>
 </head>
-<body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 0; background-color: #f9f9f9;">
-    
-    <!-- Header -->
-    <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); color: white; padding: 30px; text-align: center;">
-        <h1 style="margin: 0; font-size: 28px; font-weight: bold;">🎁 Reward Earned!</h1>
-        <p style="margin: 10px 0 0 0; font-size: 16px; opacity: 0.9;">${businessName}</p>
-    </div>
-    
-    <!-- AI Message -->
-    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; margin: 0;">
-        <div style="display: flex; align-items: center; margin-bottom: 10px;">
-            <span style="font-size: 20px; margin-right: 10px;">🤖</span>
-            <strong style="color: #856404;">Personal AI Message</strong>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="business-name">${businessName}</h1>
+            <p class="subtitle">🎉 CONGRATULATIONS! You've Earned Your Reward!</p>
+            <div class="linkloyal-brand">
+                🔗 LinkLoyal
+            </div>
         </div>
-        <p style="margin: 0; color: #856404; font-style: italic; line-height: 1.5;">
-            ${aiMessage}
-        </p>
-    </div>
-    
-    <!-- Main Content -->
-    <div style="background: white; padding: 30px;">
-        <h2 style="color: #333; margin-top: 0; text-align: center;">Hello ${customerName}! 👋</h2>
         
-        <!-- Reward Card -->
-        <div style="background: #f8f9fa; border: 2px solid #28a745; border-radius: 10px; padding: 20px; text-align: center; margin: 20px 0;">
-            <h3 style="margin: 0 0 10px 0; color: #28a745; font-size: 20px;">🏆 Your Reward</h3>
-            <p style="margin: 0; font-size: 22px; font-weight: bold; color: #333;">
-                ${context.rewardTitle}
+        <div class="content">
+            <div class="greeting">
+                Dear ${customerName}, 🎊
+            </div>
+            
+            <div class="ai-message">
+                ${aiMessage}
+            </div>
+            
+            <div class="reward-card">
+                <div class="reward-title">${context.rewardTitle}</div>
+                <p style="margin: 15px 0; color: #e65100; font-size: 16px;">
+                    Your loyalty has been rewarded! 🌟
+                </p>
+            </div>
+            
+            <div class="claim-section">
+                <div class="claim-title">🎁 How to Claim Your Reward</div>
+                <p style="margin: 15px 0; font-size: 16px;">
+                    Show this claim code to any team member:
+                </p>
+                <div class="claim-token">${context.claimToken}</div>
+            </div>
+            
+            <div class="qr-section">
+                <h4 style="margin: 0 0 15px 0; color: #e65100;">📱 Or Scan This QR Code</h4>
+                <div class="qr-code">
+                    <img src="${context.qrCodeUrl}" alt="Reward QR Code" style="max-width: 150px; height: auto;" />
+                </div>
+            </div>
+            
+            <div class="instructions">
+                <h4>✨ Redemption Instructions:</h4>
+                <ol>
+                    <li>Visit ${businessName} at your convenience</li>
+                    <li>Show this email to any staff member</li>
+                    <li>Present your claim code or scan the QR code</li>
+                    <li>Enjoy your well-deserved reward! 🎉</li>
+                </ol>
+            </div>
+            
+            <div style="text-align: center; margin: 30px 0;">
+                <p style="font-size: 18px; color: #e65100; font-weight: 600;">
+                    Thank you for being such a loyal customer! 💝
+                </p>
+                <p style="font-size: 16px; color: #636e72;">
+                    Keep visiting to earn more amazing rewards!
+                </p>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p class="business-contact">${businessName}</p>
+            <p>🏪 We appreciate your loyalty and look forward to seeing you again!</p>
+            <p style="font-size: 12px; color: #666; margin-top: 15px; font-weight: 600;">
+                Powered by <strong>🔗 LinkLoyal</strong> - Making loyalty simple and rewarding
+            </p>
+            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                You've successfully earned this exclusive reward through your continued loyalty!
             </p>
         </div>
-        
-        <!-- Claim Code -->
-        <div style="background: #e9ecef; border-radius: 8px; padding: 20px; text-align: center; margin: 20px 0;">
-            <h4 style="margin: 0 0 10px 0; color: #495057;">🔐 Claim Code</h4>
-            <div style="background: white; padding: 15px; border-radius: 5px; font-family: monospace; font-size: 18px; font-weight: bold; color: #333; letter-spacing: 1px; border: 2px dashed #6c757d;">
-                ${context.claimToken}
-            </div>
-        </div>
-        
-        <!-- QR Code -->
-        <div style="text-align: center; margin: 25px 0;">
-            <h4 style="margin: 0 0 15px 0; color: #495057;">📱 Or Scan This QR Code</h4>
-            <div style="background: white; padding: 15px; border-radius: 10px; display: inline-block; border: 1px solid #dee2e6;">
-                <img src="${context.qrCodeUrl}" alt="Reward QR Code" style="max-width: 150px; height: auto;" />
-            </div>
-        </div>
-        
-        <!-- Instructions -->
-        <div style="background: #d1ecf1; border: 1px solid #bee5eb; border-radius: 8px; padding: 20px; margin: 20px 0;">
-            <h4 style="margin: 0 0 10px 0; color: #0c5460;">How to Claim:</h4>
-            <ol style="margin: 0; padding-left: 20px; color: #0c5460;">
-                <li>Show this email to staff</li>
-                <li>Present your claim code or QR code</li>
-                <li>Enjoy your reward! 🎉</li>
-            </ol>
-        </div>
-    </div>
-    
-    <!-- Footer -->
-    <div style="background: #343a40; color: white; text-align: center; padding: 20px;">
-        <p style="margin: 0 0 10px 0; font-size: 16px;">Thank you for your loyalty! 🌟</p>
-        <p style="margin: 0; font-size: 12px; opacity: 0.8;">
-            Powered by LinkLoyal - Simple Loyalty Program
-        </p>
     </div>
 </body>
 </html>`
