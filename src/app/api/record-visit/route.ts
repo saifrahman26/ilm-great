@@ -167,8 +167,14 @@ export async function POST(request: NextRequest) {
         }
 
         if (reachedGoal) {
-            console.log('🎉 Customer reached reward milestone!')
-            console.log(`   - This is reward #${rewardNumber} for ${customer.name}`)
+            console.log('🎉🎉🎉 REWARD MILESTONE REACHED! 🎉🎉🎉')
+            console.log(`   - Customer: ${customer.name}`)
+            console.log(`   - Email: ${customer.email}`)
+            console.log(`   - Visit count: ${newVisitCount}`)
+            console.log(`   - Visit goal: ${business.visit_goal}`)
+            console.log(`   - Reward #${rewardNumber}`)
+            console.log(`   - Business: ${business.name}`)
+            console.log(`   - Reward title: ${business.reward_title}`)
 
             // Check if reward already exists for this exact visit milestone to prevent duplicates
             // Only check for very recent duplicates (within 10 minutes) to avoid blocking legitimate rewards
@@ -229,9 +235,12 @@ export async function POST(request: NextRequest) {
 
                 // Send reward token email directly
                 if (customer.email?.trim()) {
-                    console.log('🎁 REWARD EMAIL: Attempting to send reward token email to:', customer.email)
+                    console.log('🎁🎁🎁 SENDING REWARD EMAIL 🎁🎁🎁')
+                    console.log('🎁 REWARD EMAIL: Customer:', customer.name)
+                    console.log('🎁 REWARD EMAIL: Email address:', customer.email)
                     console.log('🎁 REWARD EMAIL: Token:', token)
                     console.log('🎁 REWARD EMAIL: Reward title:', business.reward_title)
+                    console.log('🎁 REWARD EMAIL: Business:', business.name)
                     try {
                         const { sendRewardTokenEmail } = await import('@/lib/messaging')
                         await sendRewardTokenEmail(updatedCustomer, business, token)
