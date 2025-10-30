@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@supabase/supabase-js'
 
-// Create admin client for database operations
 const supabaseAdmin = createClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.SUPABASE_SERVICE_ROLE_KEY!,
@@ -24,46 +23,33 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        const searchTerm = identifier.trim().toLowerCase()
+        console.log('🔍 Finding customer:', { businessId, identifier })
 
-        // Search for customer by email or phone
+        // Search for customer by email or phone in the specified business
         const { data: customers, error: searchError } = await supabaseAdmin
             .from('customers')
             .select('*')
             .eq('business_id', businessId)
-            .or(`email.ilike.%${searchTerm}%,phone.ilike.%${searchTerm}%`)
+            .or(`email.eq.${identifier},phone.eq.${identifier}`)
 
         if (searchError) {
-            console.error('Error searching customers:', searchError)
+            console.error('❌ Error searching customers:', searchError)
             return NextResponse.json(
                 { error: 'Failed to search customers' },
                 { status: 500 }
             )
         }
 
-        // Find exact match first, then partial match
-        let customer = customers?.find(c =>
-            c.email?.toLowerCase() === searchTerm ||
-            c.phone === searchTerm ||
-            c.phone?.replace(/\D/g, '') === searchTerm.replace(/\D/g, '') // Remove non-digits for phone comparison
-        )
-
-        // If no exact match, try partial match
-        if (!customer && customers && customers.length > 0) {
-            customer = customers.find(c =>
-                c.email?.toLowerCase().includes(searchTerm) ||
-                c.phone?.includes(searchTerm)
-            )
-        }
-
-        if (!customer) {
+        if (!customers || customers.length === 0) {
             return NextResponse.json(
-                { error: 'Customer not found. Please check the email or phone number.' },
+                { error: 'Customer not found' },
                 { status: 404 }
             )
         }
 
-        // Get business information
+        const customer = customers[0] // Take the first match
+
+        // Get business details
         const { data: business, error: businessError } = await supabaseAdmin
             .from('businesses')
             .select('*')
@@ -71,33 +57,29 @@ export async function POST(request: NextRequest) {
             .single()
 
         if (businessError || !business) {
+            console.error('❌ Error fetching business:', businessError)
             return NextResponse.json(
                 { error: 'Business not found' },
                 { status: 404 }
             )
         }
 
+        console.log('✅ Customer found:', {
+            customerId: customer.id,
+            customerName: customer.name,
+            customerEmail: customer.email,
+            customerPhone: customer.phone,
+            visits: customer.visits
+        })
+
         return NextResponse.json({
-            customer: {
-                id: customer.id,
-                name: customer.name,
-                phone: customer.phone,
-                email: customer.email,
-                visits: customer.visits,
-                points: customer.points,
-                last_visit: customer.last_visit
-            },
-            business: {
-                id: business.id,
-                name: business.name,
-                reward_title: business.reward_title,
-                reward_description: business.reward_description,
-                visit_goal: business.visit_goal
-            }
+            success: true,
+            customer,
+            business
         })
 
     } catch (error) {
-        console.error('Customer search error:', error)
+        console.error('❌ Find customer error:', error)
         return NextResponse.json(
             { error: 'Internal server error' },
             { status: 500 }

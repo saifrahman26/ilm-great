@@ -103,19 +103,20 @@ export default function ManualVisitPage() {
         setRecording(true)
         setError('')
 
-        // Use customer's business_id directly (same as QR scan flow)
-        const businessId = customer.business_id
+        // Use customer's business_id, fallback to current business ID
+        const businessId = customer.business_id || business?.id
 
         console.log('📝 Manual visit - Recording visit:', {
             customerId: customer.id,
             businessId: businessId,
             customerBusinessId: customer.business_id,
             authBusiness: business?.id,
-            authUser: user?.id
+            authUser: user?.id,
+            usingFallback: !customer.business_id && !!business?.id
         })
 
         if (!businessId) {
-            setError('Customer business ID not found. Please contact support.')
+            setError('Unable to determine business ID. Please ensure you are logged in and try again.')
             setRecording(false)
             return
         }
