@@ -48,6 +48,7 @@ export default function ManualVisitPage() {
     const { user, business, loading } = useAuth()
     const [customer, setCustomer] = useState<Customer | null>(null)
     const [businessData, setBusinessData] = useState<Business | null>(null)
+    const [multipleCustomers, setMultipleCustomers] = useState<Customer[]>([])
     const [searching, setSearching] = useState(false)
     const [recording, setRecording] = useState(false)
     const [visitRecorded, setVisitRecorded] = useState(false)
@@ -86,9 +87,21 @@ export default function ManualVisitPage() {
 
             if (!response.ok) {
                 setError(result.error || 'Customer not found')
+                setMultipleCustomers([])
             } else {
-                setCustomer(result.customer)
-                setBusinessData(result.business)
+                if (result.multiple) {
+                    // Multiple customers found - show selection list
+                    setMultipleCustomers(result.customers)
+                    setBusinessData(result.business)
+                    setError('')
+                    setCustomer(null)
+                } else {
+                    // Single customer found
+                    setCustomer(result.customer)
+                    setBusinessData(result.business)
+                    setMultipleCustomers([])
+                    setError('')
+                }
             }
         } catch (err) {
             setError('Failed to search for customer')
@@ -167,6 +180,7 @@ export default function ManualVisitPage() {
     const resetForm = () => {
         setCustomer(null)
         setBusinessData(null)
+        setMultipleCustomers([])
         setVisitRecorded(false)
         setRewardEarned(false)
         setError('')
@@ -350,7 +364,7 @@ export default function ManualVisitPage() {
     }
 
     return (
-        <DashboardLayout title="Manual Visit" subtitle="Record a customer visit by searching their email or phone">
+        <DashboardLayout title="Manual Visit" subtitle="Record a customer visit by searching their name, email, or phone">
             <div className="max-w-2xl mx-auto">
                 {!customer ? (
                     /* Enhanced Search Form */
@@ -360,7 +374,7 @@ export default function ManualVisitPage() {
                                 <Search className="w-10 h-10 text-white" />
                             </div>
                             <h2 className="text-2xl font-bold text-gray-900 mb-3">Find Customer</h2>
-                            <p className="text-gray-600 text-lg">Search by email or phone number to record their visit</p>
+                            <p className="text-gray-600 text-lg">Search by name, email, or phone number to record their visit</p>
                         </div>
 
                         <form onSubmit={handleSubmit(searchCustomer)} className="space-y-6">
@@ -373,7 +387,7 @@ export default function ManualVisitPage() {
 
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                                    Email or Phone Number
+                                    Name, Email, or Phone Number
                                 </label>
                                 <div className="relative">
                                     <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
@@ -382,7 +396,7 @@ export default function ManualVisitPage() {
                                     <input
                                         {...register('identifier')}
                                         type="text"
-                                        placeholder="customer@email.com or +1234567890"
+                                        placeholder="Enter name, email, or phone (2+ digits)"
                                         className="w-full pl-10 pr-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-teal-500 focus:border-transparent text-gray-900 placeholder-gray-500"
                                     />
                                 </div>
@@ -422,7 +436,71 @@ export default function ManualVisitPage() {
                             </Link>
                         </div>
                     </div>
-                ) : (
+                ) : null}
+
+                {/* Multiple Customers Selection */}
+                {multipleCustomers.length > 0 && (
+                    <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-8 mb-6">
+                        <div className="text-center mb-8">
+                            <div className="w-20 h-20 bg-gradient-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-lg">
+                                <User className="w-10 h-10 text-white" />
+                            </div>
+                            <h2 className="text-2xl font-bold text-gray-900 mb-3">Multiple Customers Found ({multipleCustomers.length})</h2>
+                            <p className="text-gray-600 text-lg">Select the correct customer to record their visit</p>
+                        </div>
+
+                        <div className="space-y-4">
+                            {multipleCustomers.map((cust, index) => (
+                                <div
+                                    key={cust.id}
+                                    onClick={() => {
+                                        setCustomer(cust)
+                                        setMultipleCustomers([])
+                                    }}
+                                    className="p-6 border border-gray-200 rounded-xl hover:border-teal-500 hover:bg-teal-50 cursor-pointer transition-all duration-300 hover:shadow-md"
+                                >
+                                    <div className="flex items-center justify-between">
+                                        <div className="flex-1">
+                                            <h3 className="text-lg font-semibold text-gray-900 mb-2">{cust.name}</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm text-gray-600">
+                                                {cust.phone && (
+                                                    <div className="flex items-center">
+                                                        <Phone className="w-4 h-4 mr-2 text-gray-400" />
+                                                        <span>{cust.phone}</span>
+                                                    </div>
+                                                )}
+                                                {cust.email && (
+                                                    <div className="flex items-center">
+                                                        <Mail className="w-4 h-4 mr-2 text-gray-400" />
+                                                        <span>{cust.email}</span>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        </div>
+                                        <div className="text-right ml-6">
+                                            <div className="text-2xl font-bold text-teal-600">{cust.visits}</div>
+                                            <div className="text-xs text-gray-500 uppercase tracking-wide">visits</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        <div className="mt-8 text-center">
+                            <button
+                                onClick={() => {
+                                    setMultipleCustomers([])
+                                    setError('')
+                                }}
+                                className="bg-gray-600 text-white px-8 py-3 rounded-xl hover:bg-gray-700 transition-colors font-medium"
+                            >
+                                Cancel Selection
+                            </button>
+                        </div>
+                    </div>
+                )}
+
+                {customer && multipleCustomers.length === 0 && (
                     /* Customer Found - Confirm Visit */
                     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
                         <div className="text-center mb-8">

@@ -25,12 +25,62 @@ export async function POST(request: NextRequest) {
 
         console.log('🔍 Finding customer:', { businessId, identifier })
 
-        // Search for customer by email or phone in the specified business
+        // Enhanced search: support partial matching for phone, email, and name
+        const searchTerm = identifier.trim().toLowerCase()
+
+        console.log('🔍 Enhanced search for:', searchTerm)
+
+        // Build flexible search query with enhanced matching
+        const searchConditions = []
+
+        // 1. Name matching (partial, case-insensitive) - most common search
+        if (searchTerm.length >= 2) {
+            searchConditions.push(`name.ilike.%${searchTerm}%`)
+        }
+
+        // 2. Email matching
+        if (searchTerm.includes('@')) {
+            // Exact email match
+            searchConditions.push(`email.eq.${identifier}`)
+            // Partial email match
+            searchConditions.push(`email.ilike.%${searchTerm}%`)
+        } else if (searchTerm.length >= 2) {
+            // Partial email match for non-@ searches
+            searchConditions.push(`email.ilike.%${searchTerm}%`)
+        }
+
+        // 3. Enhanced phone number matching
+        const digitsOnly = searchTerm.replace(/\D/g, '')
+        if (digitsOnly.length >= 2) {
+            // Direct digit matching in phone field
+            searchConditions.push(`phone.ilike.%${digitsOnly}%`)
+
+            // Try with +91 prefix variations
+            if (digitsOnly.length >= 3) {
+                searchConditions.push(`phone.ilike.%+91${digitsOnly}%`)
+                searchConditions.push(`phone.ilike.%91${digitsOnly}%`)
+                searchConditions.push(`phone.ilike.%+91-${digitsOnly}%`)
+                searchConditions.push(`phone.ilike.%+91 ${digitsOnly}%`)
+            }
+
+            // If it looks like a full phone number, try exact matches
+            if (digitsOnly.length >= 10) {
+                searchConditions.push(`phone.eq.${digitsOnly}`)
+                searchConditions.push(`phone.eq.+91${digitsOnly}`)
+                searchConditions.push(`phone.eq.+91-${digitsOnly}`)
+                searchConditions.push(`phone.eq.+91 ${digitsOnly}`)
+            }
+        }
+
+        console.log('🔍 Search conditions:', searchConditions)
+
+        // Execute search with all conditions
         const { data: customers, error: searchError } = await supabaseAdmin
             .from('customers')
             .select('*')
             .eq('business_id', businessId)
-            .or(`email.eq.${identifier},phone.eq.${identifier}`)
+            .or(searchConditions.join(','))
+            .limit(15) // Return up to 15 matches
 
         if (searchError) {
             console.error('❌ Error searching customers:', searchError)
@@ -40,14 +90,36 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        console.log('✅ Search results:', customers?.length || 0, 'customers found')
+
         if (!customers || customers.length === 0) {
             return NextResponse.json(
-                { error: 'Customer not found' },
+                { error: `No customers found matching "${identifier}"` },
                 { status: 404 }
             )
         }
 
-        const customer = customers[0] // Take the first match
+        // If multiple matches, return all of them for user to choose
+        if (customers.length > 1) {
+            console.log('✅ Multiple customers found, returning all matches')
+
+            // Get business details
+            const { data: business, error: businessError } = await supabaseAdmin
+                .from('businesses')
+                .select('*')
+                .eq('id', businessId)
+                .single()
+
+            return NextResponse.json({
+                success: true,
+                multiple: true,
+                customers,
+                business,
+                count: customers.length
+            })
+        }
+
+        const customer = customers[0] // Single match
 
         // Get business details
         const { data: business, error: businessError } = await supabaseAdmin
