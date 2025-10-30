@@ -41,7 +41,7 @@ CREATE POLICY offer_campaigns_business_access ON offer_campaigns
     FOR ALL USING (
         business_id IN (
             SELECT id FROM businesses 
-            WHERE owner_id = auth.uid()
+            WHERE id = auth.uid()
         )
     );
 
