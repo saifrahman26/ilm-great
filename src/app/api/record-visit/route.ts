@@ -134,7 +134,9 @@ export async function POST(request: NextRequest) {
         const reachedGoal = newVisitCount > 0 && newVisitCount % business.visit_goal === 0
         const rewardNumber = reachedGoal ? newVisitCount / business.visit_goal : 0
 
-        console.log(`🔍 Visit Analysis:`)
+        console.log(`🔍 ACTUAL VISIT ANALYSIS:`)
+        console.log(`   - Customer ID: ${customerId}`)
+        console.log(`   - Business ID: ${businessId}`)
         console.log(`   - Customer: ${customer.name}`)
         console.log(`   - Customer email: ${customer.email}`)
         console.log(`   - Current visits: ${customer.visits}`)
@@ -143,7 +145,9 @@ export async function POST(request: NextRequest) {
         console.log(`   - Modulo calculation: ${newVisitCount} % ${business.visit_goal} = ${newVisitCount % business.visit_goal}`)
         console.log(`   - Reached goal: ${reachedGoal}`)
         console.log(`   - Reward number: ${rewardNumber}`)
+        console.log(`   - Business: ${business.name}`)
         console.log(`   - Business reward title: ${business.reward_title}`)
+        console.log(`   - Request source: ${request.headers.get('user-agent')?.includes('Mozilla') ? 'Browser' : 'API'}`)
 
         // Send visit confirmation email if customer has email (but not if they reached reward goal)
         if (customer.email?.trim() && !reachedGoal) {

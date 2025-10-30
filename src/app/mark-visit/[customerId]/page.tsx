@@ -92,8 +92,18 @@ function MarkVisitContent() {
             if (response.ok) {
                 setSuccess(true)
                 setVisitRecorded(true)
-                // Update customer visits count
-                setCustomer(prev => prev ? { ...prev, visits: prev.visits + 1 } : null)
+                // Update customer with data from API response
+                if (result.customer) {
+                    setCustomer(result.customer)
+                } else {
+                    // Fallback: manually update visits count
+                    setCustomer(prev => prev ? { ...prev, visits: prev.visits + 1 } : null)
+                }
+
+                // Set reward earned status from API response
+                if (result.reachedGoal) {
+                    console.log('🎉 QR Visit: Reward earned!', result.message)
+                }
             } else {
                 setError(result.error || 'Failed to record visit')
             }
@@ -135,7 +145,7 @@ function MarkVisitContent() {
         )
     }
 
-    // Calculate progress
+    // Calculate progress based on CURRENT visits (before recording)
     const visitGoal = business.visit_goal
     const currentCycleVisits = customer.visits % visitGoal
     const displayVisits = currentCycleVisits === 0 && customer.visits > 0 ? visitGoal : currentCycleVisits
@@ -155,7 +165,8 @@ function MarkVisitContent() {
                         {customer.name}'s visit has been successfully recorded.
                     </p>
 
-                    {willEarnReward && (
+                    {/* Show reward earned message only if API confirmed it */}
+                    {visitRecorded && customer.visits % visitGoal === 0 && (
                         <div className="bg-yellow-100 border border-yellow-300 rounded-lg p-4 mb-4">
                             <div className="flex items-center justify-center mb-2">
                                 <Gift className="w-6 h-6 text-yellow-600 mr-2" />
@@ -170,13 +181,13 @@ function MarkVisitContent() {
                     <div className="bg-white rounded-lg p-4 mb-6 shadow-sm">
                         <h3 className="font-semibold text-gray-900 mb-2">Updated Progress</h3>
                         <div className="flex justify-between text-sm text-gray-600 mb-2">
-                            <span>Visits: {customer.visits + 1}</span>
+                            <span>Visits: {customer.visits}</span>
                             <span>Goal: {visitGoal}</span>
                         </div>
                         <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
                                 className="bg-gradient-to-r from-green-500 to-emerald-500 h-2 rounded-full transition-all duration-500"
-                                style={{ width: `${Math.min(((customer.visits + 1) % visitGoal || visitGoal) / visitGoal * 100, 100)}%` }}
+                                style={{ width: `${Math.min((customer.visits % visitGoal || visitGoal) / visitGoal * 100, 100)}%` }}
                             ></div>
                         </div>
                     </div>
