@@ -203,8 +203,10 @@ export async function sendRewardTokenEmail(customer: any, business: any, token?:
     try {
         console.log('🎫 Sending reward token email with claim code:', token)
 
-        // Generate QR code for the reward token
-        const qrCodeUrl = await generateQRCode(`REWARD-${token || 'CLAIM'}-${customer.id}`)
+        // Generate QR code for the reward token that points to claim page
+        const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://loyallinkk.vercel.app'
+        const claimUrl = `${baseUrl}/claim-reward/${token}`
+        const qrCodeUrl = await generateQRCode(claimUrl)
 
         // Use AI-enhanced email service with premium template
         const { sendPremiumRewardEmail } = await import('./email')
