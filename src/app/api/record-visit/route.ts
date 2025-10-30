@@ -147,7 +147,7 @@ export async function POST(request: NextRequest) {
 
         // Send visit confirmation email if customer has email (but not if they reached reward goal)
         if (customer.email?.trim() && !reachedGoal) {
-            console.log('📧 Sending visit confirmation email...')
+            console.log('📧 Sending visit confirmation email (no reward reached)...')
             try {
                 const { sendVisitConfirmationEmail } = await import('@/lib/messaging')
                 await sendVisitConfirmationEmail(
@@ -160,6 +160,10 @@ export async function POST(request: NextRequest) {
                 console.error('❌ Failed to send visit email:', emailError)
                 // Don't fail the visit recording if email fails
             }
+        } else if (customer.email?.trim() && reachedGoal) {
+            console.log('🎯 Skipping visit confirmation email because reward was reached - reward email will be sent instead')
+        } else if (!customer.email?.trim()) {
+            console.log('⚠️ No email address for customer, skipping visit confirmation email')
         }
 
         if (reachedGoal) {
@@ -221,17 +225,19 @@ export async function POST(request: NextRequest) {
 
                 // Send reward token email directly
                 if (customer.email?.trim()) {
-                    console.log('📧 Attempting to send reward token email to:', customer.email)
+                    console.log('🎁 REWARD EMAIL: Attempting to send reward token email to:', customer.email)
+                    console.log('🎁 REWARD EMAIL: Token:', token)
+                    console.log('🎁 REWARD EMAIL: Reward title:', business.reward_title)
                     try {
                         const { sendRewardTokenEmail } = await import('@/lib/messaging')
                         await sendRewardTokenEmail(updatedCustomer, business, token)
-                        console.log('✅ Reward token email sent successfully')
+                        console.log('✅ REWARD EMAIL: Reward token email sent successfully!')
                     } catch (emailError) {
-                        console.error('❌ Failed to send reward token email:', emailError)
-                        console.error('❌ Email error details:', JSON.stringify(emailError, null, 2))
+                        console.error('❌ REWARD EMAIL: Failed to send reward token email:', emailError)
+                        console.error('❌ REWARD EMAIL: Email error details:', JSON.stringify(emailError, null, 2))
                     }
                 } else {
-                    console.log('⚠️ No email address for customer, skipping reward email')
+                    console.log('⚠️ REWARD EMAIL: No email address for customer, skipping reward email')
                 }
 
             } catch (tokenError) {
