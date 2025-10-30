@@ -170,18 +170,20 @@ export async function POST(request: NextRequest) {
             console.log('🎉 Customer reached reward milestone!')
             console.log(`   - This is reward #${rewardNumber} for ${customer.name}`)
 
-            // Check if reward already exists for this visit count to prevent duplicates
+            // Check if reward already exists for this exact visit milestone to prevent duplicates
+            // Only check for very recent duplicates (within 10 minutes) to avoid blocking legitimate rewards
             const { data: existingReward } = await supabaseAdmin
                 .from('rewards')
-                .select('id')
+                .select('id, created_at')
                 .eq('customer_id', customerId)
-                .eq('points_used', business.visit_goal)
                 .eq('status', 'pending')
-                .gte('created_at', new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()) // Within last 24 hours
+                .gte('created_at', new Date(Date.now() - 10 * 60 * 1000).toISOString()) // Within last 10 minutes only
                 .single()
 
             if (existingReward) {
-                console.log('⚠️ Reward already exists for this milestone, skipping email')
+                console.log('⚠️ Very recent reward exists (within 10 minutes), skipping duplicate')
+                console.log('⚠️ Existing reward created at:', existingReward.created_at)
+                console.log('⚠️ Current time:', new Date().toISOString())
                 return NextResponse.json({
                     success: true,
                     customer: updatedCustomer,
@@ -189,6 +191,8 @@ export async function POST(request: NextRequest) {
                     reachedGoal,
                     message: `Visit recorded! ${customer.name} already has a pending reward.`
                 })
+            } else {
+                console.log('✅ No recent duplicate rewards found, proceeding with reward creation')
             }
 
             // Generate reward token directly here instead of separate API call
