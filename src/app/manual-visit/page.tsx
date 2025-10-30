@@ -262,19 +262,40 @@ export default function ManualVisitPage() {
 
                         {/* Progress Bar */}
                         <div className="mb-8">
-                            <div className="flex justify-between text-sm text-gray-600 mb-2">
-                                <span>Progress to next reward</span>
-                                <span>{customer.visits % (businessData?.visit_goal || 5)}/{businessData?.visit_goal || 5}</span>
-                            </div>
-                            <div className="w-full bg-gray-200 rounded-full h-3">
-                                <div
-                                    className="bg-gradient-to-r from-teal-500 to-teal-600 h-3 rounded-full transition-all duration-500"
-                                    style={{ width: `${((customer.visits % (businessData?.visit_goal || 5)) / (businessData?.visit_goal || 5)) * 100}%` }}
-                                ></div>
-                            </div>
-                            <p className="text-xs text-gray-500 mt-2 text-center">
-                                {(businessData?.visit_goal || 5) - (customer.visits % (businessData?.visit_goal || 5))} more visits to earn: {businessData?.reward_title || 'Free Coffee'}
-                            </p>
+                            {(() => {
+                                const visitGoal = businessData?.visit_goal || business?.visit_goal || 5
+                                const currentCycleVisits = customer.visits % visitGoal
+                                const displayVisits = currentCycleVisits === 0 && customer.visits > 0 ? visitGoal : currentCycleVisits
+                                const visitsRemaining = visitGoal - displayVisits
+                                const progressPercentage = (displayVisits / visitGoal) * 100
+                                const totalRewards = Math.floor(customer.visits / visitGoal)
+
+                                return (
+                                    <>
+                                        <div className="flex justify-between text-sm text-gray-600 mb-2">
+                                            <span>Progress to next reward</span>
+                                            <span>{displayVisits}/{visitGoal}</span>
+                                        </div>
+                                        <div className="w-full bg-gray-200 rounded-full h-3">
+                                            <div
+                                                className="bg-gradient-to-r from-teal-500 to-teal-600 h-3 rounded-full transition-all duration-500"
+                                                style={{ width: `${progressPercentage}%` }}
+                                            ></div>
+                                        </div>
+                                        {displayVisits >= visitGoal ? (
+                                            <p className="text-xs text-green-600 mt-2 text-center font-medium">
+                                                🎉 Reward completed! {businessData?.reward_title || business?.reward_title || 'Reward'} earned!
+                                                {totalRewards > 1 && ` (Total rewards: ${totalRewards})`}
+                                            </p>
+                                        ) : (
+                                            <p className="text-xs text-gray-500 mt-2 text-center">
+                                                {visitsRemaining} more visit{visitsRemaining === 1 ? '' : 's'} to earn: {businessData?.reward_title || business?.reward_title || 'Reward'}
+                                                {totalRewards > 0 && ` (Previous rewards: ${totalRewards})`}
+                                            </p>
+                                        )}
+                                    </>
+                                )
+                            })()}
                         </div>
 
                         {rewardEarned && businessData && (
@@ -449,6 +470,60 @@ export default function ManualVisitPage() {
                                     </div>
                                 </div>
                             </div>
+                        </div>
+
+                        {/* Current Progress Display */}
+                        <div className="mb-8 p-4 bg-gray-50 rounded-lg">
+                            {(() => {
+                                const visitGoal = businessData?.visit_goal || business?.visit_goal || 5
+                                const currentCycleVisits = customer.visits % visitGoal
+                                const displayVisits = currentCycleVisits === 0 && customer.visits > 0 ? visitGoal : currentCycleVisits
+                                const visitsRemaining = visitGoal - displayVisits
+                                const progressPercentage = (displayVisits / visitGoal) * 100
+                                const totalRewards = Math.floor(customer.visits / visitGoal)
+                                const willEarnReward = (customer.visits + 1) % visitGoal === 0
+
+                                return (
+                                    <>
+                                        <div className="flex items-center justify-between mb-3">
+                                            <div className="flex items-center space-x-2">
+                                                <Gift className="w-5 h-5 text-purple-600" />
+                                                <span className="font-medium text-gray-900">Current Progress</span>
+                                            </div>
+                                            <span className="text-sm font-medium text-gray-600">
+                                                {displayVisits}/{visitGoal} visits
+                                            </span>
+                                        </div>
+
+                                        <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                                            <div
+                                                className="bg-gradient-to-r from-purple-500 to-purple-600 h-3 rounded-full transition-all duration-500"
+                                                style={{ width: `${progressPercentage}%` }}
+                                            ></div>
+                                        </div>
+
+                                        {displayVisits >= visitGoal ? (
+                                            <p className="text-sm text-green-600 text-center font-medium">
+                                                🎉 Ready to claim: {businessData?.reward_title || business?.reward_title || 'Reward'}!
+                                                {totalRewards > 0 && ` (Previous rewards: ${totalRewards})`}
+                                            </p>
+                                        ) : (
+                                            <p className="text-sm text-gray-600 text-center">
+                                                {visitsRemaining} more visit{visitsRemaining === 1 ? '' : 's'} to earn: {businessData?.reward_title || business?.reward_title || 'Reward'}
+                                                {totalRewards > 0 && ` (Previous rewards: ${totalRewards})`}
+                                            </p>
+                                        )}
+
+                                        {willEarnReward && (
+                                            <div className="mt-3 p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                                                <p className="text-sm text-yellow-800 text-center font-medium">
+                                                    🎁 This visit will complete the reward goal!
+                                                </p>
+                                            </div>
+                                        )}
+                                    </>
+                                )
+                            })()}
                         </div>
 
                         <div className="flex flex-col sm:flex-row gap-4">
