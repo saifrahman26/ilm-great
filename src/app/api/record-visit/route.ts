@@ -217,12 +217,17 @@ export async function POST(request: NextRequest) {
 
                 // Send reward token email directly
                 if (customer.email?.trim()) {
+                    console.log('📧 Attempting to send reward token email to:', customer.email)
                     try {
                         const { sendRewardTokenEmail } = await import('@/lib/messaging')
                         await sendRewardTokenEmail(updatedCustomer, business, token)
+                        console.log('✅ Reward token email sent successfully')
                     } catch (emailError) {
                         console.error('❌ Failed to send reward token email:', emailError)
+                        console.error('❌ Email error details:', JSON.stringify(emailError, null, 2))
                     }
+                } else {
+                    console.log('⚠️ No email address for customer, skipping reward email')
                 }
 
             } catch (tokenError) {
