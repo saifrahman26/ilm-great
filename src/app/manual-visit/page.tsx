@@ -103,20 +103,19 @@ export default function ManualVisitPage() {
         setRecording(true)
         setError('')
 
-        // More robust business ID resolution
-        const actualBusinessId = String(business?.id || user?.id || customer.business_id || '').trim()
+        // Use customer's business_id directly (same as QR scan flow)
+        const businessId = customer.business_id
 
         console.log('📝 Manual visit - Recording visit:', {
             customerId: customer.id,
-            actualBusinessId,
-            businessFromAuth: business?.id,
-            userIdFallback: user?.id,
+            businessId: businessId,
             customerBusinessId: customer.business_id,
-            allData: { business, user, customer }
+            authBusiness: business?.id,
+            authUser: user?.id
         })
 
-        if (!actualBusinessId) {
-            setError('Unable to determine business ID. Please refresh the page and try again.')
+        if (!businessId) {
+            setError('Customer business ID not found. Please contact support.')
             setRecording(false)
             return
         }
@@ -124,7 +123,7 @@ export default function ManualVisitPage() {
         try {
             const requestBody = {
                 customerId: customer.id,
-                businessId: actualBusinessId
+                businessId: businessId
             }
 
             console.log('📤 Manual visit request body:', requestBody)
@@ -149,7 +148,13 @@ export default function ManualVisitPage() {
                 setCustomer(result.customer)
                 setBusinessData(result.business)
                 setVisitRecorded(true)
-                setRewardEarned(result.rewardEarned)
+                setRewardEarned(result.reachedGoal || false)
+
+                console.log('✅ Manual visit recorded successfully:', {
+                    newVisits: result.visits,
+                    reachedGoal: result.reachedGoal,
+                    message: result.message
+                })
             }
         } catch (err) {
             setError('Failed to record visit')
