@@ -17,38 +17,36 @@ export default function TestRewardEmailPage() {
         setResult(null)
 
         try {
-            // Test the reward token email directly
-            const { sendRewardTokenEmail } = await import('@/lib/messaging')
 
-            const testCustomer = {
-                id: 'test-customer-123',
-                name: 'Test Customer',
-                email: email,
-                phone: '+1234567890'
-            }
-
-            const testBusiness = {
-                id: 'test-business-123',
-                name: 'Test Coffee Shop',
-                business_type: 'Coffee Shop',
-                reward_title: 'Free Coffee',
-                reward_description: 'Get a free coffee of your choice'
-            }
-
-            const testToken = '123456'
-
-            await sendRewardTokenEmail(testCustomer, testBusiness, testToken)
-
-            setResult({
-                success: true,
-                message: 'Reward email sent successfully!',
-                details: {
-                    customer: testCustomer.name,
-                    business: testBusiness.name,
-                    reward: testBusiness.reward_title,
-                    token: testToken
-                }
+            // Test the reward token email via server-side API
+            const response = await fetch('/api/test-reward-email', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    email: email,
+                    customerName: 'Test Customer',
+                    businessName: 'Test Coffee Shop',
+                    rewardTitle: 'Free Coffee'
+                })
             })
+
+            const data = await response.json()
+
+            if (response.ok) {
+                setResult({
+                    success: true,
+                    message: data.message,
+                    details: data.details
+                })
+            } else {
+                setResult({
+                    success: false,
+                    error: data.error,
+                    details: data.details
+                })
+            }
 
         } catch (error) {
             console.error('Test reward email error:', error)
